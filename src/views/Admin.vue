@@ -32,7 +32,7 @@
               Zum Spiel
             </router-link>
             <button @click="editGame(game)">Bearbeiten</button>
-            <button @click="deleteGame(game._id)">Löschen</button>
+            <button @click="deleteGame(game._id)">Löschen jetzt</button>
           </div>
         </div>
       </div>
