@@ -2,7 +2,9 @@
   <div class="edit-container">
     <!-- Navigation zurück zur Übersicht -->
     <div class="top-navigation">
-      <router-link to="/admin" class="btn-back"> <font-awesome-icon icon="arrow-left" /> Zu allen Spielen</router-link>
+      <router-link to="/admin" class="btn-back">
+        <font-awesome-icon icon="arrow-left" /> Zu allen Spielen</router-link
+      >
     </div>
 
     <h2>Spiel bearbeiten</h2>
@@ -23,7 +25,11 @@
 
         <div class="form-group">
           <label for="ageGroup">Altersgruppe:</label>
-          <input v-model="game.ageGroup" id="ageGroup" placeholder="Altersgruppe eingeben" />
+          <input
+            v-model="game.ageGroup"
+            id="ageGroup"
+            placeholder="Altersgruppe eingeben"
+          />
         </div>
 
         <div class="form-actions">
@@ -37,21 +43,22 @@
     <!-- Fragenverwaltung -->
     <section class="edit-section">
       <h3>Fragen verwalten</h3>
-      <QuestionList 
-        :questions="game.questions" 
-        @edit="editQuestion" 
-        @delete="deleteQuestion" 
+      <QuestionList
+        :questions="game.questions"
+        @edit="editQuestion"
+        @delete="deleteQuestion"
         @add="addQuestion"
       />
     </section>
-
+    <div v-if="successMessage" class="success-message">
+      {{ this.successMessage }}
+    </div>
     <!-- Formular für neue Frage / Bearbeitung -->
     <section v-if="showQuestionForm" class="edit-section">
-
-      <QuestionForm 
-        :questionData="selectedQuestion" 
-        :editing="editingQuestion" 
-        @save="saveQuestion" 
+      <QuestionForm
+        :questionData="selectedQuestion"
+        :editing="editingQuestion"
+        @save="saveQuestion"
         @cancel="cancelQuestionEdit"
       />
     </section>
@@ -59,25 +66,26 @@
 </template>
 
 <script>
-import QuestionList from '@/components/QuestionList.vue';
-import QuestionForm from '@/components/QuestionForm.vue';
-import apiService from '@/services/apiService';
+import QuestionList from "@/components/QuestionList.vue";
+import QuestionForm from "@/components/QuestionForm.vue";
+import apiService from "@/services/apiService";
 
 export default {
   components: { QuestionList, QuestionForm },
-  props: ['id'],
+  props: ["id"],
   data() {
     return {
       game: {
-        city: '',
-        name: '',
-        ageGroup: '',
-        encryptedId: '',
-        questions: []
+        city: "",
+        name: "",
+        ageGroup: "",
+        encryptedId: "",
+        questions: [],
       },
-      selectedQuestion: { question: '', answer: '' },
+      selectedQuestion: { question: "", answer: "" },
       showQuestionForm: false,
-      editingQuestion: false
+      editingQuestion: false,
+      successMessage: "",
     };
   },
   async mounted() {
@@ -92,15 +100,12 @@ export default {
         const response = await apiService.fetchGameById(id);
         this.game = { ...response };
       } catch (error) {
-        console.error('Fehler beim Laden des Spiels:', error);
+        console.error("Fehler beim Laden des Spiels:", error);
       }
     },
-    async updateGame() {
-      await apiService.updateGame({ _id: this.id, ...this.game });
-      this.$router.push('/admin');
-    },
+
     addQuestion() {
-      this.selectedQuestion = { question: '', answer: '' };
+      this.selectedQuestion = { question: "", answer: "" };
       this.showQuestionForm = true;
       this.editingQuestion = false;
     },
@@ -114,20 +119,71 @@ export default {
       await this.fetchGame(this.id);
     },
     async saveQuestion(question) {
-      if (this.editingQuestion) {
-        await apiService.updateQuestion(this.id, question._id, question);
-      } else {
-        await apiService.addQuestion(this.id, question);
+  try {
+    // Prüfe, ob die Frage bearbeitet oder neu ist
+    if (this.editingQuestion) {
+      // Lokale Aktualisierung
+      const questionIndex = this.game.questions.findIndex(
+        (q) => q._id === question._id
+      );
+      if (questionIndex !== -1) {
+        this.game.questions[questionIndex] = { ...question };
       }
-      await this.fetchGame(this.id);
-      this.cancelQuestionEdit();
-    },
+
+      // API-Aufruf für Text- und Multiple-Fragen
+      await apiService.updateQuestion(this.game.encryptedId, question._id, {
+        question: question.question,
+        answer: question.answer,
+        options: question.options,
+        type: question.type,
+        imageUrl: question.imageUrl,
+      });
+    } else {
+      // Verhindere doppelte API-Anfragen
+      if (this.isSaving) return;
+      this.isSaving = true;
+
+      // Neue Frage hinzufügen
+      const newQuestion = await apiService.addQuestion(
+        this.game.encryptedId,
+        question
+      );
+
+      // Nur zur lokalen Liste hinzufügen, wenn die API erfolgreich ist
+      this.game.questions.push(newQuestion);
+    }
+
+    // Spiel aktualisieren (lokal, ohne Navigation)
+    await this.fetchGame(this.game.encryptedId);
+
+    this.cancelQuestionEdit(); // Formular schließen
+
+    setTimeout(() => {
+      this.successMessage = "✅ Frage erfolgreich gespeichert!";
+    }, 300);
+  } catch (error) {
+    console.error("❌ Fehler beim Speichern der Frage:", error);
+    alert("Fehler beim Speichern der Frage.");
+  } finally {
+    this.isSaving = false; // Sperre zurücksetzen
+  }
+},
     cancelQuestionEdit() {
-      this.selectedQuestion = { question: '', answer: '' };
+      this.selectedQuestion = { question: "", answer: "" };
       this.showQuestionForm = false;
       this.editingQuestion = false;
-    }
-  }
+    },
+    async updateGame() {
+      try {
+        await apiService.updateGame({ _id: this.id, ...this.game });
+        // Keine Navigation mehr hier!
+        console.log("✅ Spiel erfolgreich aktualisiert");
+      } catch (error) {
+        console.error("❌ Fehler beim Aktualisieren des Spiels:", error);
+        alert("Fehler beim Aktualisieren des Spiels.");
+      }
+    },
+  },
 };
 </script>
 
@@ -292,6 +348,15 @@ input {
     width: 50%;
   }
 }
-
+.success-message {
+  margin-top: 10px;
+  padding: 10px;
+  border-width: 2px;
+  border-style: solid;
+  border-color: #4caf50;
+  color: #000;
+  text-align: center;
+  border-radius: 4px;
+  font-weight: bold;
+}
 </style>
-

@@ -1,7 +1,7 @@
 <template>
   <div id="edit-question-container"  class="question-form">
     <h3>{{ isEditing ? 'Frage bearbeiten' : 'Neue Frage hinzufügen' }}</h3>
-    <form @submit.prevent="saveQuestion">
+    <form @submit.prevent.once="saveQuestion">
       <!-- Frage -->
       <div class="form-group">
         <label for="question">Frage</label>
@@ -71,11 +71,13 @@ export default {
     isEditing: {
       type: Boolean,
       default: false,
+      isSaving: false, // Sperre hinzufügen
     },
   },
   data() {
     return {
       question: {
+        _id: null,
         question: '',
         type: 'text',
         options: [],
@@ -105,35 +107,57 @@ export default {
       }
     },
     async saveQuestion() {
-    try {
-      // Validierung für Mehrfachauswahl
-      if (this.question.type === 'multiple' && this.question.options.length === 0) {
-        alert('Bitte mindestens eine Option hinzufügen.');
-        return;
-      }
+  if (this.isSaving) return; // Verhindert mehrfachen Aufruf
+  this.isSaving = true;
 
-      // Bild hochladen (falls vorhanden)
-      if (this.uploadedFile) {
-        const imageUrl = await apiService(this.uploadedFile);
-        this.question.imageUrl = imageUrl;
-      }
-      console.log('QFomr');
-      console.log(this.question._id);
-      // Frage speichern (Neu oder Bearbeiten)
-      if (this.question._id) {
-        // Bearbeiten einer bestehenden Frage
-        await apiService.updateQuestion(this.$route.params.id, this.question._id, this.question);
-      } else {
-        // Neue Frage hinzufügen
-        await apiService.addQuestion(this.$route.params.id, this.question);
-      }
-
-      this.$emit('save', { ...this.question });
-    } catch (error) {
-      console.error('❌ Fehler beim Speichern der Frage:', error);
-      alert('Fehler beim Speichern der Frage.');
+  try {
+    // Validierung für Mehrfachauswahl
+    if (this.question.type === 'multiple' && this.question.options.length === 0) {
+      alert('Bitte mindestens eine Option hinzufügen.');
+      return;
     }
-  },
+
+    // Bild hochladen (falls vorhanden)
+    if (this.uploadedFile) {
+      const imageUrl = await apiService.uploadImage(this.uploadedFile);
+      this.question.imageUrl = imageUrl;
+    }
+
+    // Frage speichern (Neu oder Bearbeiten)
+    let response;
+    if (this.question._id) {
+      console.log('🔄 Bearbeiten einer bestehenden Frage');
+      response = await apiService.updateQuestion(this.$route.params.id, this.question._id, this.question);
+    } else {
+      console.log('➕ Neue Frage hinzufügen');
+      response = await apiService.addQuestion(this.$route.params.id, this.question);
+    }
+
+    console.log('✅ Frage gespeichert:', response);
+
+    // Lokale Aktualisierung sicherstellen
+    this.$emit('save', { ...response });
+    this.resetForm();
+  } catch (error) {
+    console.error('❌ Fehler beim Speichern der Frage:', error);
+    alert('Fehler beim Speichern der Frage.');
+  } finally {
+    this.isSaving = false; // Sperre aufheben
+  }
+},
+
+    resetForm() {
+      this.question = {
+        question: '',
+        type: 'text',
+        options: [],
+        answer: '',
+        imageUrl: '',
+      };
+      this.previewImage = null;
+      this.uploadedFile = null;
+    },
+
     onFileChange(event) {
     const file = event.target.files[0];
     if (file) {
@@ -153,6 +177,7 @@ export default {
       handler(newData) {
         this.question = { ...newData };
         this.previewImage = newData.imageUrl || null;
+        console.log('📝 Geladene Frage:', this.question);
       }
     }
   }
@@ -187,6 +212,7 @@ label {
   font-weight: bold;
   margin-bottom: 5px;
   display: block;
+  font-size: 12px;
 }
 
 input,
@@ -214,7 +240,7 @@ select {
 }
 
 .btn-delete {
-  background-color: #f44336;
+  background-color: #f9f9f9;
   color: white;
   border-radius: 4px;
   cursor: pointer;

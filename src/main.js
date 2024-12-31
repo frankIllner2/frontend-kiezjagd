@@ -9,10 +9,10 @@ import 'animate.css';
 // Font Awesome Imports
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { faEdit, faTrash, faExternalLinkAlt, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
-
+import { faEdit, faTrash, faExternalLinkAlt, faArrowLeft, faPuzzlePiece, faMobileAlt, faUsers, faTrophy } from '@fortawesome/free-solid-svg-icons';
+import { faFacebook, faTwitter, faInstagram } from '@fortawesome/free-brands-svg-icons';
 // Icons zur Bibliothek hinzufügen
-library.add(faEdit, faTrash, faExternalLinkAlt, faArrowLeft);
+library.add(faEdit, faTrash, faExternalLinkAlt, faArrowLeft, faPuzzlePiece, faMobileAlt, faUsers, faTrophy, faFacebook, faTwitter, faInstagram);
 
 const app = createApp(App);
 
