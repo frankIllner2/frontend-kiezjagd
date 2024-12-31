@@ -119,55 +119,53 @@ export default {
       await this.fetchGame(this.id);
     },
     async saveQuestion(question) {
-  try {
-    // Prüfe, ob die Frage bearbeitet oder neu ist
-    if (this.editingQuestion) {
-      // Lokale Aktualisierung
-      const questionIndex = this.game.questions.findIndex(
-        (q) => q._id === question._id
-      );
-      if (questionIndex !== -1) {
-        this.game.questions[questionIndex] = { ...question };
+      try {
+        if (this.editingQuestion) {
+          // Lokale Liste aktualisieren
+          const questionIndex = this.game.questions.findIndex(
+            (q) => q._id === question._id
+          );
+          if (questionIndex !== -1) {
+            this.game.questions[questionIndex] = { ...question };
+          }
+
+          // API-Aufruf für Text- und Multiple-Fragen
+          if (question.type === "text") {
+            await apiService.updateQuestion(this.game.encryptedId, question._id, {
+              question: question.question,
+              answer: question.answer,
+              type: question.type,
+              imageUrl: question.imageUrl,
+            });
+          } else {
+            await apiService.updateQuestion(this.game.encryptedId, question._id, {
+              question: question.question,
+              options: question.options,
+              type: question.type,
+              imageUrl: question.imageUrl,
+            });
+          }
+        } else {
+          // Neue Frage hinzufügen
+          const newQuestion = await apiService.addQuestion(
+            this.game.encryptedId,
+            question
+          );
+          this.game.questions.push(newQuestion);
+        }
+        // Spiel aktualisieren (lokal, ohne Navigation)
+        await this.fetchGame(this.game.encryptedId);
+
+        this.cancelQuestionEdit(); // Formular schließen
+        
+        setTimeout(() => {
+          this.successMessage = "✅ Frage erfolgreich gespeichert!";
+        }, 300);
+      } catch (error) {
+        console.error("❌ Fehler beim Speichern der Frage:", error);
+        alert("Fehler beim Speichern der Frage.");
       }
-
-      // API-Aufruf für Text- und Multiple-Fragen
-      await apiService.updateQuestion(this.game.encryptedId, question._id, {
-        question: question.question,
-        answer: question.answer,
-        options: question.options,
-        type: question.type,
-        imageUrl: question.imageUrl,
-      });
-    } else {
-      // Verhindere doppelte API-Anfragen
-      if (this.isSaving) return;
-      this.isSaving = true;
-
-      // Neue Frage hinzufügen
-      const newQuestion = await apiService.addQuestion(
-        this.game.encryptedId,
-        question
-      );
-
-      // Nur zur lokalen Liste hinzufügen, wenn die API erfolgreich ist
-      this.game.questions.push(newQuestion);
-    }
-
-    // Spiel aktualisieren (lokal, ohne Navigation)
-    await this.fetchGame(this.game.encryptedId);
-
-    this.cancelQuestionEdit(); // Formular schließen
-
-    setTimeout(() => {
-      this.successMessage = "✅ Frage erfolgreich gespeichert!";
-    }, 300);
-  } catch (error) {
-    console.error("❌ Fehler beim Speichern der Frage:", error);
-    alert("Fehler beim Speichern der Frage.");
-  } finally {
-    this.isSaving = false; // Sperre zurücksetzen
-  }
-},
+    },
     cancelQuestionEdit() {
       this.selectedQuestion = { question: "", answer: "" };
       this.showQuestionForm = false;

@@ -82,19 +82,10 @@ export default {
       }
     },
     async createGame(game) {
-          await apiService.createGame(game);
-          this.fetchGames();
-          this.currentView = "list";
-        },
-        async loadGameRanking(encryptedId) {
-      try {
-        this.ranking = await apiService.fetchGameRanking(encryptedId);
-        console.log('Ranking erfolgreich geladen:', this.ranking);
-      } catch (error) {
-        console.error('❌ Fehler beim Laden des Rankings:', error);
-      }
+      await apiService.createGame(game);
+      this.fetchGames();
+      this.currentView = "list";
     },
-
     editGame(game) {
       if (!game.encryptedId) {
         console.error("Fehler: encryptedId ist undefined");
@@ -122,10 +113,6 @@ export default {
   },
   mounted() {
     this.fetchGames();
-    const encryptedId = this.$route.params.encryptedId || null;
-    if (encryptedId) {
-      this.loadGameRanking(encryptedId);
-    }
   },
 };
 </script>

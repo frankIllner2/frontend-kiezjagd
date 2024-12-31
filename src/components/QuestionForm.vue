@@ -1,7 +1,7 @@
 <template>
-  <div id="edit-question-container"  class="question-form">
-    <h3>{{ isEditing ? 'Frage bearbeiten' : 'Neue Frage hinzufügen' }}</h3>
-    <form @submit.prevent.once="saveQuestion">
+  <div id="edit-question-container" class="question-form">
+    <h3>{{ isEditing ? "Frage bearbeiten" : "Neue Frage hinzufügen" }}</h3>
+    <form @submit.prevent="saveQuestion">
       <!-- Frage -->
       <div class="form-group">
         <label for="question">Frage</label>
@@ -36,9 +36,13 @@
             <input type="checkbox" v-model="option.correct" />
             Korrekt
           </label>
-          <button @click="removeOption(index)" type="button" class="btn-delete">🗑️</button>
+          <button @click="removeOption(index)" type="button" class="btn-delete">
+            🗑️
+          </button>
         </div>
-        <button @click="addOption" type="button" class="btn-add-option">Antwort hinzufügen</button>
+        <button @click="addOption" type="button" class="btn-add-option">
+          Antwort hinzufügen
+        </button>
       </div>
 
       <!-- Antwort für Freitext -->
@@ -53,19 +57,18 @@
 </template>
 
 <script>
-import { apiService } from '@/services/apiService';
-
+import { apiService } from "@/services/apiService";
 
 export default {
   props: {
     questionData: {
       type: Object,
       default: () => ({
-        question: '',
-        type: 'text',
+        question: "",
+        type: "text",
         options: [],
-        answer: '',
-        imageUrl: '',
+        answer: "",
+        imageUrl: "",
       }),
     },
     isEditing: {
@@ -78,11 +81,11 @@ export default {
     return {
       question: {
         _id: null,
-        question: '',
-        type: 'text',
+        question: "",
+        type: "text",
         options: [],
-        answer: '',
-        imageUrl: '',
+        answer: "",
+        imageUrl: "",
       },
       previewImage: null,
       uploadedFile: null,
@@ -99,7 +102,7 @@ export default {
       if (!this.question.options) {
         this.question.options = [];
       }
-      this.question.options.push({ text: '', correct: false });
+      this.question.options.push({ text: "", correct: false });
     },
     removeOption(index) {
       if (this.question.options && this.question.options.length > index) {
@@ -107,69 +110,73 @@ export default {
       }
     },
     async saveQuestion() {
-  if (this.isSaving) return; // Verhindert mehrfachen Aufruf
-  this.isSaving = true;
+      if (this.isSaving) return; // Verhindert mehrfachen Aufruf
+      this.isSaving = true;
 
-  try {
-    // Validierung für Mehrfachauswahl
-    if (this.question.type === 'multiple' && this.question.options.length === 0) {
-      alert('Bitte mindestens eine Option hinzufügen.');
-      return;
-    }
+      try {
+        // Validierung für Mehrfachauswahl
+        if (this.question.type === "multiple" && this.question.options.length === 0) {
+          alert("Bitte mindestens eine Option hinzufügen.");
+          this.isSaving = false;
+          return;
+        }
 
-    // Bild hochladen (falls vorhanden)
-    if (this.uploadedFile) {
-      const imageUrl = await apiService.uploadImage(this.uploadedFile);
-      this.question.imageUrl = imageUrl;
-    }
+        // Bild hochladen (falls vorhanden)
+        if (this.uploadedFile) {
+          const imageUrl = await apiService.uploadImage(this.uploadedFile);
+          this.question.imageUrl = imageUrl;
+          console.log("📸 Bild erfolgreich hochgeladen:", imageUrl);
+        }
 
-    // Frage speichern (Neu oder Bearbeiten)
-    let response;
-    if (this.question._id) {
-      console.log('🔄 Bearbeiten einer bestehenden Frage');
-      response = await apiService.updateQuestion(this.$route.params.id, this.question._id, this.question);
-    } else {
-      console.log('➕ Neue Frage hinzufügen');
-      response = await apiService.addQuestion(this.$route.params.id, this.question);
-    }
+        console.log("📝 Frage-ID:", this.question._id);
 
-    console.log('✅ Frage gespeichert:', response);
+        // Frage speichern (Neu oder Bearbeiten)
+        if (this.question._id) {
+          console.log("✏️ Bearbeiten einer bestehenden Frage");
+          await apiService.updateQuestion(
+            this.$route.params.id,
+            this.question._id,
+            this.question
+          );
+        } else {
+          console.log("➕ Neue Frage hinzufügen");
+          await apiService.addQuestion(this.$route.params.id, this.question);
+        }
 
-    // Lokale Aktualisierung sicherstellen
-    this.$emit('save', { ...response });
-    this.resetForm();
-  } catch (error) {
-    console.error('❌ Fehler beim Speichern der Frage:', error);
-    alert('Fehler beim Speichern der Frage.');
-  } finally {
-    this.isSaving = false; // Sperre aufheben
-  }
-},
+        this.$emit("save", { ...this.question });
+        this.resetForm();
+      } catch (error) {
+        console.error("❌ Fehler beim Speichern der Frage:", error);
+        alert("Fehler beim Speichern der Frage.");
+      } finally {
+        this.isSaving = false; // Sperre aufheben
+      }
+    },
 
     resetForm() {
       this.question = {
-        question: '',
-        type: 'text',
+        question: "",
+        type: "text",
         options: [],
-        answer: '',
-        imageUrl: '',
+        answer: "",
+        imageUrl: "",
       };
       this.previewImage = null;
       this.uploadedFile = null;
     },
 
     onFileChange(event) {
-    const file = event.target.files[0];
-    if (file) {
-      this.uploadedFile = file;
-      this.previewImage = URL.createObjectURL(file);
-    }
-  },
-  removeImage() {
-    this.uploadedFile = null;
-    this.previewImage = null;
-    this.question.imageUrl = '';
-  }
+      const file = event.target.files[0];
+      if (file) {
+        this.uploadedFile = file;
+        this.previewImage = URL.createObjectURL(file);
+      }
+    },
+    removeImage() {
+      this.uploadedFile = null;
+      this.previewImage = null;
+      this.question.imageUrl = "";
+    },
   },
   watch: {
     questionData: {
@@ -177,13 +184,11 @@ export default {
       handler(newData) {
         this.question = { ...newData };
         this.previewImage = newData.imageUrl || null;
-        console.log('📝 Geladene Frage:', this.question);
-      }
-    }
-  }
-
+        console.log("📝 Geladene Frage:", this.question);
+      },
+    },
+  },
 };
-
 </script>
 
 <style scoped>
@@ -235,7 +240,7 @@ select {
   margin-bottom: 10px;
 }
 
-.option-item input[type='text'] {
+.option-item input[type="text"] {
   flex: 1;
 }
 
