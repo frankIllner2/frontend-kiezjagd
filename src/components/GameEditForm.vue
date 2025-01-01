@@ -58,7 +58,7 @@
       <QuestionForm
         :questionData="selectedQuestion"
         :editing="editingQuestion"
-        @save="saveQuestion"
+        @save="handleQuestionSave" 
         @cancel="cancelQuestionEdit"
       />
     </section>
@@ -118,54 +118,20 @@ export default {
       await apiService.deleteQuestion(this.id, questionId);
       await this.fetchGame(this.id);
     },
-    async saveQuestion(question) {
-      try {
-        if (this.editingQuestion) {
-          // Lokale Liste aktualisieren
-          const questionIndex = this.game.questions.findIndex(
-            (q) => q._id === question._id
-          );
-          if (questionIndex !== -1) {
-            this.game.questions[questionIndex] = { ...question };
-          }
+    async handleQuestionSave(question) {
+  // Nur lokale Aktualisierung der Fragenliste
+  const questionIndex = this.game.questions.findIndex(q => q._id === question._id);
+  if (questionIndex !== -1) {
+    this.game.questions[questionIndex] = { ...question };
+  } else {
+    this.game.questions.push(question);
+  }
 
-          // API-Aufruf für Text- und Multiple-Fragen
-          if (question.type === "text") {
-            await apiService.updateQuestion(this.game.encryptedId, question._id, {
-              question: question.question,
-              answer: question.answer,
-              type: question.type,
-              imageUrl: question.imageUrl,
-            });
-          } else {
-            await apiService.updateQuestion(this.game.encryptedId, question._id, {
-              question: question.question,
-              options: question.options,
-              type: question.type,
-              imageUrl: question.imageUrl,
-            });
-          }
-        } else {
-          // Neue Frage hinzufügen
-          const newQuestion = await apiService.addQuestion(
-            this.game.encryptedId,
-            question
-          );
-          this.game.questions.push(newQuestion);
-        }
-        // Spiel aktualisieren (lokal, ohne Navigation)
-        await this.fetchGame(this.game.encryptedId);
+  // Spiel aktualisieren, um die Fragenliste konsistent zu halten
+  await this.fetchGame(this.game.encryptedId);
 
-        this.cancelQuestionEdit(); // Formular schließen
-        
-        setTimeout(() => {
-          this.successMessage = "✅ Frage erfolgreich gespeichert!";
-        }, 300);
-      } catch (error) {
-        console.error("❌ Fehler beim Speichern der Frage:", error);
-        alert("Fehler beim Speichern der Frage.");
-      }
-    },
+  this.cancelQuestionEdit();
+},
     cancelQuestionEdit() {
       this.selectedQuestion = { question: "", answer: "" };
       this.showQuestionForm = false;

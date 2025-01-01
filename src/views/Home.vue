@@ -97,7 +97,7 @@ Bereit, deinen Kiez neu zu entdecken? Dann starte jetzt dein Abenteuer mit Kiezj
 
     <!-- Social Media -->
     <section class="social-media-section">
-      <h4>Folge uns auf Social Media!</h4>
+      
       <div class="social-icons">
         <a href="https://facebook.com" target="_blank">
           <font-awesome-icon :icon="['fab', 'facebook']" class="social-icon facebook" />
@@ -149,6 +149,7 @@ export default {
 };
 </script>
 <style scoped>
+
 /* Container */
 /* 🎯 Allgemeine Layout-Stile */
 .home-container {
@@ -297,7 +298,7 @@ export default {
 .game-preview-section {
   margin: 60px 0;
   padding: 40px 20px;
-  background-color: #fce4ec; /* Hellrosa Hintergrund */
+  background-color: whitesmoke; 
   border-radius: 8px;
   text-align: center;
 }
@@ -318,7 +319,7 @@ export default {
 .game-card {
   background: #ffffff;
   padding: 20px;
-  border-radius: 8px;
+  border-radius: 2px;
   text-align: center;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -362,8 +363,8 @@ export default {
 .social-media-section {
   text-align: center;
   margin-top: 60px;
-  padding: 30px 20px;
-  background-color: #f3e5f5; /* Helllila Hintergrund */
+  padding: 10px 20px;
+  background-color: whitesmoke; /* Helllila Hintergrund */
   border-radius: 8px;
 }
 

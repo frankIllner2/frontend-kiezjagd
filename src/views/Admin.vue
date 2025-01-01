@@ -73,7 +73,7 @@ export default {
         const games = await apiService.fetchGames();
         // Lade Ranking und Fragenanzahl für jedes Spiel
         for (const game of games) {
-          const ranking = await apiService.fetchGameRanking(game.encryptedId);
+          const ranking = await apiService.fetchRanking(game.encryptedId);
           game.ranking = ranking || [];
         }
         this.games = games;
