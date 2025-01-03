@@ -19,18 +19,36 @@
     </section>
 
     <!-- Einführungstext -->
-    <section class="intro-section">
-      <h2>🌟 Warum Kiezjagd spielen?</h2>
-      <p>
-        Kiezjagd ist mehr als nur ein Spiel – es ist ein interaktives Abenteuer, das dich direkt in deinem Viertel herausfordert! 🌍🚀 <br /> <br />Egal ob du alleine, mit Freunden, der Familie oder deinem Team unterwegs bist, jede Runde ist ein einzigartiges Erlebnis. Während du knifflige Rätsel löst, versteckte Hinweise findest und spannende Herausforderungen meisterst, entdeckst du vertraute Orte aus völlig neuen Perspektiven. 🧩🔍
+    <section class="why-kiezjagd-section">
+    <h2>🌟 Warum Kiezjagd spielen?</h2>
+    <div class="cards-container">
+      <!-- Card 1 -->
+      <div class="card">
+        <h3>Das interaktive Abenteuer 🌍🚀</h3>
+        <p>
+          Kiezjagd ist mehr als nur ein Spiel – es ist ein interaktives Abenteuer, das dich direkt in deinem Viertel herausfordert! 
+          Egal ob du alleine, mit Freunden, der Familie oder deinem Team unterwegs bist, jede Runde ist ein einzigartiges Erlebnis.
+        </p>
+        <p>
+          Während du knifflige Rätsel löst, versteckte Hinweise findest und spannende Herausforderungen meisterst, 
+          entdeckst du vertraute Orte aus völlig neuen Perspektiven. 🧩🔍
+        </p>
+      </div>
 
-<br />Mit deinem Smartphone als Spielleiter begibst du dich auf eine Reise voller Überraschungen und Spaß. Jede Frage ist sorgfältig auf deinen Kiez abgestimmt und führt dich zu interessanten Plätzen, die du vielleicht noch nie bemerkt hast. Ob historische Denkmäler, versteckte Gassen oder geheimnisvolle Gebäude – bei Kiezjagd wird jeder Spaziergang zum Abenteuer! 🏞️📱
-
-Doch es geht nicht nur um Rätsel – es geht um Teamgeist, Strategie und das gemeinsame Erlebnis. Trete gegen andere Teams an, sichere dir deinen Platz in der Bestenliste und werde zum wahren Kiez-Meister! 🏆🔥
-
-Bereit, deinen Kiez neu zu entdecken? Dann starte jetzt dein Abenteuer mit Kiezjagd und erlebe, wie aufregend deine Nachbarschaft sein kann! 🌟🎲
-      </p>
-    </section>
+      <!-- Card 2 -->
+      <div class="card">
+        <h3>Dein Smartphone als Spielleiter 📱🏞️</h3>
+        <p>
+          Mit deinem Smartphone begibst du dich auf eine Reise voller Überraschungen und Spaß. Jede Frage führt dich zu interessanten Plätzen,
+          die du vielleicht noch nie bemerkt hast. Ob historische Denkmäler, versteckte Gassen oder geheimnisvolle Gebäude.
+        </p>
+        <p>
+          Trete gegen andere Teams an, sichere dir deinen Platz in der Bestenliste und werde zum wahren Kiez-Meister! 🏆🔥
+          Starte jetzt dein Abenteuer und erlebe, wie aufregend deine Nachbarschaft sein kann! 🌟🎲
+        </p>
+      </div>
+    </div>
+  </section>
 
     <!-- Vorteile als Cards -->
     <section class="features-section">
@@ -213,24 +231,66 @@ export default {
 
 
 /* 📝 Einführungstext */
-.intro-section {
+
+/* 🌟 Allgemeine Styles für den Abschnitt */
+.why-kiezjagd-section {
   text-align: center;
-  margin: 50px 0;
+  margin: 50px auto;
   padding: 30px 20px;
-  background-color: #f0f8ff; /* Hellblauer Hintergrund */
-  border-radius: 8px;
+  background-color: #f5f9ff;
+  border-radius: 12px;
 }
 
-.intro-section h1 {
-  font-size: 2.2rem;
-  color: #4caf50;
-  margin-bottom: 15px;
-}
-
-.intro-section p {
-  font-size: 1.1rem;
-  color: #444;
+/* 🎯 Überschrift */
+.why-kiezjagd-section h2 {
+  font-size: 2rem;
   margin-bottom: 20px;
+  color: #4a90e2;
+}
+
+/* 📦 Cards-Container */
+.cards-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+/* 🃏 Einzelne Card */
+.card {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: left;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* 🎨 Hover-Effekt */
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* 📝 Card Titel */
+.card h3 {
+  font-size: 1.4rem;
+  margin-bottom: 10px;
+  color: #1976d2;
+}
+
+/* 📄 Card Text */
+.card p {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #555;
+}
+
+/* 📱 Mobile Optimierung */
+@media (max-width: 768px) {
+  .cards-container {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* 🟢 Vorteile als Cards */

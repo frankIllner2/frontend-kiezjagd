@@ -5,7 +5,7 @@
 
     <!-- Frage mit Bild -->
     <div v-if="question.imageUrl" class="question-image">
-      <img :src="question.imageUrl" alt="Frage Bild" />
+      <img :src="getCorrectImageUrl(question.imageUrl)" alt="Frage Bild" />
     </div>
 
     <!-- Freitextantwort -->
@@ -67,6 +67,12 @@ export default {
       this.userAnswer = '';
       this.selectedOptions = [];
     },
+    getCorrectImageUrl(imageUrl) {
+      if (imageUrl.startsWith('http://localhost')) {
+        return imageUrl.replace('localhost', window.location.hostname);
+      }
+      return imageUrl;
+    }
   },
 };
 </script>
