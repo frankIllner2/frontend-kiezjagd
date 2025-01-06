@@ -53,7 +53,7 @@ router.beforeEach(async (to, from, next) => {
       next('/admin/login');
     } else {
       try {
-        await axios.get('http://localhost:5000/api/auth/validate', {
+        await axios.get(`${process.env.VUE_APP_API_AUTH_URL}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         next();

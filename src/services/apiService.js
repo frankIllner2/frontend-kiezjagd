@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // ✅ Axios-Instanz erstellen
 const axiosInstance = axios.create({
-  baseURL: 'http://192.168.178.26:5000/api',
+  baseURL: process.env.VUE_APP_API_BASE_URL,
   timeout: 5000,
 });
 

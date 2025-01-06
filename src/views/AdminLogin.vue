@@ -33,7 +33,7 @@
     methods: {
       async login() {
         try {
-          const response = await axios.post('http://localhost:5000/api/auth/login', {
+          const response = await axios.post(process.env.VUE_APP_API_LOGIN_URL, {
             username: this.username,
             password: this.password,
           });

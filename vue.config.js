@@ -13,7 +13,7 @@ module.exports = {
       runtimeCaching: [
         {
           // API-Caching für Produktionsumgebung
-          urlPattern: /^http:\/\/localhost:5000\/api\//,
+          urlPattern: new RegExp(`^${process.env.VUE_APP_API_BASE_URL}/api/`),
           handler: 'NetworkFirst',
           options: {
             cacheName: 'api-cache',
@@ -32,7 +32,7 @@ module.exports = {
   devServer: {
     proxy: {
       '/api': {
-        target: 'http://192.168.178.26:5000', // API-Backend-URL
+        target:  process.env.VUE_APP_ROOT, // API-Backend-URL
         changeOrigin: true, // Ändert den Origin-Header, um CORS-Probleme zu vermeiden
         secure: false, // Nur wenn HTTPS deaktiviert ist
         pathRewrite: {
