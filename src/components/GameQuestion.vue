@@ -42,6 +42,18 @@ export default {
       selectedOptions: [],
     };
   },
+  mounted() {
+    // Lade gespeicherten Index aus localStorage
+    const savedIndex = localStorage.getItem('currentQuestionIndex');
+    if (savedIndex !== null) {
+      this.$emit('updateIndex', parseInt(savedIndex, 10)); // Index zurücksetzen
+    }
+  },
+  watch: {
+    currentIndex(newIndex) {
+      this.saveProgress(newIndex);
+    },
+  },
   methods: {
     toggleOption(index) {
       if (this.selectedOptions.includes(index)) {
@@ -60,19 +72,25 @@ export default {
           .map((option, index) => (option.correct ? index : null))
           .filter((index) => index !== null);
 
-        isCorrect = JSON.stringify(correctIndexes.sort()) === JSON.stringify(this.selectedOptions.sort());
+        isCorrect =
+          JSON.stringify(correctIndexes.sort()) ===
+          JSON.stringify(this.selectedOptions.sort());
       }
 
       this.$emit('submitAnswer', { isCorrect });
       this.userAnswer = '';
       this.selectedOptions = [];
     },
+    saveProgress(index) {
+      localStorage.setItem('currentQuestionIndex', index);
+      console.log(`📍 Fortschritt gespeichert: Frage ${index + 1}`);
+    },
     getCorrectImageUrl(imageUrl) {
       if (imageUrl.startsWith('http://localhost')) {
         return imageUrl.replace('localhost', window.location.hostname);
       }
       return imageUrl;
-    }
+    },
   },
 };
 </script>

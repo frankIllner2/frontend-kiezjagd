@@ -1,5 +1,10 @@
 <template>
   <div class="admin-container">
+    <div class="logout">
+      <h2>🔒 Admin-Bereich</h2>
+      <button @click="logout">Logout</button>
+      <router-view />
+    </div>
     <!-- Sidebar für Navigation -->
     <aside class="sidebar">
       <button @click="currentView = 'list'">Alle Spiele</button>
@@ -110,6 +115,10 @@ export default {
       this.selectedGame = null;
       this.currentView = "list";
     },
+    logout() {
+      localStorage.removeItem('token');
+      this.$router.push('/admin/login');
+    }
   },
   mounted() {
     this.fetchGames();
@@ -118,6 +127,12 @@ export default {
 </script>
 
 <style scoped>
+
+.logout {
+  display: inline-flex;
+  flex-direction: column-reverse;
+}
+
 /* Allgemeine Container-Stile */
 .admin-container {
   display: flex;

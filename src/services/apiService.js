@@ -121,8 +121,10 @@ export const apiService = {
 
   // 🔹 Ergebnis speichern
   saveGameResult(result) {
-    if (!result) throw new Error('⚠️ Ergebnis darf nicht leer sein.');
-    return performRequest('post', '/results', result);
+    if (!result || !result.gameId || !result.teamName || !result.email || !result.startTime || !result.endTime || !result.duration) {
+      throw new Error('⚠️ Fehlende Felder beim Speichern des Ergebnisses.');
+    }
+    return performRequest('post', `/results`, result);
   },
 
   // 🔹 Bild hochladen

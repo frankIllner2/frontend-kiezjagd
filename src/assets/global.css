@@ -46,3 +46,18 @@ body {
   .game-card .margin-top-2 {
     margin-top: 2em;
   }
+  textarea {
+    width: 50%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+    resize: vertical;
+  }
+  
+  textarea:focus {
+    border-color: #4caf50;
+    outline: none;
+  }
+  

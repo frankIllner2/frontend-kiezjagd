@@ -44,7 +44,6 @@
   </div>
 </template>
 
-
 <script>
 import StartForm from '@/components/StartForm.vue';
 import GameQuestion from '@/components/GameQuestion.vue';
@@ -77,38 +76,53 @@ export default {
   computed: {
     currentQuestion() {
       return this.questions.length > 0 && this.currentQuestionIndex < this.questions.length
-      ? this.questions[this.currentQuestionIndex]
-      : null;
+        ? this.questions[this.currentQuestionIndex]
+        : null;
     }
   },
   async mounted() {
-    this.gameId = this.$route.params.encryptedId || null;
-    this.teamName = this.$route.query.teamName || '';
-    this.email = this.$route.query.email || '';
-    this.playerNames = JSON.parse(this.$route.query.players || '[]');
+      this.gameId = this.$route.params.encryptedId || null;
+      this.teamName = localStorage.getItem('teamName') || '';
+      this.email = localStorage.getItem('email') || '';
+      this.playerNames = JSON.parse(localStorage.getItem('playerNames') || '[]');
 
-    if (this.gameId) {
-      await this.loadGameData(this.gameId);
-    }
-  },
+      if (localStorage.getItem('gameInProgress') === 'true') {
+        this.gameStarted = true;
+        this.startTime = parseInt(localStorage.getItem('startTime'), 10) || Date.now();
+        this.currentQuestionIndex = parseInt(localStorage.getItem(`currentQuestionIndex_${this.gameId}`), 10) || 0;
+        this.startTimer();
+      }
+
+      if (this.gameId) {
+        this.loadGameData(this.gameId);
+      }
+    },
   methods: {
     async loadGameData(gameId) {
       try {
         const response = await apiService.fetchGameById(gameId);
-        console.log('API Response:', response); // Überprüfe die API-Antwort
         this.gameName = response.name || 'Unbekanntes Spiel';
         this.questions = response.questions || [];
-        console.log('Geladene Fragen:', this.questions); // Überprüfe die geladenen Fragen
-        this.currentQuestionIndex = 0;
       } catch (error) {
-        console.error('Fehler beim Laden des Spiels:', error);
+        console.error('❌ Fehler beim Laden des Spiels:', error);
       }
     },
+
+    restoreQuestionIndex() {
+      const savedIndex = localStorage.getItem(`currentQuestionIndex_${this.gameId}`);
+      if (savedIndex !== null) {
+        this.currentQuestionIndex = parseInt(savedIndex, 10);
+        this.gameStarted = true;
+        console.log(`📍 Wiederhergestellter Index für Spiel ${this.gameId}: ${this.currentQuestionIndex}`);
+      }
+    },
+
     startGame(payload) {
       const { teamName, email, playerNames } = payload;
 
       if (!teamName || !email) {
         console.warn('⚠️ Teamname und E-Mail dürfen nicht leer sein.');
+        alert('⚠️ Bitte Teamname und E-Mail eingeben.');
         return;
       }
 
@@ -121,9 +135,18 @@ export default {
       this.teamName = teamName;
       this.email = email;
       this.playerNames = playerNames;
+      this.startTime = Date.now(); // Setze die Startzeit korrekt
       this.gameStarted = true;
+
+      // Speichere die Spielinformationen in localStorage
+      localStorage.setItem('gameInProgress', 'true');
+      localStorage.setItem('currentGameId', this.gameId);
+      localStorage.setItem('teamName', teamName);
+      localStorage.setItem('email', email);
+      localStorage.setItem('startTime', this.startTime);
       this.startTimer();
     },
+
     handleAnswer({ isCorrect }) {
       if (isCorrect) {
         this.feedbackMessage = '✅ Antwort richtig!';
@@ -135,13 +158,21 @@ export default {
         this.feedbackMessage = '❌ Antwort falsch! Versuche es erneut.';
       }
     },
+
     nextQuestion() {
       if (this.currentQuestionIndex < this.questions.length - 1) {
         this.currentQuestionIndex++;
+        this.saveQuestionIndex();
       } else {
         this.finishGame();
       }
     },
+
+    saveQuestionIndex() {
+      localStorage.setItem(`currentQuestionIndex_${this.gameId}`, this.currentQuestionIndex);
+      console.log(`📍 Index für Spiel ${this.gameId} gespeichert: ${this.currentQuestionIndex}`);
+    },
+
     startTimer() {
       this.startTime = Date.now();
       this.timerInterval = setInterval(() => {
@@ -154,28 +185,46 @@ export default {
       }, 1000);
     },
     async finishGame() {
-      clearInterval(this.timerInterval);
-      this.endTime = Date.now();
-      this.gameFinished = true;
-
-      const resultPayload = {
-        gameId: this.gameId,
-        teamName: this.teamName,
-        email: this.email,
-        startTime: new Date(this.startTime).toISOString(),
-        endTime: new Date(this.endTime).toISOString(),
-        duration: this.gameDuration
-      };
-
-      console.log('📤 Ergebnis wird gesendet:', resultPayload);
-
       try {
+        clearInterval(this.timerInterval);
+        this.endTime = Date.now();
+        this.gameFinished = true;
+
+        const durationInSeconds = Math.round((this.endTime - this.startTime) / 1000);
+        const hours = Math.floor(durationInSeconds / 3600);
+        const minutes = Math.floor((durationInSeconds % 3600) / 60);
+        const seconds = durationInSeconds % 60;
+
+        const formattedDuration = `${hours}h ${minutes}m ${seconds}s`;
+
+        const resultPayload = {
+          gameId: this.gameId,
+          teamName: this.teamName,
+          email: this.email,
+          startTime: new Date(this.startTime).toISOString(),
+          endTime: new Date(this.endTime).toISOString(),
+          duration: formattedDuration,
+        };
+
+        console.log('📤 Ergebnis wird gesendet:', resultPayload);
+
         await apiService.saveGameResult(resultPayload);
-        console.log('✅ Ergebnis erfolgreich gespeichert');
+
+        // Lokale Daten bereinigen
+        localStorage.removeItem('teamName');
+        localStorage.removeItem('email');
+        localStorage.removeItem('gameInProgress');
+        localStorage.removeItem('startTime');
+        localStorage.removeItem(`currentQuestionIndex_${this.gameId}`);
+        alert('🎉 Spiel erfolgreich abgeschlossen! Ergebnis wurde gespeichert.');
       } catch (error) {
         console.error('❌ Fehler beim Speichern der Ergebnisse:', error.response?.data || error.message);
+        alert('❌ Fehler beim Speichern der Ergebnisse. Bitte versuche es erneut.');
+      } finally {
+        clearInterval(this.timerInterval);
       }
     },
+
     goToHome() {
       this.$router.push('/');
     }
@@ -185,6 +234,7 @@ export default {
   }
 };
 </script>
+
 <style scoped>
 /* Allgemeine Spielcontainer-Stile */
 .game-container {

@@ -24,6 +24,17 @@
         </div>
 
         <div class="form-group">
+          <label for="description">Spielbeschreibung:</label>
+          <textarea 
+            v-model="game.description" 
+            id="description" 
+            placeholder="Kurze Beschreibung des Spiels bearbeiten" 
+            rows="4"
+            required
+          ></textarea>
+        </div>
+
+        <div class="form-group">
           <label for="ageGroup">Altersgruppe:</label>
           <input
             v-model="game.ageGroup"
@@ -80,6 +91,7 @@ export default {
         name: "",
         ageGroup: "",
         encryptedId: "",
+        description: "",
         questions: [],
       },
       selectedQuestion: { question: "", answer: "" },
@@ -119,19 +131,19 @@ export default {
       await this.fetchGame(this.id);
     },
     async handleQuestionSave(question) {
-  // Nur lokale Aktualisierung der Fragenliste
-  const questionIndex = this.game.questions.findIndex(q => q._id === question._id);
-  if (questionIndex !== -1) {
-    this.game.questions[questionIndex] = { ...question };
-  } else {
-    this.game.questions.push(question);
-  }
+      // Nur lokale Aktualisierung der Fragenliste
+      const questionIndex = this.game.questions.findIndex(q => q._id === question._id);
+      if (questionIndex !== -1) {
+        this.game.questions[questionIndex] = { ...question };
+      } else {
+        this.game.questions.push(question);
+      }
 
-  // Spiel aktualisieren, um die Fragenliste konsistent zu halten
-  await this.fetchGame(this.game.encryptedId);
+      // Spiel aktualisieren, um die Fragenliste konsistent zu halten
+      await this.fetchGame(this.game.encryptedId);
 
-  this.cancelQuestionEdit();
-},
+      this.cancelQuestionEdit();
+    },
     cancelQuestionEdit() {
       this.selectedQuestion = { question: "", answer: "" };
       this.showQuestionForm = false;
@@ -308,7 +320,7 @@ input {
   margin-top: 15px;
 }
 @media (min-width: 1200px) {
-  input {
+  input, textarea {
     width: 50%;
   }
 }

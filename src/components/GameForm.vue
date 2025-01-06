@@ -14,6 +14,18 @@
       <input v-model="localGame.name" id="name" placeholder="Spielname eingeben" required />
     </div>
 
+    <!-- Spielbeschreibung -->
+    <div class="form-group">
+      <label for="description">Spielbeschreibung</label>
+      <textarea 
+        v-model="localGame.description" 
+        id="description" 
+        placeholder="Kurze Beschreibung des Spiels hinzufügen" 
+        rows="4"
+        required
+      ></textarea>
+    </div>
+
     <!-- Altersgruppe -->
     <div class="form-group">
       <label for="ageGroup">Altersgruppe</label>
@@ -96,7 +108,8 @@ label {
 }
 
 input,
-select {
+select,
+textarea {
   width: 100%;
   padding: 10px;
   border: 1px solid #ccc;
