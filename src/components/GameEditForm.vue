@@ -51,7 +51,7 @@
 
     <hr />
 
-    <!-- Fragenverwaltung -->
+    <!-- Fragen -->
     <section class="edit-section">
       <h3>Fragen verwalten</h3>
       <QuestionList
