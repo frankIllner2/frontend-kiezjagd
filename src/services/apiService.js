@@ -40,11 +40,18 @@ export const apiService = {
   fetchGames() {
     return performRequest('get', '/games');
   },
-
+  // Zwei zufällige Spiele abrufen
+  getRandomGames() {
+    return performRequest('get', '/games/random');
+  },
   // 🔹 Ein Spiel anhand der encryptedId abrufen
   fetchGameById(encryptedId) {
     if (!encryptedId) throw new Error('⚠️ GameId darf nicht leer sein.');
     return performRequest('get', `/games/${encryptedId}`);
+  },
+  getTop5Results(encryptedId) {
+    if (!encryptedId) throw new Error('⚠️ encryptedId darf nicht leer sein.');
+    return performRequest('get', `/games/${encryptedId}/top5`);
   },
 
   // 🔹 Fragen eines Spiels abrufen
@@ -140,8 +147,8 @@ export const apiService = {
     })
       .then(res => res.data.imageUrl)
       .catch(error => handleApiError(error, 'uploadImage'));
-  },
-  
+  }
+
 
 };
 

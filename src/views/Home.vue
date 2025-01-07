@@ -79,13 +79,24 @@
 
     <!-- Top Teams Ranking -->
     <section class="ranking-section">
-      <h2>🏁 Top Teams der Woche</h2>
-      <ul>
-        <li class="rank-1">1. Team Blitzrätsel 🥇 0h 34m 21s</li>
-        <li class="rank-2">2. Die Stadtfüchse 🥈 0h 45m 12s</li>
-        <li class="rank-3">3. Rätseljäger 🥉 0h 50m 30s</li>
-      </ul>
+      <h2>🏆 Top Rankings der Spiele</h2>
+      <div class="rankings-container">
+        <div
+          v-for="(ranking, index) in randomRankings"
+          :key="index"
+          class="ranking-card"
+        >
+          <h3>{{ ranking.gameName }}</h3>
+          <ul>
+            <li v-for="(result, idx) in ranking.topResults" :key="idx">
+              <strong>{{ idx + 1 }}.</strong> {{ result.teamName }} - {{ result.duration }}
+            </li>
+          </ul>
+        </div>
+      </div>
     </section>
+
+
 
     <!-- Beliebte Spiele -->
     <section class="game-preview-section">
@@ -140,21 +151,11 @@ export default {
     return {
       topTeams: [],
       games: [],
+      randomRankings: [],
     };
   },
-  async mounted() {
-    await this.fetchRanking();
-    await this.fetchGames();
-  },
   methods: {
-    async fetchRanking() {
-      try {
-        const ranking = await apiService.fetchRanking("global");
-        this.topTeams = ranking.slice(0, 5);
-      } catch (error) {
-        console.error("Fehler beim Laden des Rankings:", error);
-      }
-    },
+
     async fetchGames() {
       try {
         const games = await apiService.fetchGames();
@@ -163,6 +164,52 @@ export default {
         console.error("Fehler beim Laden der Spiele:", error);
       }
     },
+    async fetchRandomGameRankings() {
+      try {
+        // ✅ Zufällige Spiele abrufen
+        console.log('🎲 Zufällige Spiele:');
+
+
+        const randomGameIds = await apiService.getRandomGames();
+        console.log('🎲 Zufällige Spiele:', randomGameIds);
+
+        if (!randomGameIds || randomGameIds.length === 0) {
+          console.warn('⚠️ Keine zufälligen Spiele gefunden');
+          return;
+        }
+
+        // ✅ Top-5-Ergebnisse für jedes zufällige Spiel abrufen
+        const rankings = await Promise.all(
+          randomGameIds.map(async (id) => {
+            try {
+              return await apiService.getTop5Results(id);
+            } catch (error) {
+              console.error(`❌ Fehler beim Abrufen von Top 5 für Spiel ${id}:`, error);
+              return null;
+            }
+          })
+        );
+
+        // ✅ Daten filtern, falls einzelne Abfragen fehlschlagen
+        this.randomRankings = rankings
+          .filter(ranking => ranking !== null)
+          .map((ranking, index) => ({
+            gameId: randomGameIds[index],
+            gameName: ranking.gameName,
+            topResults: ranking.topResults,
+          }));
+        
+        console.log('🏆 Top 5 Rankings:', this.randomRankings);
+      } catch (error) {
+        console.error('❌ Fehler beim Laden zufälliger Rankings:', error);
+      }
+    },
+    
+  },
+  async mounted() {
+    this.fetchRandomGameRankings();
+    await this.fetchGames();
+
   },
 };
 </script>
@@ -228,9 +275,6 @@ export default {
   background-color: #e68900;
 }
 
-
-
-/* 📝 Einführungstext */
 
 /* 🌟 Allgemeine Styles für den Abschnitt */
 .why-kiezjagd-section {
@@ -329,30 +373,81 @@ export default {
 }
 
 /* 🏆 Ranking-Section */
+/* 🌟 Ranking Section */
 .ranking-section {
-  margin: 60px 0;
-  padding: 30px 20px;
-  background-color: #fff3e0; /* Hellorange Hintergrund */
-  border-radius: 8px;
+  margin-top: 30px;
   text-align: center;
 }
 
 .ranking-section h2 {
   font-size: 1.8rem;
   margin-bottom: 20px;
-  color: #fb8c00;
+  color: #4caf50;
 }
 
-.ranking-section ul {
+/* 🌟 Container für die Cards */
+.rankings-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+/* 🌟 Einzelne Ranking-Card */
+.ranking-card {
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 15px;
+  text-align: left;
+  transition: transform 0.2s ease-in-out;
+}
+
+.ranking-card:hover {
+  transform: scale(1.02);
+}
+
+.ranking-card h3 {
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+  color: #333;
+  text-align: center;
+}
+
+/* 🌟 Ranking-Liste */
+.ranking-card ul {
   list-style: none;
   padding: 0;
+  margin: 0;
 }
 
-.ranking-section li {
-  font-size: 1rem;
-  margin: 8px 0;
-  color: #444;
+.ranking-card li {
+  display: flex;
+  justify-content: flex-start;
+  margin: 5px 0;
+  font-size: 0.9rem;
+  padding: 5px;
+  border-bottom: 1px solid #f0f0f0;
 }
+.ranking-card li strong {
+  padding: 0 20px 0 0;
+}
+
+.ranking-card li:last-child {
+  border-bottom: none;
+}
+
+/* 🌟 Responsiveness */
+@media (max-width: 768px) {
+  .rankings-container {
+    grid-template-columns: 1fr;
+  }
+
+  .ranking-card {
+    padding: 10px;
+  }
+}
+
 
 /* 🎲 Spielvorschau */
 .game-preview-section {
