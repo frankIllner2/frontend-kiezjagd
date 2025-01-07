@@ -578,10 +578,6 @@ export default {
 
     }
 
-  .hero-image {
-    height: 250px;
-  }
-
   .intro-section p {
     font-size: 1rem;
   }

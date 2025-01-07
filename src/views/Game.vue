@@ -216,7 +216,7 @@ export default {
         localStorage.removeItem('gameInProgress');
         localStorage.removeItem('startTime');
         localStorage.removeItem(`currentQuestionIndex_${this.gameId}`);
-        alert('🎉 Spiel erfolgreich abgeschlossen! Ergebnis wurde gespeichert.');
+       
       } catch (error) {
         console.error('❌ Fehler beim Speichern der Ergebnisse:', error.response?.data || error.message);
         alert('❌ Fehler beim Speichern der Ergebnisse. Bitte versuche es erneut.');
