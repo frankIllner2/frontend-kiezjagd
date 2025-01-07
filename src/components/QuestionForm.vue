@@ -110,62 +110,62 @@ export default {
       }
     },
     async saveQuestion() {
-  if (this.isSaving) {
-    console.warn("⛔ Frage wird bereits gespeichert!");
-    return; // Verhindert mehrfaches Speichern
-  }
-  this.isSaving = true;
-
-  try {
-    // Validierung für Mehrfachauswahl
-    if (this.question.type === "multiple" && this.question.options.length === 0) {
-      alert("⚠️ Bitte mindestens eine Option hinzufügen.");
-      return;
-    }
-
-    // Bild hochladen (falls vorhanden)
-    if (this.uploadedFile) {
-      const imageUrl = await apiService.uploadImage(this.uploadedFile);
-      this.question.imageUrl = imageUrl;
-      console.log("📸 Bild erfolgreich hochgeladen:", imageUrl);
-    }
-
-    console.log("📝 Frage-ID:", this.question._id);
-
-    if (this.question._id) {
-      console.log("✏️ Bearbeiten einer bestehenden Frage");
-      if (this.question.type === "text") {
-        // Bearbeitung von Freitext-Fragen
-        await apiService.updateQuestion(this.$route.params.id, this.question._id, {
-          question: this.question.question,
-          answer: this.question.answer,
-          type: this.question.type,
-          imageUrl: this.question.imageUrl,
-        });
-      } else if (this.question.type === "multiple") {
-        // Bearbeitung von Mehrfachauswahl-Fragen
-        await apiService.updateQuestion(this.$route.params.id, this.question._id, {
-          question: this.question.question,
-          options: this.question.options,
-          type: this.question.type,
-          imageUrl: this.question.imageUrl,
-        });
+      if (this.isSaving) {
+        console.warn("⛔ Frage wird bereits gespeichert!");
+        return; // Verhindert mehrfaches Speichern
       }
-    } else {
-      console.log("➕ Neue Frage hinzufügen");
-      await apiService.addQuestion(this.$route.params.id, this.question);
-    }
+      this.isSaving = true;
 
-    // Event feuern
-    this.$emit("save", { ...this.question });
-    this.resetForm();
-  } catch (error) {
-    console.error("❌ Fehler beim Speichern der Frage:", error);
-    alert("❌ Fehler beim Speichern der Frage.");
-  } finally {
-    this.isSaving = false;
-  }
-},
+      try {
+        // Validierung für Mehrfachauswahl
+        if (this.question.type === "multiple" && this.question.options.length === 0) {
+          alert("⚠️ Bitte mindestens eine Option hinzufügen.");
+          return;
+        }
+
+        // Bild hochladen (falls vorhanden)
+        if (this.uploadedFile) {
+          const imageUrl = await apiService.uploadImage(this.uploadedFile);
+          this.question.imageUrl = imageUrl;
+          console.log("📸 Bild erfolgreich hochgeladen:", imageUrl);
+        }
+
+        console.log("📝 Frage-ID:", this.question._id);
+
+        if (this.question._id) {
+          console.log("✏️ Bearbeiten einer bestehenden Frage");
+          if (this.question.type === "text") {
+            // Bearbeitung von Freitext-Fragen
+            await apiService.updateQuestion(this.$route.params.id, this.question._id, {
+              question: this.question.question,
+              answer: this.question.answer,
+              type: this.question.type,
+              imageUrl: this.question.imageUrl,
+            });
+          } else if (this.question.type === "multiple") {
+            // Bearbeitung von Mehrfachauswahl-Fragen
+            await apiService.updateQuestion(this.$route.params.id, this.question._id, {
+              question: this.question.question,
+              options: this.question.options,
+              type: this.question.type,
+              imageUrl: this.question.imageUrl,
+            });
+          }
+        } else {
+          console.log("➕ Neue Frage hinzufügen");
+          await apiService.addQuestion(this.$route.params.id, this.question);
+        }
+
+        // Event feuern
+        this.$emit("save", { ...this.question });
+        this.resetForm();
+      } catch (error) {
+        console.error("❌ Fehler beim Speichern der Frage:", error);
+        alert("❌ Fehler beim Speichern der Frage.");
+      } finally {
+        this.isSaving = false;
+      }
+    },
 
     resetForm() {
       this.question = {
