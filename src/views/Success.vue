@@ -3,24 +3,28 @@
     <h1>🎉 Zahlung erfolgreich!</h1>
     <p>Dein Spiel wurde erfolgreich erworben. Überprüfe deine E-Mail für den Zugang!</p>
     
+    <!-- Ladeanzeige -->
     <div v-if="isLoading" class="loading">
       ⏳ Lade Bestellinformationen...
     </div>
 
+    <!-- Fehleranzeige -->
     <div v-else-if="error" class="error">
       ❌ Fehler: {{ error }}
     </div>
 
+    <!-- Bestellinformationen -->
     <div v-else-if="order">
       <h2>📝 Bestellinformationen</h2>
-      <p><strong>Spiel:</strong> {{ order.gameName }}</p>
-      <p><strong>E-Mail:</strong> {{ order.email }}</p>
+      <p><strong>Spiel:</strong> {{ order.gameName || 'Unbekannt' }}</p>
+      <p><strong>E-Mail:</strong> {{ order.email || 'Keine E-Mail angegeben' }}</p>
       <p><strong>Zeitpunkt:</strong> {{ formattedTimestamp }}</p>
 
       <a :href="gameLink" class="btn-primary" target="_blank">🎮 Spiel starten</a>
     </div>
   </div>
 </template>
+
 
 <script>
 import apiService from '@/services/apiService';
@@ -29,41 +33,45 @@ export default {
   name: 'SuccessPage',
   data() {
     return {
-      sessionId: null,
-      order: null,
-      error: null,
-      isLoading: true,
-      gameLink: '',
+      sessionId: null, // Stripe-Session-ID aus der URL
+      order: null, // Bestellinformationen
+      error: null, // Fehlernachricht
+      isLoading: true, // Ladeindikator
+      gameLink: '', // Link zum Spiel
     };
   },
   computed: {
     formattedTimestamp() {
+      // Formatiere das Datum der Bestellung
       if (!this.order || !this.order.timestamp) return 'N/A';
       return new Date(this.order.timestamp).toLocaleString();
     },
   },
   async mounted() {
+    // Session-ID aus der URL auslesen
     this.sessionId = this.$route.query.session_id;
+
     if (!this.sessionId) {
-      this.error = 'Keine Session-ID gefunden!';
+      this.error = '⚠️ Keine Session-ID gefunden!';
       this.isLoading = false;
       return;
     }
 
     try {
-      // ✅ Bestellstatus abrufen
+      // ✅ Bestellstatus vom Backend abrufen
+      console.log(`🔄 Lade Bestellinformationen für Session-ID: ${this.sessionId}`);
       const response = await apiService.performRequest(
         'get',
         `/checkout/order-status/${this.sessionId}`
       );
 
+      // Daten aktualisieren
       console.log('✅ Bestellinformationen:', response);
-
       this.order = response.order;
       this.gameLink = response.gameLink;
     } catch (err) {
       console.error('❌ Fehler beim Abrufen der Bestellinformationen:', err);
-      this.error = 'Bestellinformationen konnten nicht geladen werden.';
+      this.error = '❌ Bestellinformationen konnten nicht geladen werden.';
     } finally {
       this.isLoading = false;
     }
