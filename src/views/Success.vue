@@ -60,10 +60,7 @@ export default {
     try {
       // ✅ Bestellstatus vom Backend abrufen
       console.log(`🔄 Lade Bestellinformationen für Session-ID: ${this.sessionId}`);
-      const response = await apiService.performRequest(
-        'get',
-        `/checkout/order-status/${this.sessionId}`
-      );
+      const response = await apiService.fetchOrderStatus(this.sessionId);
 
       // Daten aktualisieren
       console.log('✅ Bestellinformationen:', response);
