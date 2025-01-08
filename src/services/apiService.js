@@ -53,6 +53,16 @@ export const apiService = {
     if (!encryptedId) throw new Error('⚠️ encryptedId darf nicht leer sein.');
     return performRequest('get', `/games/${encryptedId}/top5`);
   },
+  // 🔹 Stripe-Checkout-Session erstellen
+  createCheckoutSession(gameId, email) {
+    console.log('createCheckoutSession');
+    console.log(gameId);
+    console.log(email);
+    if (!gameId || !email) {
+      throw new Error('⚠️ Spiel-ID und E-Mail sind erforderlich.');
+    }
+    return performRequest('post', '/order/create-checkout-session', { gameId, email });
+  },
 
   // 🔹 Fragen eines Spiels abrufen
   fetchQuestions(encryptedId) {
@@ -147,7 +157,7 @@ export const apiService = {
     })
       .then(res => res.data.imageUrl)
       .catch(error => handleApiError(error, 'uploadImage'));
-  }
+  },
 
 
 };

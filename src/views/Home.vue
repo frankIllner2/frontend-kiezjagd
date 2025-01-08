@@ -96,8 +96,6 @@
       </div>
     </section>
 
-
-
     <!-- Beliebte Spiele -->
     <section class="game-preview-section">
       <h2>🎲 Beliebte Spiele</h2>
@@ -105,11 +103,8 @@
         <div v-for="game in games" :key="game._id" class="game-card">
           <h3>{{ game.name }}</h3>
           <p>{{ game.description }}</p>
-          <button
-            @click="$router.push(`/game/${game.encryptedId}`)"
-            class="btn-secondary"
-          >
-            Zum Spiel
+          <button @click="handleCheckout(game.encryptedId)">
+            🛒 Spiel kaufen
           </button>
         </div>
       </div>
@@ -152,6 +147,7 @@ export default {
       topTeams: [],
       games: [],
       randomRankings: [],
+      userEmail: '',
     };
   },
   methods: {
@@ -162,6 +158,20 @@ export default {
         this.games = games.slice(0, 3);
       } catch (error) {
         console.error("Fehler beim Laden der Spiele:", error);
+      }
+    },
+    async handleCheckout(gameId) {
+      try {
+        const email = this.userEmail || prompt('Bitte geben Sie Ihre E-Mail-Adresse ein:');
+        if (!email) {
+          alert('⚠️ Eine E-Mail-Adresse ist erforderlich!');
+          return;
+        }
+        const { url } = await apiService.createCheckoutSession(gameId, email);
+        window.location.href = url;
+      } catch (error) {
+        console.error('❌ Fehler beim Checkout:', error);
+        alert('❌ Ein Fehler ist beim Checkout aufgetreten.');
       }
     },
     async fetchRandomGameRankings() {

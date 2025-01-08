@@ -1,0 +1,15 @@
+{
+    "redirects": [
+      {
+        "source": "http://kiezjagd.de/(.*)",
+        "destination": "https://www.kiezjagd.de/$1",
+        "permanent": true
+      },
+      {
+        "source": "https://kiezjagd.de/(.*)",
+        "destination": "https://www.kiezjagd.de/$1",
+        "permanent": true
+      }
+    ]
+  }
+  
