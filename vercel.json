@@ -11,7 +11,7 @@
     {
       "source": "/(.*)", 
       "has": [
-        { "type": "host", "value": "https://kiezjagd.de" }
+        { "type": "host", "value": "https://kiezjagd.de" } 
       ],
       "destination": "https://www.kiezjagd.de/$1",
       "permanent": true
