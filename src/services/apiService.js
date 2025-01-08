@@ -87,6 +87,11 @@ export const apiService = {
     if (!id) throw new Error('⚠️ ID darf nicht leer sein.');
     return performRequest('delete', `/games/${id}`);
   },
+  // Bestellstatus abrufen
+  fetchOrderStatus(sessionId) {
+    if (!sessionId) throw new Error('⚠️ Session-ID darf nicht leer sein.');
+    return performRequest('get', `/checkout/order-status/${sessionId}`);
+  },
 
   // 🔹 Teamname prüfen
   checkTeamName(teamName) {

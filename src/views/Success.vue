@@ -1,7 +1,129 @@
 <template>
-    <div>
-      <h1>🎉 Zahlung erfolgreich!</h1>
-      <p>Du hast das Spiel erfolgreich erworben. Überprüfe deine E-Mail für den Zugang!</p>
+  <div class="success-container">
+    <h1>🎉 Zahlung erfolgreich!</h1>
+    <p>Dein Spiel wurde erfolgreich erworben. Überprüfe deine E-Mail für den Zugang!</p>
+    
+    <div v-if="isLoading" class="loading">
+      ⏳ Lade Bestellinformationen...
     </div>
+
+    <div v-else-if="error" class="error">
+      ❌ Fehler: {{ error }}
+    </div>
+
+    <div v-else-if="order">
+      <h2>📝 Bestellinformationen</h2>
+      <p><strong>Spiel:</strong> {{ order.gameName }}</p>
+      <p><strong>E-Mail:</strong> {{ order.email }}</p>
+      <p><strong>Zeitpunkt:</strong> {{ formattedTimestamp }}</p>
+
+      <a :href="gameLink" class="btn-primary" target="_blank">🎮 Spiel starten</a>
+    </div>
+  </div>
 </template>
-  
+
+<script>
+import apiService from '@/services/apiService';
+
+export default {
+  name: 'SuccessPage',
+  data() {
+    return {
+      sessionId: null,
+      order: null,
+      error: null,
+      isLoading: true,
+      gameLink: '',
+    };
+  },
+  computed: {
+    formattedTimestamp() {
+      if (!this.order || !this.order.timestamp) return 'N/A';
+      return new Date(this.order.timestamp).toLocaleString();
+    },
+  },
+  async mounted() {
+    this.sessionId = this.$route.query.session_id;
+    if (!this.sessionId) {
+      this.error = 'Keine Session-ID gefunden!';
+      this.isLoading = false;
+      return;
+    }
+
+    try {
+      // ✅ Bestellstatus abrufen
+      const response = await apiService.performRequest(
+        'get',
+        `/checkout/order-status/${this.sessionId}`
+      );
+
+      console.log('✅ Bestellinformationen:', response);
+
+      this.order = response.order;
+      this.gameLink = response.gameLink;
+    } catch (err) {
+      console.error('❌ Fehler beim Abrufen der Bestellinformationen:', err);
+      this.error = 'Bestellinformationen konnten nicht geladen werden.';
+    } finally {
+      this.isLoading = false;
+    }
+  },
+};
+</script>
+
+<style scoped>
+.success-container {
+  max-width: 600px;
+  margin: 50px auto;
+  padding: 20px;
+  text-align: center;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+  color: #4caf50;
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+p {
+  font-size: 1rem;
+  margin-bottom: 15px;
+}
+
+.loading {
+  color: #ff9800;
+  font-size: 1.2rem;
+  margin: 20px 0;
+}
+
+.error {
+  color: #f44336;
+  font-size: 1.2rem;
+  margin: 20px 0;
+}
+
+h2 {
+  margin-top: 20px;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.btn-primary {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  color: #fff;
+  background-color: #1976d2;
+  border-radius: 5px;
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: #135ba1;
+}
+</style>
