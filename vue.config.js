@@ -1,5 +1,7 @@
+const path = require('path');
+
 module.exports = {
-  // PWA-Optionen
+  // ✅ PWA-Konfiguration
   pwa: {
     name: 'Kiezjagd',
     themeColor: '#4DBA87',
@@ -20,7 +22,7 @@ module.exports = {
             networkTimeoutSeconds: 10,
             expiration: {
               maxEntries: 50,
-              maxAgeSeconds: 86400,
+              maxAgeSeconds: 86400, // Cache für 24 Stunden
             },
           },
         },
@@ -28,15 +30,16 @@ module.exports = {
     },
   },
 
-  // Proxy-Setup für Entwicklungsumgebung
+  // ✅ Entwicklungsserver mit Proxy
   devServer: {
     proxy: {
+      // Proxy für API-Requests
       '/api': {
-        target:  process.env.VUE_APP_ROOT, // API-Backend-URL
-        changeOrigin: true, // Ändert den Origin-Header, um CORS-Probleme zu vermeiden
-        secure: false, // Nur wenn HTTPS deaktiviert ist
+        target: process.env.VUE_APP_API_BASE_URL || 'http://localhost:5000', // Standard-Backend-URL
+        changeOrigin: true, // CORS-Probleme vermeiden
+        secure: false, // HTTPS deaktivieren, wenn Backend lokal ohne SSL läuft
         pathRewrite: {
-          '^/api': '', // Entfernt das /api-Präfix bei Weiterleitung
+          '^/api': '', // Entfernt das `/api` Präfix
         },
         onProxyReq: (proxyReq, req) => {
           console.log(`[Proxy] ${req.method} ${req.url} -> ${proxyReq.path}`);
@@ -45,12 +48,19 @@ module.exports = {
     },
   },
 
-  // Build-spezifische Optionen
+  // ✅ Webpack-Konfiguration
   configureWebpack: {
     resolve: {
       alias: {
-        '@': require('path').resolve(__dirname, 'src'),
+        '@': path.resolve(__dirname, 'src'),
       },
     },
+  },
+
+  // ✅ Umgebungsvariablen sicherstellen
+  env: {
+    VUE_APP_API_BASE_URL: process.env.VUE_APP_API_BASE_URL || 'http://localhost:5000',
+    VUE_APP_STRIPE_PUBLIC_KEY: process.env.VUE_APP_STRIPE_PUBLIC_KEY,
+    VUE_APP_FRONTEND_URL: process.env.VUE_APP_FRONTEND_URL || 'http://localhost:8080',
   },
 };

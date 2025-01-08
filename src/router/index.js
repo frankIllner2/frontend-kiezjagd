@@ -1,11 +1,15 @@
-
 import axios from 'axios';
 import { createRouter, createWebHistory } from 'vue-router';
+
+// ✅ Seiten importieren
 import HomePage from '../views/Home.vue';
 import GamePage from '../views/Game.vue';
 import AdminPage from '../views/Admin.vue';
-import GameEditForm from '../components/GameEditForm.vue'; // Bearbeitungsformular hinzufügen
+import GameEditForm from '../components/GameEditForm.vue';
 import AdminLogin from '../views/AdminLogin.vue';
+import SuccessPage from '../views/Success.vue';
+import CancelPage from '../views/Cancel.vue';
+import NotFoundPage from '../views/NotFound.vue';
 
 const routes = [
   {
@@ -23,20 +27,37 @@ const routes = [
     path: '/admin',
     name: 'Admin',
     component: AdminPage,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true },
   },
   {
     path: '/admin/edit/:id',
     name: 'EditGame',
     component: GameEditForm,
     meta: { requiresAuth: true },
-    props: true, // Parameter id wird als Prop übergeben
+    props: true,
   },
-  { 
-    path: '/admin/login', 
-    name: 'AdminLogin', 
-    component: AdminLogin 
-  }
+  {
+    path: '/admin/login',
+    name: 'AdminLogin',
+    component: AdminLogin,
+  },
+  {
+    path: '/success',
+    name: 'Success',
+    component: SuccessPage,
+    meta: { requiresAuth: false },
+  },
+  {
+    path: '/cancel',
+    name: 'Cancel',
+    component: CancelPage,
+    meta: { requiresAuth: false },
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'NotFound',
+    component: NotFoundPage,
+  },
 ];
 
 const router = createRouter({
@@ -44,7 +65,7 @@ const router = createRouter({
   routes,
 });
 
-// Navigation Guard für Auth-Schutz
+// ✅ Navigation Guard für Auth-Schutz
 router.beforeEach(async (to, from, next) => {
   const token = localStorage.getItem('token');
 
@@ -54,7 +75,7 @@ router.beforeEach(async (to, from, next) => {
     } else {
       try {
         await axios.get(`${process.env.VUE_APP_API_AUTH_URL}`, {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         });
         next();
       } catch (err) {
@@ -67,6 +88,5 @@ router.beforeEach(async (to, from, next) => {
     next();
   }
 });
-
 
 export default router;
