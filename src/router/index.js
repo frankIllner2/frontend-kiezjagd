@@ -8,7 +8,7 @@ import AdminPage from '../views/Admin.vue';
 import GameEditForm from '../components/GameEditForm.vue';
 import AdminLogin from '../views/AdminLogin.vue';
 import SuccessPage from '../views/Success.vue';
-import CancelPage from '../views/Cancel.vue';
+import CancelPage from '../views/CancelSite.vue';
 import NotFoundPage from '../views/NotFound.vue';
 
 const routes = [

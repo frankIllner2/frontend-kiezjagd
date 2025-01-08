@@ -57,10 +57,4 @@ module.exports = {
     },
   },
 
-  // ✅ Umgebungsvariablen sicherstellen
-  env: {
-    VUE_APP_API_BASE_URL: process.env.VUE_APP_API_BASE_URL || 'http://localhost:5000',
-    VUE_APP_STRIPE_PUBLIC_KEY: process.env.VUE_APP_STRIPE_PUBLIC_KEY,
-    VUE_APP_FRONTEND_URL: process.env.VUE_APP_FRONTEND_URL || 'http://localhost:8080',
-  },
 };
