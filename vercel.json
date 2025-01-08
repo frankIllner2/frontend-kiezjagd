@@ -1,15 +1,20 @@
 {
-    "redirects": [
-      {
-        "source": "http://kiezjagd.de/(.*)",
-        "destination": "https://www.kiezjagd.de/$1",
-        "permanent": true
-      },
-      {
-        "source": "https://kiezjagd.de/(.*)",
-        "destination": "https://www.kiezjagd.de/$1",
-        "permanent": true
-      }
-    ]
-  }
-  
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [
+        { "type": "host", "value": "kiezjagd.de" }
+      ],
+      "destination": "https://www.kiezjagd.de/$1",
+      "permanent": true
+    },
+    {
+      "source": "/(.*)",
+      "has": [
+        { "type": "host", "value": "https://kiezjagd.de" }
+      ],
+      "destination": "https://www.kiezjagd.de/$1",
+      "permanent": true
+    }
+  ]
+}
