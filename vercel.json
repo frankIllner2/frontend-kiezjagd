@@ -9,7 +9,7 @@
       "permanent": true
     },
     {
-      "source": "/(.*)",
+      "source": "/(.*)", 
       "has": [
         { "type": "host", "value": "https://kiezjagd.de" }
       ],
