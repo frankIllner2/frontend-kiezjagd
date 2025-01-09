@@ -1,18 +1,22 @@
 {
     "name": "Kiezjagd",
     "short_name": "Spiel",
-    "start_url": ".",
+    "start_url": "/",
     "display": "standalone",
-    "background_color": "#ffffff",
+    "scope": "/",
+    "description": "Willkommen bei Kiezjagd – Dein Abenteuer beginnt hier!",
+    "lang": "de-DE",
+    "dir": "ltr",
+    "background_color": "#add8e6",
     "theme_color": "#4DBA87",
     "icons": [
       {
-        "src": "img/icons/android-icon-192x192.png",
+        "src": "img/icons/web-app-manifest-192x192.png",
         "sizes": "192x192",
         "type": "image/png"
       },
       {
-        "src": "img/icons/android-icon-192x192.png",
+        "src": "img/icons/web-app-manifest-512x512.png",
         "sizes": "512x512",
         "type": "image/png"
       }
