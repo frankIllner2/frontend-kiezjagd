@@ -6,6 +6,7 @@ module.exports = {
     name: 'Kiezjagd',
     themeColor: '#4DBA87',
     manifestOptions: {
+      id: '/', 
       short_name: 'Kiez-Spiel',
       start_url: '/',
       display: 'standalone',
