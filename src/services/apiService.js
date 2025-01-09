@@ -55,9 +55,7 @@ export const apiService = {
   },
   // 🔹 Stripe-Checkout-Session erstellen
   createCheckoutSession(gameId, email) {
-    console.log('createCheckoutSession');
-    console.log(gameId);
-    console.log(email);
+
     if (!gameId || !email) {
       throw new Error('⚠️ Spiel-ID und E-Mail sind erforderlich.');
     }

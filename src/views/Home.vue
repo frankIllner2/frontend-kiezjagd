@@ -103,12 +103,30 @@
         <div v-for="game in games" :key="game._id" class="game-card">
           <h3>{{ game.name }}</h3>
           <p>{{ game.description }}</p>
-          <button @click="handleCheckout(game.encryptedId)">
-            🛒 Spiel kaufen
+          <button @click="openModal(game.encryptedId)">
+            Spiel kaufen
           </button>
         </div>
       </div>
     </section>
+
+    <!-- Modal Fenster -->
+    <div v-if="showModal" class="modal-overlay">
+      <div class="modal">
+        <h2>🎟️ Spiel kaufen</h2>
+        <p>Um dir den Spiel-Link nach dem Kauf zusenden zu können, benötigen wir deine E-Mail-Adresse:</p>
+        <input
+          type="email"
+          v-model="userEmail"
+          placeholder="E-Mail-Adresse"
+          required
+        />
+        <div class="modal-actions">
+          <button @click="handleCheckout">Bestätigen</button>
+          <button @click="closeModal">Abbrechen</button>
+        </div>
+      </div>
+    </div>
 
     <!-- Call-to-Action -->
     <section class="cta-section">
@@ -148,6 +166,7 @@ export default {
       games: [],
       randomRankings: [],
       userEmail: '',
+      showModal: false, 
     };
   },
   methods: {
@@ -173,6 +192,14 @@ export default {
         console.error('❌ Fehler beim Checkout:', error);
         alert('❌ Ein Fehler ist beim Checkout aufgetreten.');
       }
+    },
+    openModal(gameId) {
+      this.selectedGameId = gameId;
+      this.showModal = true;
+    },
+    closeModal() {
+      this.showModal = false;
+      this.userEmail = "";
     },
     async fetchRandomGameRankings() {
       try {
@@ -590,6 +617,93 @@ export default {
 
   .intro-section p {
     font-size: 1rem;
+  }
+}
+
+/* Modal Layer */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: #ffffff;
+  border-radius: 8px;
+  width: 400px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.modal h2 {
+  margin-bottom: 10px;
+  font-size: 1.5rem;
+}
+
+.modal p {
+  margin-bottom: 15px;
+  font-size: 1rem;
+}
+
+.modal input {
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.modal-actions button {
+  flex: 1;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.modal-actions button:first-child {
+  background-color: #1976d2;
+  color: white;
+}
+
+.modal-actions button:last-child {
+  background-color: #f44336;
+  color: white;
+}
+/* Mobile Optimierungen */
+@media (max-width: 768px) {
+  .modal {
+    width: 90%; /* Verkleinert das Modal für kleinere Geräte */
+    max-width: 90%; /* Sicherstellen, dass es nicht über die Ränder hinausgeht */
+    padding: 15px;
+  }
+
+  .modal-container h3 {
+    font-size: 1.3rem;
+  }
+
+  .modal-container input[type='email'] {
+    font-size: 0.9rem; /* Kleinere Schrift für Mobilgeräte */
+  }
+
+  .modal-container .btn-primary {
+    font-size: 0.9rem; /* Kleinere Schriftgröße für Buttons */
+    padding: 8px;
   }
 }
 </style>
