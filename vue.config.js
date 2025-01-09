@@ -12,7 +12,7 @@ module.exports = {
       background_color: '#ffffff',
       icons: [
         {
-          src:  '/img/icons/web-app-manifest-192x192.png',
+          src: '/img/icons/web-app-manifest-192x192.png',
           sizes: '192x192',
           type: 'image/png',
         },
@@ -21,7 +21,12 @@ module.exports = {
           sizes: '512x512',
           type: 'image/png',
         },
-      ]
+        {
+          src: '/img/icons/web-app-manifest-96x96.png',
+          sizes: '96x96',
+          type: 'image/png',
+        },
+      ],
     },
     workboxOptions: {
       runtimeCaching: [
@@ -38,9 +43,22 @@ module.exports = {
             },
           },
         },
+        {
+          // Caching von statischen Ressourcen (Bilder, Fonts, CSS, JS)
+          urlPattern: /\.(?:png|jpg|jpeg|svg|gif|css|js|woff2|woff|ttf|eot)$/,
+          handler: 'CacheFirst',
+          options: {
+            cacheName: 'static-resources',
+            expiration: {
+              maxEntries: 100,
+              maxAgeSeconds: 2592000, // Cache für 30 Tage
+            },
+          },
+        },
       ],
     },
   },
+  
 
   // ✅ Entwicklungsserver mit Proxy
   devServer: {
