@@ -28,6 +28,20 @@ module.exports = {
           type: 'image/png',
         },
       ],
+      screenshots: [
+        {
+          src: '/img/screenshots/screenshot-desktop-1920x740.png',
+          sizes: '1920x740',
+          type: 'image/png',
+          label: 'Desktop-Version von Kiezjagd'
+        },
+        {
+          src: '/img/screenshots/screenshot-mobile-412x915.png',
+          sizes: '412x915',
+          type: 'image/png',
+          label: 'Mobile-Version von Kiezjagd'
+        }
+      ],
     },
     workboxOptions: {
       runtimeCaching: [
