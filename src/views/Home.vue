@@ -186,6 +186,7 @@ export default {
           alert('⚠️ Eine E-Mail-Adresse ist erforderlich!');
           return;
         }
+        console.log(gameId);
         const { url } = await apiService.createCheckoutSession(gameId, email);
         window.location.href = url;
       } catch (error) {
