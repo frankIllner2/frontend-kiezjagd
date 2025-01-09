@@ -3,10 +3,6 @@
     "short_name": "Spiel",
     "start_url": "/",
     "display": "standalone",
-    "scope": "/",
-    "description": "Willkommen bei Kiezjagd – Dein Abenteuer beginnt hier!",
-    "lang": "de-DE",
-    "dir": "ltr",
     "background_color": "#add8e6",
     "theme_color": "#4DBA87",
     "icons": [
