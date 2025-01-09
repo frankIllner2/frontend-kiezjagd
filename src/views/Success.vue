@@ -63,7 +63,7 @@ export default {
       const response = await apiService.fetchOrderStatus(this.sessionId);
 
       // Daten aktualisieren
-      console.log('✅ Bestellinformationen:', response);
+     
       this.order = response.order;
       this.gameLink = response.gameLink;
     } catch (err) {

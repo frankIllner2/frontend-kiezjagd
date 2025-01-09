@@ -122,6 +122,7 @@
           required
         />
         <div class="modal-actions">
+          
           <button @click="handleCheckout">Bestätigen</button>
           <button @click="closeModal">Abbrechen</button>
         </div>
@@ -167,6 +168,7 @@ export default {
       randomRankings: [],
       userEmail: '',
       showModal: false, 
+      currentGameId: null,
     };
   },
   methods: {
@@ -179,15 +181,21 @@ export default {
         console.error("Fehler beim Laden der Spiele:", error);
       }
     },
-    async handleCheckout(gameId) {
+    async handleCheckout() {
       try {
         const email = this.userEmail || prompt('Bitte geben Sie Ihre E-Mail-Adresse ein:');
         if (!email) {
           alert('⚠️ Eine E-Mail-Adresse ist erforderlich!');
           return;
         }
-        console.log(gameId);
-        const { url } = await apiService.createCheckoutSession(gameId, email);
+        if (!this.currentGameId) {
+          alert('⚠️ Keine Spiel-ID gefunden!');
+          return;
+        }
+        console.log('########### gameId ##############');
+        console.log(this.currentGameId);
+        console.log(email);
+        const { url } = await apiService.createCheckoutSession(this.currentGameId, email);
         window.location.href = url;
       } catch (error) {
         console.error('❌ Fehler beim Checkout:', error);
@@ -195,12 +203,13 @@ export default {
       }
     },
     openModal(gameId) {
-      this.selectedGameId = gameId;
+      this.currentGameId = gameId;
       this.showModal = true;
     },
     closeModal() {
       this.showModal = false;
       this.userEmail = "";
+      this.currentGameId = null;
     },
     async fetchRandomGameRankings() {
       try {
