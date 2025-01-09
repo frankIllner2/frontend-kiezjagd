@@ -10,7 +10,7 @@
           Herausforderungen. 🌍🔍
         </p>
         <button
-          @click="$router.push('/game/b0235c812cb9a1a6ebaedfaec427a01b')"
+          @click="$router.push('/game/aa7c546e650ecb922bb1b920d5e9ef7d')"
           class="btn-primary"
         >
           Jetzt starten!
