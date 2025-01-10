@@ -1,5 +1,5 @@
 <template>
-    <button @click="startCheckout">Spiel kaufen</button>
+    <button @click="startCheckout">Spiel kaufen jetzt </button>
 </template>
   
   <script>
