@@ -85,6 +85,7 @@ export default {
   margin: 20px auto;
   max-width: 600px;
   text-align: left;
+  width: 90%;
 }
 
 h2 {
@@ -110,7 +111,7 @@ label {
 input,
 select,
 textarea {
-  width: 100%;
+  width: 90%;
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 4px;
