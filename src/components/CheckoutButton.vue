@@ -1,6 +1,6 @@
 <template>
     <button @click="startCheckout">Spiel kaufen</button>
-  </template>
+</template>
   
   <script>
   import { loadStripe } from '@stripe/stripe-js';

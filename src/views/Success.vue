@@ -1,7 +1,8 @@
 <template>
   <div class="success-container">
     <h1>🎉 Zahlung erfolgreich!</h1>
-    <p>Dein Spiel wurde erfolgreich erworben. Überprüfe deine E-Mail für den Zugang!</p>
+    <p>Dein Spiel "{{ order.gameName }}" wurde erfolgreich erworben.</p>
+    <p>Überprüfe deine E-Mail - dort befindet sich der Link zu deinem Spiel!</p>
     
     <!-- Ladeanzeige -->
     <div v-if="isLoading" class="loading">
@@ -20,7 +21,6 @@
       <p><strong>E-Mail:</strong> {{ order.email || 'Keine E-Mail angegeben' }}</p>
       <p><strong>Zeitpunkt:</strong> {{ formattedTimestamp }}</p>
 
-      <a :href="gameLink" class="btn-primary" target="_blank">🎮 Spiel starten</a>
     </div>
   </div>
 </template>

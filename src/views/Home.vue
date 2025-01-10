@@ -113,7 +113,7 @@
     <!-- Modal Fenster -->
     <div v-if="showModal" class="modal-overlay">
       <div class="modal">
-        <h2>🎟️ Spiel kaufen</h2>
+        <h2>Spiel kaufen</h2>
         <p>Um dir den Spiel-Link nach dem Kauf zusenden zu können, benötigen wir deine E-Mail-Adresse:</p>
         <input
           type="email"
@@ -687,12 +687,12 @@ export default {
 }
 
 .modal-actions button:first-child {
-  background-color: #1976d2;
+  background-color: #4caf50;
   color: white;
 }
 
 .modal-actions button:last-child {
-  background-color: #f44336;
+  background-color: #fbc02d;
   color: white;
 }
 /* Mobile Optimierungen */
