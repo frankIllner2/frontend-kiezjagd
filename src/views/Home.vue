@@ -20,35 +20,41 @@
 
     <!-- Einführungstext -->
     <section class="why-kiezjagd-section">
-    <h2>🌟 Warum Kiezjagd spielen?</h2>
-    <div class="cards-container">
-      <!-- Card 1 -->
-      <div class="card">
-        <h3>Das interaktive Abenteuer 🌍🚀</h3>
-        <p>
-          Kiezjagd ist mehr als nur ein Spiel – es ist ein interaktives Abenteuer, das dich direkt in deinem Viertel herausfordert! 
-          Egal ob du alleine, mit Freunden, der Familie oder deinem Team unterwegs bist, jede Runde ist ein einzigartiges Erlebnis.
-        </p>
-        <p>
-          Während du knifflige Rätsel löst, versteckte Hinweise findest und spannende Herausforderungen meisterst, 
-          entdeckst du vertraute Orte aus völlig neuen Perspektiven. 🧩🔍
-        </p>
-      </div>
+      <h2>🌟 Warum Kiezjagd spielen?</h2>
+      <div class="cards-container">
+        <!-- Card 1 -->
+        <div class="card">
+          <h3>Das interaktive Abenteuer 🌍🚀</h3>
+          <p>
+            Kiezjagd ist mehr als nur ein Spiel – es ist ein interaktives Abenteuer, das
+            dich direkt in deinem Viertel herausfordert! Egal ob du alleine, mit Freunden,
+            der Familie oder deinem Team unterwegs bist, jede Runde ist ein einzigartiges
+            Erlebnis.
+          </p>
+          <p>
+            Während du knifflige Rätsel löst, versteckte Hinweise findest und spannende
+            Herausforderungen meisterst, entdeckst du vertraute Orte aus völlig neuen
+            Perspektiven. 🧩🔍
+          </p>
+        </div>
 
-      <!-- Card 2 -->
-      <div class="card">
-        <h3>Dein Smartphone als Spielleiter 📱🏞️</h3>
-        <p>
-          Mit deinem Smartphone begibst du dich auf eine Reise voller Überraschungen und Spaß. Jede Frage führt dich zu interessanten Plätzen,
-          die du vielleicht noch nie bemerkt hast. Ob historische Denkmäler, versteckte Gassen oder geheimnisvolle Gebäude.
-        </p>
-        <p>
-          Trete gegen andere Teams an, sichere dir deinen Platz in der Bestenliste und werde zum wahren Kiez-Meister! 🏆🔥
-          Starte jetzt dein Abenteuer und erlebe, wie aufregend deine Nachbarschaft sein kann! 🌟🎲
-        </p>
+        <!-- Card 2 -->
+        <div class="card">
+          <h3>Dein Smartphone als Spielleiter 📱🏞️</h3>
+          <p>
+            Mit deinem Smartphone begibst du dich auf eine Reise voller Überraschungen und
+            Spaß. Jede Frage führt dich zu interessanten Plätzen, die du vielleicht noch
+            nie bemerkt hast. Ob historische Denkmäler, versteckte Gassen oder
+            geheimnisvolle Gebäude.
+          </p>
+          <p>
+            Trete gegen andere Teams an, sichere dir deinen Platz in der Bestenliste und
+            werde zum wahren Kiez-Meister! 🏆🔥 Starte jetzt dein Abenteuer und erlebe,
+            wie aufregend deine Nachbarschaft sein kann! 🌟🎲
+          </p>
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
 
     <!-- Vorteile als Cards -->
     <section class="features-section">
@@ -81,15 +87,12 @@
     <section class="ranking-section">
       <h2>🏆 Top Rankings der Spiele</h2>
       <div class="rankings-container">
-        <div
-          v-for="(ranking, index) in randomRankings"
-          :key="index"
-          class="ranking-card"
-        >
+        <div v-for="(ranking, index) in randomRankings" :key="index" class="ranking-card">
           <h3>{{ ranking.gameName }}</h3>
           <ul>
             <li v-for="(result, idx) in ranking.topResults" :key="idx">
-              <strong>{{ idx + 1 }}.</strong> {{ result.teamName }} - {{ result.duration }}
+              <strong>{{ idx + 1 }}.</strong> {{ result.teamName }} -
+              {{ result.duration }}
             </li>
           </ul>
         </div>
@@ -103,9 +106,7 @@
         <div v-for="game in games" :key="game._id" class="game-card">
           <h3>{{ game.name }}</h3>
           <p>{{ game.description }}</p>
-          <button @click="openModal(game.encryptedId)">
-            Spiel kaufen
-          </button>
+          <button @click="openModal(game.encryptedId)">Spiel kaufen</button>
         </div>
       </div>
     </section>
@@ -114,15 +115,12 @@
     <div v-if="showModal" class="modal-overlay">
       <div class="modal">
         <h2>Spiel kaufen</h2>
-        <p>Um dir den Spiel-Link nach dem Kauf zusenden zu können, benötigen wir deine E-Mail-Adresse:</p>
-        <input
-          type="email"
-          v-model="userEmail"
-          placeholder="E-Mail-Adresse"
-          required
-        />
+        <p>
+          Um dir den Spiel-Link nach dem Kauf zusenden zu können, benötigen wir deine
+          E-Mail-Adresse:
+        </p>
+        <input type="email" v-model="userEmail" placeholder="E-Mail-Adresse" required />
         <div class="modal-actions">
-          
           <button @click="handleCheckout">Bestätigen</button>
           <button @click="closeModal">Abbrechen</button>
         </div>
@@ -140,7 +138,6 @@
 
     <!-- Social Media -->
     <section class="social-media-section">
-      
       <div class="social-icons">
         <a href="https://facebook.com" target="_blank">
           <font-awesome-icon :icon="['fab', 'facebook']" class="social-icon facebook" />
@@ -166,40 +163,40 @@ export default {
       topTeams: [],
       games: [],
       randomRankings: [],
-      userEmail: '',
-      showModal: false, 
+      userEmail: "",
+      showModal: false,
       currentGameId: null,
     };
   },
   methods: {
-
     async fetchGames() {
       try {
         const games = await apiService.fetchGames();
-        this.games = games.slice(0, 3);
+        this.games = games.slice(0, 4);
       } catch (error) {
         console.error("Fehler beim Laden der Spiele:", error);
       }
     },
     async handleCheckout() {
       try {
-        const email = this.userEmail || prompt('Bitte geben Sie Ihre E-Mail-Adresse ein:');
+        const email =
+          this.userEmail || prompt("Bitte geben Sie Ihre E-Mail-Adresse ein:");
         if (!email) {
-          alert('⚠️ Eine E-Mail-Adresse ist erforderlich!');
+          alert("⚠️ Eine E-Mail-Adresse ist erforderlich!");
           return;
         }
         if (!this.currentGameId) {
-          alert('⚠️ Keine Spiel-ID gefunden!');
+          alert("⚠️ Keine Spiel-ID gefunden!");
           return;
         }
-        console.log('########### gameId ##############');
+        console.log("########### gameId ##############");
         console.log(this.currentGameId);
         console.log(email);
         const { url } = await apiService.createCheckoutSession(this.currentGameId, email);
         window.location.href = url;
       } catch (error) {
-        console.error('❌ Fehler beim Checkout:', error);
-        alert('❌ Ein Fehler ist beim Checkout aufgetreten.');
+        console.error("❌ Fehler beim Checkout:", error);
+        alert("❌ Ein Fehler ist beim Checkout aufgetreten.");
       }
     },
     openModal(gameId) {
@@ -214,14 +211,13 @@ export default {
     async fetchRandomGameRankings() {
       try {
         // ✅ Zufällige Spiele abrufen
-        console.log('🎲 Zufällige Spiele:');
-
+        console.log("🎲 Zufällige Spiele:");
 
         const randomGameIds = await apiService.getRandomGames();
-        console.log('🎲 Zufällige Spiele:', randomGameIds);
+        console.log("🎲 Zufällige Spiele:", randomGameIds);
 
         if (!randomGameIds || randomGameIds.length === 0) {
-          console.warn('⚠️ Keine zufälligen Spiele gefunden');
+          console.warn("⚠️ Keine zufälligen Spiele gefunden");
           return;
         }
 
@@ -239,29 +235,26 @@ export default {
 
         // ✅ Daten filtern, falls einzelne Abfragen fehlschlagen
         this.randomRankings = rankings
-          .filter(ranking => ranking !== null)
+          .filter((ranking) => ranking !== null)
           .map((ranking, index) => ({
             gameId: randomGameIds[index],
             gameName: ranking.gameName,
             topResults: ranking.topResults,
           }));
-        
-        console.log('🏆 Top 5 Rankings:', this.randomRankings);
+
+        console.log("🏆 Top 5 Rankings:", this.randomRankings);
       } catch (error) {
-        console.error('❌ Fehler beim Laden zufälliger Rankings:', error);
+        console.error("❌ Fehler beim Laden zufälliger Rankings:", error);
       }
     },
-    
   },
   async mounted() {
     this.fetchRandomGameRankings();
     await this.fetchGames();
-
   },
 };
 </script>
 <style scoped>
-
 /* Container */
 /* 🎯 Allgemeine Layout-Stile */
 .home-container {
@@ -321,7 +314,6 @@ export default {
 .hero-overlay .btn-primary:hover {
   background-color: #e68900;
 }
-
 
 /* 🌟 Allgemeine Styles für den Abschnitt */
 .why-kiezjagd-section {
@@ -495,12 +487,11 @@ export default {
   }
 }
 
-
 /* 🎲 Spielvorschau */
 .game-preview-section {
   margin: 60px 0;
   padding: 40px 20px;
-  background-color: whitesmoke; 
+  background-color: whitesmoke;
   border-radius: 8px;
   text-align: center;
 }
@@ -612,7 +603,6 @@ export default {
   text-decoration: underline;
 }
 
-
 /* 📱 Mobile Optimierung */
 @media (max-width: 768px) {
   .game-cards,
@@ -620,10 +610,8 @@ export default {
     grid-template-columns: 1fr;
   }
   .hero-overlay {
-
     width: 100%;
-
-    }
+  }
 
   .intro-section p {
     font-size: 1rem;
@@ -707,7 +695,7 @@ export default {
     font-size: 1.3rem;
   }
 
-  .modal-container input[type='email'] {
+  .modal-container input[type="email"] {
     font-size: 0.9rem; /* Kleinere Schrift für Mobilgeräte */
   }
 

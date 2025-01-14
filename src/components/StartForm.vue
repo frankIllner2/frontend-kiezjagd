@@ -6,20 +6,13 @@
         v-model="localTeamName"
         id="teamName"
         placeholder="Teamname eingeben"
+        @blur="checkTeamName"
         required
       />
-      <button 
-        type="button" 
-        @click="checkTeamName" 
-        class="btn-secondary"
-        :disabled="!localTeamName.trim()"
-      >
-        Teamname prüfen
-      </button>
+      <p v-if="localTeamExists" class="error">
+        Dieser Teamname ist bereits vergeben. Bitte wähle einen anderen.
+      </p>
     </div>
-
-
-    <div v-if="localTeamExists" class="error">Teamname existiert bereits!</div>
 
     <div class="form-group">
       <label for="email">E-Mail</label>
@@ -55,30 +48,33 @@
       </div>
     </div>
 
-    <button type="submit" class="btn-primary">Spiel starten</button>
+    <button type="submit" class="btn-primary" :disabled="localTeamExists">Spiel starten</button>
   </form>
 </template>
-
 
 <script>
 import { apiService } from '@/services/apiService';
 
 export default {
   props: {
+    gameId: {
+      type: String,
+      required: true,
+    },
     teamName: String,
     email: String,
     playerCount: Number,
     playerNames: Array,
     teamExists: Boolean,
   },
-  emits: ['checkTeamName', 'startGame'],
+  emits: ['startGame'],
   data() {
     return {
       localTeamName: this.teamName || '',
       localEmail: this.email || '',
       localPlayerCount: this.playerCount || 1,
       localPlayerNames: [...(this.playerNames || [])],
-      localTeamExists: this.teamExists || false, // Lokale Kopie für Änderungen
+      localTeamExists: this.teamExists || false,
     };
   },
   watch: {
@@ -86,35 +82,39 @@ export default {
       this.adjustPlayerInputs();
     },
     teamExists(newValue) {
-      this.localTeamExists = newValue; // Reaktiver Prop-Wert wird in lokale Kopie übernommen
-    }
+      this.localTeamExists = newValue;
+    },
   },
   methods: {
     async checkTeamName() {
-    console.log('✅ Methode `checkTeamName` aufgerufen');
-    if (!this.localTeamName.trim()) {
-      console.warn('⚠️ Teamname darf nicht leer sein.');
-      this.localTeamExists = false;
-      return;
-    }
-    try {
-      const response = await apiService.checkTeamName(this.localTeamName);
-      console.log('🔄 API Antwort:', response);
-      this.localTeamExists = response.exists || false;
-    } catch (error) {
-      console.error('❌ Fehler beim Überprüfen des Teamnamens:', error);
-      this.localTeamExists = false;
-    }
-  },
-  submitForm() {
-      console.log('✅ submitForm aufgerufen');
-      console.log('Teamname:', this.localTeamName);
-      console.log('E-Mail:', this.localEmail);
-      console.log('Spieleranzahl:', this.localPlayerCount);
-      console.log('Spielernamen:', this.localPlayerNames);
+      if (!this.localTeamName.trim()) {
+        this.localTeamExists = false;
+        return;
+      }
 
+      try {
+        const response = await apiService.checkTeamName(this.localTeamName, this.gameId);
+        this.localTeamExists = response.exists || false;
+
+        if (this.localTeamExists) {
+          console.warn('⚠️ Teamname existiert bereits.');
+        } else {
+          console.log('✅ Teamname ist verfügbar.');
+        }
+      } catch (error) {
+        console.error('❌ Fehler beim Überprüfen des Teamnamens:', error);
+        this.localTeamExists = false;
+      }
+    },
+
+    submitForm() {
       if (!this.localTeamName.trim() || !this.localEmail.trim()) {
         console.warn('⚠️ Teamname und E-Mail dürfen nicht leer sein.');
+        return;
+      }
+
+      if (this.localTeamExists) {
+        console.warn('⚠️ Teamname ist bereits vergeben. Bitte wähle einen anderen.');
         return;
       }
 
@@ -125,6 +125,7 @@ export default {
         playerNames: this.localPlayerNames,
       });
     },
+
     adjustPlayerInputs() {
       const currentCount = this.localPlayerNames.length;
       if (this.localPlayerCount > currentCount) {
@@ -134,11 +135,11 @@ export default {
       } else if (this.localPlayerCount < currentCount) {
         this.localPlayerNames.splice(this.localPlayerCount);
       }
-    }
+    },
   },
   mounted() {
     this.adjustPlayerInputs();
-  }
+  },
 };
 </script>
 
@@ -187,20 +188,6 @@ button.btn-primary {
 
 button.btn-primary:hover {
   background-color: #388e3c;
-}
-
-button.btn-secondary {
-  margin-top: 10px;
-  background-color: #2196f3;
-  color: white;
-  padding: 8px 12px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-button.btn-secondary:hover {
-  background-color: #1976d2;
 }
 
 .error {

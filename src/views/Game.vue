@@ -9,6 +9,7 @@
     <!-- Startformular -->
     <div v-if="!gameStarted" class="game-card start-form">
       <StartForm
+        :gameId="gameId"
         :teamName="teamName"
         :email="email"
         :playerCount="playerCount"

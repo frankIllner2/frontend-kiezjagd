@@ -92,12 +92,16 @@ export const apiService = {
   },
 
   // 🔹 Teamname prüfen
-  checkTeamName(teamName) {
-    if (!teamName || teamName.trim() === '') {
-      throw new Error('⚠️ Teamname darf nicht leer sein.');
+  checkTeamName(teamName, gameId) {
+    console.log('api');
+    console.log(teamName);
+    console.log(gameId);
+    if (!teamName || !gameId) {
+      throw new Error('Teamname und Spiel-ID sind erforderlich.');
     }
-    return performRequest('get', `/teams/check?teamName=${teamName}`);
+    return performRequest('get', `/teams/check?teamName=${encodeURIComponent(teamName)}&gameId=${encodeURIComponent(gameId)}`);
   },
+  
 
   // 🔹 Ranking eines Spiels abrufen
   fetchRanking(encryptedId, sort = true) {
