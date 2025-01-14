@@ -10,6 +10,7 @@ import AdminLogin from '../views/AdminLogin.vue';
 import SuccessPage from '../views/Success.vue';
 import CancelPage from '../views/CancelSite.vue';
 import NotFoundPage from '../views/NotFound.vue';
+import LinkFault from '../views/LinkFault.vue';
 
 const routes = [
   {
@@ -57,6 +58,11 @@ const routes = [
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
     component: NotFoundPage,
+  },
+  {
+    path: '/linkFault',
+    name: 'LinkFault',
+    component: LinkFault,
   },
 ];
 
