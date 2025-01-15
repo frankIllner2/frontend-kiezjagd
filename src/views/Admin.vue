@@ -30,7 +30,7 @@
 
           <div class="game-actions">
             <router-link
-              :to="`/game/${game.encryptedId}?from=admin`"
+              :to="`/game/${game.encryptedId}`"
               target="_blank"
               class="link-button"
             >

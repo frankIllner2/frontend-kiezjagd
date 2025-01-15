@@ -18,31 +18,36 @@ const routes = [
     name: 'Home',
     component: HomePage,
   },
- {
-  path: '/game/:sessionId/:gameId',
-  name: 'Game',
-  component: GamePage,
-  props: true, // Parameter encryptedId wird als Prop übergeben
-  beforeEnter: async (to, from, next) => {
+  {
+    path: '/game/:sessionId/:gameId',
+    name: 'Game',
+    component: GamePage,
+    props: true, // Parameter encryptedId wird als Prop übergeben
+    beforeEnter: async (to, from, next) => {
     const { sessionId } = to.params;
 
-    // Prüfe die Linkgültigkeit für normale Benutzer
-    try {
-      const response = await axios.get(
-        `${process.env.VUE_APP_API_BASE_URL}/order/validate-link/${sessionId}`
-      );
-      console.log('✅ Link gültig:', response.data);
+      // Prüfe die Linkgültigkeit für normale Benutzer
+      try {
+        const response = await axios.get(
+          `${process.env.VUE_APP_API_BASE_URL}/order/validate-link/${sessionId}`
+        );
+        console.log('✅ Link gültig:', response.data);
 
-      next();
-    } catch (error) {
-      console.error('❌ Linkprüfung fehlgeschlagen:', error.response?.data || error.message);
+        next();
+      } catch (error) {
+        console.error('❌ Linkprüfung fehlgeschlagen:', error.response?.data || error.message);
 
-      // Link ist ungültig, zur Fehlerseite weiterleiten
-      next({ name: 'LinkFault' });
-    }
+        // Link ist ungültig, zur Fehlerseite weiterleiten
+        next({ name: 'LinkFault' });
+      }
+    },
   },
-},
-
+  {
+    path: '/game/:encryptedId',
+    name: 'Game',
+    component: GamePage,
+    props: true, // Parameter encryptedId wird als Prop übergeben
+  },
   {
     path: '/admin',
     name: 'Admin',
