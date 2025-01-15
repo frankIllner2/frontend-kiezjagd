@@ -82,23 +82,38 @@ export default {
     }
   },
   async mounted() {
-      this.gameId = this.$route.params.encryptedId || null;
-      this.teamName = localStorage.getItem('teamName') || '';
-      this.email = localStorage.getItem('email') || '';
-      this.playerNames = JSON.parse(localStorage.getItem('playerNames') || '[]');
+    // Prüfe, ob gameId oder sessionId übergeben wurde
+    this.gameId = this.$route.params.gameId || null;
+    const sessionId = this.$route.params.sessionId || null;
 
-      if (localStorage.getItem('gameInProgress') === 'true') {
-        this.gameStarted = true;
-        this.startTime = parseInt(localStorage.getItem('startTime'), 10) || Date.now();
-        this.currentQuestionIndex = parseInt(localStorage.getItem(`currentQuestionIndex_${this.gameId}`), 10) || 0;
-        this.startTimer();
+    console.log('🔍 Überprüfte Parameter:', { gameId: this.gameId, sessionId });
+
+    if (!this.gameId && !sessionId) {
+      console.error('❌ Weder gameId noch sessionId verfügbar.');
+      return;
+    }
+
+    // Wenn sessionId vorhanden, führe Validierung durch
+    if (sessionId) {
+      try {
+        const response = await apiService.validateLink(sessionId);
+        console.log('✅ Link gültig:', response.data);
+
+        // Falls notwendig, lade die gameId aus der Antwort
+        if (response.data?.order?.gameId) {
+          this.gameId = response.data.order.gameId;
+        }
+      } catch (error) {
+        console.error('❌ Fehler bei der Validierung des Links:', error.message);
       }
-      console.log('gameId');
-      console.log(this.gameId);
-      if (this.gameId) {
-       await this.loadGameData(this.gameId);
-      }
-    },
+    }
+
+    // Lade Spieldaten
+    if (this.gameId) {
+      await this.loadGameData(this.gameId);
+    }
+  },
+
   methods: {
     async loadGameData(gameId) {
       try {
