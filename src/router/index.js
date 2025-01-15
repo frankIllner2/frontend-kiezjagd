@@ -18,12 +18,37 @@ const routes = [
     name: 'Home',
     component: HomePage,
   },
-  {
-    path: '/game/:encryptedId',
-    name: 'Game',
-    component: GamePage,
-    props: true, // Parameter encryptedId wird als Prop übergeben
+{
+  path: '/game/:encryptedId',
+  name: 'Game',
+  component: GamePage,
+  props: true, // Parameter encryptedId wird als Prop übergeben
+  beforeEnter: async (to, from, next) => {
+    const { encryptedId } = to.params;
+
+    // Wenn der Aufruf aus dem Admin-Bereich kommt, überspringe die Validierung
+    if (to.query.from === 'admin') {
+      next();
+      return;
+    }
+
+    // Prüfe die Linkgültigkeit für normale Benutzer
+    try {
+      const response = await axios.get(
+        `${process.env.VUE_APP_API_BASE_URL}/order/validate-link/${encryptedId}`
+      );
+      console.log('✅ Link gültig:', response.data);
+      // Link ist gültig, weiterleiten
+      next();
+    } catch (error) {
+      console.error('❌ Linkprüfung fehlgeschlagen:', error.response?.data || error.message);
+
+      // Link ist ungültig, zur Fehlerseite weiterleiten
+      next({ name: 'LinkFault' });
+    }
   },
+},
+
   {
     path: '/admin',
     name: 'Admin',

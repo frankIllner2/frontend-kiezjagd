@@ -101,7 +101,13 @@ export const apiService = {
     }
     return performRequest('get', `/teams/check?teamName=${encodeURIComponent(teamName)}&gameId=${encodeURIComponent(gameId)}`);
   },
+
+  // prüfen ob Link abgelaufen ist
+  validateLink(gameId) {
+    if (!gameId) throw new Error('⚠️ encryptedId ist erforderlich.');
   
+    return this.performRequest('get', `/order/validate-link/${gameId}`);
+  },
 
   // 🔹 Ranking eines Spiels abrufen
   fetchRanking(encryptedId, sort = true) {
