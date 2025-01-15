@@ -95,7 +95,7 @@ export default {
       }
 
       if (this.gameId) {
-        this.loadGameData(this.gameId);
+       await this.loadGameData(this.gameId);
       }
     },
   methods: {

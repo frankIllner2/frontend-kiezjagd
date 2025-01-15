@@ -19,18 +19,12 @@ const routes = [
     component: HomePage,
   },
  {
-  path: '/game/:sessionId',
+  path: '/game/:sessionId/:gameId',
   name: 'Game',
   component: GamePage,
   props: true, // Parameter encryptedId wird als Prop übergeben
   beforeEnter: async (to, from, next) => {
     const { sessionId } = to.params;
-
-    // Wenn der Aufruf aus dem Admin-Bereich kommt, überspringe die Validierung
-    if (to.query.from === 'admin') {
-      next();
-      return;
-    }
 
     // Prüfe die Linkgültigkeit für normale Benutzer
     try {
@@ -38,7 +32,7 @@ const routes = [
         `${process.env.VUE_APP_API_BASE_URL}/order/validate-link/${sessionId}`
       );
       console.log('✅ Link gültig:', response.data);
-      // Link ist gültig, weiterleiten
+
       next();
     } catch (error) {
       console.error('❌ Linkprüfung fehlgeschlagen:', error.response?.data || error.message);
