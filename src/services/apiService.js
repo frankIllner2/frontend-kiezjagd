@@ -101,10 +101,10 @@ export const apiService = {
   },
 
   // prüfen ob Link abgelaufen ist
-  validateLink(gameId) {
-    if (!gameId) throw new Error('⚠️ encryptedId ist erforderlich.');
+  validateLink(sessionId) {
+    if (!sessionId) throw new Error('⚠️ encryptedId ist erforderlich.');
   
-    return this.performRequest('get', `/order/validate-link/${gameId}`);
+    return this.performRequest('get', `/order/validate-link/${sessionId}`);
   },
 
   // 🔹 Ranking eines Spiels abrufen
