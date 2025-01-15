@@ -82,7 +82,7 @@ export default {
     }
   },
   async mounted() {
-      this.gameId = this.$route.params.gameId  || null;
+      this.gameId = this.$route.params.encryptedId || null;
       this.teamName = localStorage.getItem('teamName') || '';
       this.email = localStorage.getItem('email') || '';
       this.playerNames = JSON.parse(localStorage.getItem('playerNames') || '[]');
