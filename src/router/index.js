@@ -24,6 +24,7 @@ const routes = [
     component: GamePage,
     props: true, // Parameter encryptedId wird als Prop übergeben
     beforeEnter: async (to, from, next) => {
+      const { sessionId } = to.params;
       // Wenn der Aufruf aus dem Admin-Bereich kommt, überspringe die Validierung
       if (to.query.from === 'admin') {
         next();
@@ -31,7 +32,7 @@ const routes = [
       }
       // Prüfe die Linkgültigkeit für normale Benutzer
       try {
-        const sessionId = to.params.sessionId;
+        
         const response = await axios.get(
           `${process.env.VUE_APP_API_BASE_URL}/order/validate-link/${sessionId}`
         );
