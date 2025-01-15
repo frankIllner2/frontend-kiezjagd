@@ -22,6 +22,7 @@
       <p><strong>Zeitpunkt:</strong> {{ formattedTimestamp }}</p>
 
     </div>
+    <router-link to="/" class="btn-primary">Zurück zur Startseite</router-link>
   </div>
 </template>
 
