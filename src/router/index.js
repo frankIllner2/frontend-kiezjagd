@@ -19,39 +19,38 @@ const routes = [
     component: HomePage,
   },
   {
+    // Route für Benutzer mit sessionId und gameId
     path: '/game/:sessionId/:gameId',
-    name: 'Game',
+    name: 'GameWithValidation',
     component: GamePage,
-    props: true, // Parameter encryptedId wird als Prop übergeben
+    props: true,
     beforeEnter: async (to, from, next) => {
       const { sessionId } = to.params;
-      // Wenn der Aufruf aus dem Admin-Bereich kommt, überspringe die Validierung
+
       if (to.query.from === 'admin') {
+        console.log('🔓 Admin-Bereich: Validierung übersprungen');
         next();
         return;
       }
-      // Prüfe die Linkgültigkeit für normale Benutzer
+
       try {
-        
         const response = await axios.get(
           `${process.env.VUE_APP_API_BASE_URL}/order/validate-link/${sessionId}`
         );
         console.log('✅ Link gültig:', response.data);
-
         next();
       } catch (error) {
         console.error('❌ Linkprüfung fehlgeschlagen:', error.response?.data || error.message);
-
-        // Link ist ungültig, zur Fehlerseite weiterleiten
         next({ name: 'LinkFault' });
       }
     },
   },
   {
+    // Direkter Aufruf mit gameId (z.B. aus dem Admin-Bereich)
     path: '/game/:gameId',
-    name: 'Game',
+    name: 'GameDirect',
     component: GamePage,
-    props: true, // Parameter encryptedId wird als Prop übergeben
+    props: true,
   },
   {
     path: '/admin',
@@ -84,14 +83,14 @@ const routes = [
     meta: { requiresAuth: false },
   },
   {
-    path: '/:pathMatch(.*)*',
-    name: 'NotFound',
-    component: NotFoundPage,
-  },
-  {
     path: '/linkFault',
     name: 'LinkFault',
     component: LinkFault,
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'NotFound',
+    component: NotFoundPage,
   },
 ];
 
