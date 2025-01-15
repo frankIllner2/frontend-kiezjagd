@@ -93,7 +93,8 @@ export default {
         this.currentQuestionIndex = parseInt(localStorage.getItem(`currentQuestionIndex_${this.gameId}`), 10) || 0;
         this.startTimer();
       }
-
+      console.log('gameId');
+      console.log(this.gameId);
       if (this.gameId) {
        await this.loadGameData(this.gameId);
       }
@@ -104,6 +105,7 @@ export default {
         const response = await apiService.fetchGameById(gameId);
         this.gameName = response.name || 'Unbekanntes Spiel';
         this.questions = response.questions || [];
+        console.log('### loadGameData ####');
       } catch (error) {
         console.error('❌ Fehler beim Laden des Spiels:', error);
       }
