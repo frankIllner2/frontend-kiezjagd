@@ -36,8 +36,10 @@
             >
               Zum Spiel
             </router-link>
-            <button @click="editGame(game)">Bearbeiten</button>
-            <button @click="deleteGame(game._id)">Löschen</button>
+            <button @click="editGame(game)"><font-awesome-icon icon="edit" /></button>
+            <button @click="deleteGame(game._id)">
+              <font-awesome-icon icon="trash" />
+            </button>
           </div>
         </div>
       </div>
@@ -116,9 +118,9 @@ export default {
       this.currentView = "list";
     },
     logout() {
-      localStorage.removeItem('token');
-      this.$router.push('/admin/login');
-    }
+      localStorage.removeItem("token");
+      this.$router.push("/admin/login");
+    },
   },
   mounted() {
     this.fetchGames();
@@ -127,7 +129,6 @@ export default {
 </script>
 
 <style scoped>
-
 .logout {
   display: inline-flex;
   flex-direction: column-reverse;
@@ -182,6 +183,13 @@ export default {
 
 /* Spielkarte */
 .game-card {
+  position: relative;
+  display: flex;
+  height: 340px;
+  max-height: 350px;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
   background: #f9f9f9;
   border: 1px solid #ccc;
   border-radius: 8px;
@@ -221,6 +229,8 @@ ul li {
 
 /* Aktionen */
 .game-actions {
+  position: absolute;
+  bottom: 10px;
   margin-top: 15px;
   display: flex;
   gap: 10px;
@@ -253,7 +263,7 @@ button:hover {
 /* Responsive Design */
 @media (min-width: 768px) {
   .game-card {
-    width: calc(50% - 20px);
+    width: calc(25% - 20px);
   }
 }
 

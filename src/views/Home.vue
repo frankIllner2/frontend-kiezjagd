@@ -510,6 +510,10 @@ export default {
 }
 
 .game-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: space-between;
+  justify-content: space-around;
   background: #ffffff;
   padding: 20px;
   border-radius: 2px;

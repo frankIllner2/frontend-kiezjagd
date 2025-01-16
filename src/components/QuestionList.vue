@@ -2,16 +2,22 @@
   <div class="question-list">
     <h3>Fragen für das Spiel</h3>
     <div class="questions-container">
-      <div v-for="(question, index) in questions" :key="question._id" class="question-card">
+      <div
+        v-for="(question, index) in questions"
+        :key="question._id"
+        class="question-card"
+      >
         <div class="question-header">
           <h4>Frage {{ index + 1 }}</h4>
         </div>
         <div class="question-content">
           <p><strong>Frage:</strong> {{ question.question }}</p>
-          
+
           <!-- Freitext-Antwort anzeigen -->
-          <p v-if="question.type === 'text'"><strong>Antwort:</strong> {{ question.answer }}</p>
-          
+          <p v-if="question.type === 'text'">
+            <strong>Antwort:</strong> {{ question.answer }}
+          </p>
+
           <!-- Mehrfachauswahl-Antworten anzeigen -->
           <div v-if="question.type === 'multiple'">
             <strong>Antworten:</strong>
@@ -22,7 +28,7 @@
               </li>
             </ul>
           </div>
-          
+
           <!-- Bild anzeigen, falls vorhanden -->
           <div v-if="question.imageUrl" class="question-image">
             <img :src="question.imageUrl" alt="Fragenbild" />
@@ -43,34 +49,35 @@
 </template>
 
 <script>
-
 export default {
   props: {
     questions: {
       type: Array,
-      required: true
-    }
+      required: true,
+    },
   },
   methods: {
     handleEdit(question) {
       if (!question) {
-        console.error('⚠️ Fehler: Frage-Objekt ist undefined');
+        console.error("⚠️ Fehler: Frage-Objekt ist undefined");
         return;
       }
-      
-      this.$emit('edit', { ...question }); // Stelle sicher, dass eine Kopie übergeben wird
+
+      this.$emit("edit", { ...question }); // Stelle sicher, dass eine Kopie übergeben wird
 
       // Sanftes Scrollen zum Formular
       this.$nextTick(() => {
-        const editForm = document.getElementById('edit-question-container');
+        const editForm = document.getElementById("edit-question-container");
         if (editForm) {
-          editForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          editForm.scrollIntoView({ behavior: "smooth", block: "start" });
         } else {
-          console.warn('⚠️ Element mit ID "edit-question-container" wurde nicht gefunden.');
+          console.warn(
+            '⚠️ Element mit ID "edit-question-container" wurde nicht gefunden.'
+          );
         }
       });
-    }
-  }
+    },
+  },
 };
 </script>
 <style scoped>

@@ -1,4 +1,7 @@
 <template>
+  <div id="toast" class="toast hidden">
+    <p id="toast-message">Daten wurden erfolgreich gespeichert!</p>
+  </div>
   <div class="edit-container">
     <!-- Navigation zurück zur Übersicht -->
     <div class="top-navigation">
@@ -152,12 +155,36 @@ export default {
     async updateGame() {
       try {
         await apiService.updateGame({ _id: this.id, ...this.game });
-        // Keine Navigation mehr hier!
+
+        // ✅ Toast anzeigen
+        this.showToast("Daten wurden erfolgreich gespeichert!");
         console.log("✅ Spiel erfolgreich aktualisiert");
       } catch (error) {
         console.error("❌ Fehler beim Aktualisieren des Spiels:", error);
-        alert("Fehler beim Aktualisieren des Spiels.");
+        this.showToast("Fehler beim Speichern der Daten!", "error"); // Optional: Toast für Fehler
       }
+    },
+    showToast(message, type = "success") {
+      const toast = document.getElementById("toast");
+      const toastMessage = document.getElementById("toast-message");
+
+      // Setze Nachricht und Typ
+      toastMessage.textContent = message;
+      if (type === "error") {
+        toast.style.backgroundColor = "#f44336"; // Rot für Fehler
+      } else {
+        toast.style.backgroundColor = "#4caf50"; // Grün für Erfolg
+      }
+
+      // Zeige das Toast an
+      toast.classList.remove("hidden");
+      toast.classList.add("visible");
+
+      // Verstecke es nach 5 Sekunden
+      setTimeout(() => {
+        toast.classList.remove("visible");
+        toast.classList.add("hidden");
+      }, 5000);
     },
   },
 };
@@ -335,4 +362,29 @@ input {
   border-radius: 4px;
   font-weight: bold;
 }
+.toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: #4caf50; /* Grün für Erfolg */
+  color: white;
+  padding: 15px 20px;
+  border-radius: 5px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  transform: translateY(-20px);
+  z-index: 1000;
+}
+
+.toast.hidden {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+
+.toast.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 </style>
