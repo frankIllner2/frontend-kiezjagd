@@ -175,6 +175,7 @@ export default {
 
 /* Spieleliste */
 .game-list {
+  width: 100%;
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
@@ -263,7 +264,7 @@ button:hover {
 /* Responsive Design */
 @media (min-width: 768px) {
   .game-card {
-    width: calc(25% - 20px);
+    width: calc(22% - 20px);
   }
 }
 
