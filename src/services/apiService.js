@@ -131,6 +131,11 @@ export const apiService = {
     return performRequest('post', `/games/${encryptedId}/questions`, question);
   },
 
+  // 🔹 alle Bestellungen
+  fetchOrders() {
+    return performRequest('get', "/order/orders");
+  },
+
   // 🔹 Frage aktualisieren
   updateQuestion(encryptedId, questionId, question) {
     if (!encryptedId || !questionId || !question) {

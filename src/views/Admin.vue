@@ -9,6 +9,7 @@
     <aside class="sidebar">
       <button @click="currentView = 'list'">Alle Spiele</button>
       <button @click="currentView = 'new'">Neues Spiel</button>
+      <button @click="currentView = 'orders'">Bestellungen</button>
     </aside>
 
     <!-- Inhaltsbereich -->
@@ -54,6 +55,9 @@
         @save="updateGame"
         @cancel="cancelEdit"
       />
+
+      <!-- Bestellungen -->
+      <OrderList v-if="currentView === 'orders'" />
     </section>
   </div>
 </template>
@@ -61,10 +65,11 @@
 <script>
 import GameForm from "@/components/GameForm.vue";
 import GameEditForm from "@/components/GameEditForm.vue";
+import OrderList from "@/components/OrderList.vue";
 import { apiService } from "@/services/apiService";
 
 export default {
-  components: { GameForm, GameEditForm },
+  components: { GameForm, GameEditForm, OrderList },
   data() {
     return {
       currentView: "list",
