@@ -4,7 +4,7 @@ module.exports = {
   // ✅ PWA-Konfiguration
   pwa: {
     name: 'Kiezjagd',
-    themeColor: '#4DBA87',
+    themeColor: '#f7f9fc',
     manifestOptions: {
       id: '/', 
       short_name: 'Kiez-Spiel',
