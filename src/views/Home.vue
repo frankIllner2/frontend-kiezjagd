@@ -149,6 +149,12 @@
           <font-awesome-icon :icon="['fab', 'instagram']" class="social-icon instagram" />
         </a>
       </div>
+      <div class="bottom-menu">
+        <span>Kontakt</span>
+        <span>Abg's</span>
+        <span>Datenschutz</span>
+        <span>Impressum</span>
+      </div>
     </section>
   </div>
 </template>
@@ -320,7 +326,6 @@ export default {
   text-align: center;
   margin: 50px auto;
   padding: 30px 20px;
-  background-color: #f5f9ff;
   border-radius: 12px;
 }
 
@@ -328,7 +333,6 @@ export default {
 .why-kiezjagd-section h2 {
   font-size: 2rem;
   margin-bottom: 20px;
-  color: #4a90e2;
 }
 
 /* 📦 Cards-Container */
@@ -359,14 +363,12 @@ export default {
 .card h3 {
   font-size: 1.4rem;
   margin-bottom: 10px;
-  color: #1976d2;
 }
 
 /* 📄 Card Text */
 .card p {
   font-size: 1rem;
   line-height: 1.6;
-  color: #555;
 }
 
 /* 📱 Mobile Optimierung */
@@ -381,14 +383,12 @@ export default {
   text-align: center;
   margin: 60px 0;
   padding: 40px 20px;
-  background-color: #e8f5e9; /* Hellgrüner Hintergrund */
   border-radius: 8px;
 }
 
 .features-section h2 {
   font-size: 1.8rem;
   margin-bottom: 25px;
-  color: #388e3c;
 }
 
 .features-grid {
@@ -421,7 +421,7 @@ export default {
 .ranking-section h2 {
   font-size: 1.8rem;
   margin-bottom: 20px;
-  color: #4caf50;
+
 }
 
 /* 🌟 Container für die Cards */
@@ -491,7 +491,6 @@ export default {
 .game-preview-section {
   margin: 60px 0;
   padding: 40px 20px;
-  background-color: whitesmoke;
   border-radius: 8px;
   text-align: center;
 }
@@ -499,7 +498,6 @@ export default {
 .game-preview-section h2 {
   font-size: 1.8rem;
   margin-bottom: 20px;
-  color: #d81b60;
 }
 
 .game-cards {
@@ -531,15 +529,17 @@ export default {
 .cta-section {
   margin: 60px 0;
   padding: 40px 20px;
-  background-color: #e3f2fd; /* Hellblauer Hintergrund */
   border-radius: 8px;
   text-align: center;
+  border: 2px solid #333;
+  width: 40%;
+  margin: auto;
 }
 
 .cta-section h2 {
   font-size: 1.8rem;
   margin-bottom: 20px;
-  color: #1976d2;
+
 }
 
 .cta-section p {
@@ -561,8 +561,7 @@ export default {
   text-align: center;
   margin-top: 60px;
   padding: 10px 20px;
-  background-color: whitesmoke; /* Helllila Hintergrund */
-  border-radius: 8px;
+  background-color: #323c45;
 }
 
 .social-media-section h2 {
@@ -580,12 +579,12 @@ export default {
 
 .social-icon {
   font-size: 2rem;
-  color: #7b1fa2;
+  color: whitesmoke;
   transition: color 0.3s ease;
 }
 
 .social-icon:hover {
-  color: #4a148c;
+  color: white;
 }
 
 /* 🦶 Footer */
@@ -686,6 +685,14 @@ export default {
 .modal-actions button:last-child {
   background-color: #fbc02d;
   color: white;
+}
+.bottom-menu {
+  display: flex;
+  justify-content: flex-end;
+}
+.bottom-menu span {
+  color: whitesmoke;
+  padding: 0 5px;
 }
 /* Mobile Optimierungen */
 @media (max-width: 768px) {
