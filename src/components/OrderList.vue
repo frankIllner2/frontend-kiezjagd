@@ -84,18 +84,18 @@
   
     /* Farbmarkierungen basierend auf Zahlungsstatus */
     .status-paid {
-    border-color: #4caf50;
-    background-color: #e8f5e9;
+    border-color:#e8f5e9 ;
+    background-color: #4caf50;
     }
 
     .status-pending {
-    border-color: #ffeb3b;
-    background-color: #fffde7;
+    border-color: #fffde7;
+    background-color: #ffeb3b;
     }
 
     .status-other {
     border-color: #f44336;
-    background-color: #ffebee;
+    background-color: #f44336;
     }
 
     /* Ablaufdatum-Status */
