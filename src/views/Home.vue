@@ -696,6 +696,10 @@ export default {
 }
 /* Mobile Optimierungen */
 @media (max-width: 768px) {
+  /* 📲 Call-to-Action */
+  .cta-section {
+    width: 85%;
+  }
   .modal {
     width: 90%; /* Verkleinert das Modal für kleinere Geräte */
     max-width: 90%; /* Sicherstellen, dass es nicht über die Ränder hinausgeht */
