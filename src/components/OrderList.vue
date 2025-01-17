@@ -7,6 +7,7 @@
       <div v-for="order in orders" :key="order._id" class="order-card" >
         <h3>{{ order.gameName }}</h3>
         <p><strong>Kunde:</strong> {{ order.email }}</p>
+        <p><strong>Gekauft am:</strong> {{ formatEndTime(order.createdAt) }}</p>
         <p><strong>Spiel-ID:</strong> {{ order.gameId }}</p>
         <p :class="getStatusClass(order)"><strong>Zahlstatus:</strong> {{ order.paymentStatus }}</p>
         <p
