@@ -131,5 +131,6 @@ export default {
   height: auto;
   border-radius: 8px;
   margin: 10px 0;
+  max-width: 450px;
 }
 </style>
