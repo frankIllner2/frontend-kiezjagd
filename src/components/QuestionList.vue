@@ -23,7 +23,12 @@
             <strong>Antworten:</strong>
             <ul>
               <li v-for="(option, i) in question.options" :key="i">
-                <span>{{ option.text }}</span>
+                <!-- Textantwort -->
+                <span v-if="option.type === 'text'">{{ option.text }}</span>
+                <!-- Bildantwort -->
+                <span v-else-if="option.type === 'image'" class="option-image">
+                  <img :src="option.imageUrl" alt="Option Bild" />
+                </span>
                 <span v-if="option.correct"> ✅</span>
               </li>
             </ul>
@@ -149,7 +154,13 @@ export default {
   margin-top: 10px;
   text-align: center;
 }
-
+.option-image img {
+  max-width: 50px;
+  max-height: 50px;
+  object-fit: cover;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
 .question-image img {
   max-width: 100px;
   max-height: 100px;

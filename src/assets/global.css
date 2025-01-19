@@ -40,8 +40,6 @@ body {
   
   input:focus, select:focus {
     outline: none;
-    border-color: #4caf50;
-    box-shadow: 0 0 4px rgba(76, 175, 80, 0.5);
   }
   .game-card .margin-top-2 {
     margin-top: 2em;

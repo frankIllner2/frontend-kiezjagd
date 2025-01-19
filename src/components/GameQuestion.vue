@@ -23,7 +23,12 @@
         :class="{ selected: selectedOptions.includes(index) }"
         @click="toggleOption(index)"
       >
-        {{ option.text }}
+        <!-- Textantwort -->
+        <span v-if="option.type === 'text'">{{ option.text }}</span>
+        <!-- Bildantwort -->
+        <span v-else-if="option.type === 'image'" class="option-image">
+          <img :src="getCorrectImageUrl(option.imageUrl)" alt="Option Bild" />
+        </span>
       </div>
       <button @click="submitAnswer">Antwort senden</button>
     </div>
@@ -120,11 +125,19 @@ export default {
   border: 1px solid #ccc;
   background-color: #f9f9f9;
   cursor: pointer;
+  max-width: 250px; /* Begrenzte Breite für Bilder */
+  text-align: center;
 }
 
 .option-card.selected {
   background-color: #4caf50;
   color: white;
+}
+.option-image img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin-top: 5px;
 }
 .question-image img {
   max-width: 100%;

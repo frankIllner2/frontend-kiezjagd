@@ -82,89 +82,67 @@ export default {
     }
   },
   async mounted() {
-    // Prüfe, ob gameId oder sessionId übergeben wurde
-    this.gameId = this.$route.params.gameId || null;
-    const sessionId = this.$route.params.sessionId || null;
+    // Prüfe, ob ein gespeicherter Spielstatus vorhanden ist
+    const savedGameId = localStorage.getItem('currentGameId');
+    const gameInProgress = localStorage.getItem('gameInProgress') === 'true';
+    const savedIndex = parseInt(localStorage.getItem(`currentQuestionIndex_${savedGameId}`), 10);
 
-    console.log('🔍 Überprüfte Parameter:', { gameId: this.gameId, sessionId });
-
-    if (!this.gameId && !sessionId) {
-      console.error('❌ Weder gameId noch sessionId verfügbar.');
-      return;
+    if (gameInProgress && savedGameId) {
+      // Wiederherstellung des gespeicherten Spiels
+      this.gameId = savedGameId;
+      this.teamName = localStorage.getItem('teamName') || '';
+      this.email = localStorage.getItem('email') || '';
+      this.currentQuestionIndex = savedIndex || 0;
+      this.gameStarted = true;
+      this.startTime = parseInt(localStorage.getItem('startTime'), 10) || Date.now();
+      console.log(`📍 Wiederhergestelltes Spiel: ${this.gameId}, Startzeit: ${this.startTime}`);
+    } else {
+      // Spiel von vorne starten
+      this.gameId = this.$route.params.gameId || null;
     }
 
-    // Wenn sessionId vorhanden, führe Validierung durch
-    if (sessionId) {
-      try {
-        const response = await apiService.validateLink(sessionId);
-        console.log('✅ Link gültig:', response.data);
-
-        // Falls notwendig, lade die gameId aus der Antwort
-        if (response.data?.order?.gameId) {
-          this.gameId = response.data.order.gameId;
-        }
-      } catch (error) {
-        console.error('❌ Fehler bei der Validierung des Links:', error.message);
-      }
-    }
-
-    // Lade Spieldaten
+    // Lade Spielinformationen
     if (this.gameId) {
       await this.loadGameData(this.gameId);
     }
-  },
 
+    // Starte den Timer, falls das Spiel läuft
+    if (this.gameStarted) {
+      this.startTimer();
+    }
+  },
   methods: {
     async loadGameData(gameId) {
       try {
         const response = await apiService.fetchGameById(gameId);
         this.gameName = response.name || 'Unbekanntes Spiel';
         this.questions = response.questions || [];
-        console.log('### loadGameData ####');
+        console.log('🔄 Spieldaten geladen:', response);
       } catch (error) {
         console.error('❌ Fehler beim Laden des Spiels:', error);
       }
     },
-
-    restoreQuestionIndex() {
-      const savedIndex = localStorage.getItem(`currentQuestionIndex_${this.gameId}`);
-      if (savedIndex !== null) {
-        this.currentQuestionIndex = parseInt(savedIndex, 10);
-        this.gameStarted = true;
-        console.log(`📍 Wiederhergestellter Index für Spiel ${this.gameId}: ${this.currentQuestionIndex}`);
-      }
-    },
-
     startGame(payload) {
       const { teamName, email, playerNames } = payload;
 
       if (!teamName || !email) {
-        console.warn('⚠️ Teamname und E-Mail dürfen nicht leer sein.');
         alert('⚠️ Bitte Teamname und E-Mail eingeben.');
-        return;
-      }
-
-      if (this.questions.length === 0) {
-        console.warn('⚠️ Keine Fragen vorhanden. Bitte prüfen!');
-        alert('Dieses Spiel enthält keine Fragen.');
         return;
       }
 
       this.teamName = teamName;
       this.email = email;
       this.playerNames = playerNames;
-      this.startTime = Date.now(); // Setze die Startzeit korrekt
+      this.startTime = Date.now();
       this.gameStarted = true;
 
-      // Speichere die Spielinformationen in localStorage
+      // Spielstatus in localStorage speichern
       localStorage.setItem('gameInProgress', 'true');
       localStorage.setItem('currentGameId', this.gameId);
       localStorage.setItem('teamName', teamName);
       localStorage.setItem('email', email);
       localStorage.setItem('startTime', this.startTime);
-      this.startTimer();
     },
-
     handleAnswer({ isCorrect }) {
       if (isCorrect) {
         this.feedbackMessage = '✅ Antwort richtig!';
@@ -173,10 +151,9 @@ export default {
           this.nextQuestion();
         }, 800);
       } else {
-        this.feedbackMessage = '❌ Antwort falsch! Versuche es erneut.';
+        this.feedbackMessage = '❌ Antwort falsch!';
       }
     },
-
     nextQuestion() {
       if (this.currentQuestionIndex < this.questions.length - 1) {
         this.currentQuestionIndex++;
@@ -185,14 +162,11 @@ export default {
         this.finishGame();
       }
     },
-
     saveQuestionIndex() {
       localStorage.setItem(`currentQuestionIndex_${this.gameId}`, this.currentQuestionIndex);
-      console.log(`📍 Index für Spiel ${this.gameId} gespeichert: ${this.currentQuestionIndex}`);
+      console.log(`📍 Fortschritt gespeichert: Frage ${this.currentQuestionIndex + 1}`);
     },
-
     startTimer() {
-      this.startTime = Date.now();
       this.timerInterval = setInterval(() => {
         const currentTime = Date.now();
         const elapsedTime = Math.round((currentTime - this.startTime) / 1000);
@@ -234,24 +208,21 @@ export default {
         localStorage.removeItem('gameInProgress');
         localStorage.removeItem('startTime');
         localStorage.removeItem(`currentQuestionIndex_${this.gameId}`);
-       
       } catch (error) {
-        console.error('❌ Fehler beim Speichern der Ergebnisse:', error.response?.data || error.message);
+        console.error('❌ Fehler beim Speichern der Ergebnisse:', error);
         alert('❌ Fehler beim Speichern der Ergebnisse. Bitte versuche es erneut.');
-      } finally {
-        clearInterval(this.timerInterval);
       }
     },
-
     goToHome() {
       this.$router.push('/');
-    }
+    },
   },
   beforeUnmount() {
     clearInterval(this.timerInterval);
-  }
+  },
 };
 </script>
+
 
 <style scoped>
 /* Allgemeine Spielcontainer-Stile */

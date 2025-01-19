@@ -31,7 +31,43 @@
       <div v-if="question.type === 'multiple'" class="options-group">
         <h4>Antworten</h4>
         <div v-for="(option, index) in question.options" :key="index" class="option-item">
-          <input v-model="option.text" placeholder="Antworttext" />
+          <div class="option-type-selector">
+            <label>
+              <input
+                type="radio"
+                :name="'optionType_' + index"
+                value="text"
+                v-model="option.type"
+              />
+              Text
+            </label>
+            <label>
+              <input
+                type="radio"
+                :name="'optionType_' + index"
+                value="image"
+                v-model="option.type"
+              />
+              Bild
+            </label>
+          </div>
+
+          <!-- Textantwort -->
+          <input
+            v-if="option.type === 'text'"
+            v-model="option.text"
+            placeholder="Antworttext"
+          />
+
+          <!-- Bildantwort -->
+          <div class="add-image" v-else-if="option.type === 'image'">
+            <input type="file" @change="onImageChange($event, index)" accept="image/*" />
+            <div v-if="option.imageUrl" class="image-preview">
+              <img :src="option.imageUrl" alt="Bildantwort" />
+              <button type="button" @click="removeImage(index)">Bild entfernen</button>
+            </div>
+          </div>
+
           <label>
             <input type="checkbox" v-model="option.correct" />
             Korrekt
@@ -98,13 +134,31 @@ export default {
     }
   },
   methods: {
+    async onImageChange(event, index) {
+      const file = event.target.files[0];
+      if (file) {
+        const imageUrl = await apiService.uploadImage(file);
+        this.question.options[index].imageUrl = imageUrl;
+      }
+    },
+    removeImage(index) {
+      this.question.options[index].imageUrl = null;
+    },
     addOption() {
       if (!this.question.options) {
         this.question.options = [];
       }
-      this.question.options.push({ text: "", correct: false });
+      this.question.options.push({
+        type: "text",
+        text: "",
+        imageUrl: "",
+        correct: false,
+      });
     },
     removeOption(index) {
+      this.uploadedFile = null;
+      this.previewImage = null;
+      this.question.imageUrl = "";
       if (this.question.options && this.question.options.length > index) {
         this.question.options.splice(index, 1);
       }
@@ -186,11 +240,6 @@ export default {
         this.previewImage = URL.createObjectURL(file);
       }
     },
-    removeImage() {
-      this.uploadedFile = null;
-      this.previewImage = null;
-      this.question.imageUrl = "";
-    },
   },
   watch: {
     questionData: {
@@ -208,12 +257,16 @@ export default {
 <style scoped>
 .question-form {
   margin: 20px auto;
-  max-width: 600px;
+  max-width: 700px;
   padding: 20px;
   background: #f9f9f9;
   border-radius: 8px;
   border: 1px solid #ddd;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.option-type-selector {
+  display: inline-flex;
 }
 
 h3 {
@@ -250,8 +303,13 @@ select {
 .option-item {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 5px;
   margin-bottom: 10px;
+}
+
+.option-item .add-image  {
+  display: flex;
+  width: 100%;
 }
 
 .option-item input[type="text"] {
