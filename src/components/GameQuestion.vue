@@ -146,4 +146,11 @@ export default {
   margin: 10px 0;
   max-width: 450px;
 }
+/* 📱 Mobile Ansicht */
+@media (max-width: 767px) {
+  .question-image img {
+  max-width: 250px;
+}
+}
+
 </style>
