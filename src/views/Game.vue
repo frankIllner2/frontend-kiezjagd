@@ -96,6 +96,7 @@ export default {
       this.gameStarted = true;
       this.startTime = parseInt(localStorage.getItem('startTime'), 10) || Date.now();
       console.log(`📍 Wiederhergestelltes Spiel: ${this.gameId}, Startzeit: ${this.startTime}`);
+      this.startTimer();
     } else {
       // Spiel von vorne starten
       this.gameId = this.$route.params.gameId || null;
@@ -106,10 +107,6 @@ export default {
       await this.loadGameData(this.gameId);
     }
 
-    // Starte den Timer, falls das Spiel läuft
-    if (this.gameStarted) {
-      this.startTimer();
-    }
   },
   methods: {
     async loadGameData(gameId) {
@@ -123,6 +120,7 @@ export default {
       }
     },
     startGame(payload) {
+      this.startTimer();
       const { teamName, email, playerNames } = payload;
 
       if (!teamName || !email) {
@@ -208,9 +206,12 @@ export default {
         localStorage.removeItem('gameInProgress');
         localStorage.removeItem('startTime');
         localStorage.removeItem(`currentQuestionIndex_${this.gameId}`);
+      
       } catch (error) {
         console.error('❌ Fehler beim Speichern der Ergebnisse:', error);
         alert('❌ Fehler beim Speichern der Ergebnisse. Bitte versuche es erneut.');
+      } finally {
+        clearInterval(this.timerInterval);
       }
     },
     goToHome() {

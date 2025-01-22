@@ -149,8 +149,8 @@ export default {
 /* 📱 Mobile Ansicht */
 @media (max-width: 767px) {
   .question-image img {
-  max-width: 250px;
-}
+    max-width: 250px;
+  }
 }
 
 </style>
