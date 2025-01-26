@@ -1,0 +1,14 @@
+@use "@/assets/scss/abstracts/variables" as *;
+@use "@/assets/scss/abstracts/mixins" as *;
+
+@use './pages/homepage.scss';
+@use './pages/admin.scss';
+@use './pages/game.scss';
+
+@use './components/buttons';
+
+@use './components/card';
+@use './components/checkboxes';
+@use './components/forms';
+@use './components/inputs';
+@use './components/selects';

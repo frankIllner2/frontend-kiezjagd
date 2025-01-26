@@ -1,0 +1,20 @@
+// _select.scss
+.select {
+    display: block;
+    width: 100%;
+    padding: 0.5rem;
+    font-size: 1rem;
+    color: #495057;
+    background-color: #fff;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    appearance: none;
+  
+    &::after {
+      content: "▼";
+      position: absolute;
+      right: 1rem;
+      pointer-events: none;
+    }
+  }
+  

@@ -1,32 +1,36 @@
 /* eslint-disable no-console */
-
-import { register } from 'register-service-worker'
+import { register } from 'register-service-worker';
 
 if (process.env.NODE_ENV === 'production') {
   register(`${process.env.BASE_URL}service-worker.js`, {
-    ready () {
+    ready() {
       console.log(
-        'App is being served from cache by a service worker.\n' +
-        'For more details, visit https://goo.gl/AFskqB'
-      )
+        '✅ Die App wird von einem Service Worker aus dem Cache geladen. Weitere Details unter https://goo.gl/AFskqB'
+      );
     },
-    registered () {
-      console.log('Service worker has been registered.')
+    registered() {
+      console.log('✅ Service Worker wurde erfolgreich registriert.');
     },
-    cached () {
-      console.log('Content has been cached for offline use.')
+    cached() {
+      console.log('✅ Inhalte wurden zwischengespeichert und sind offline verfügbar.');
     },
-    updatefound () {
-      console.log('New content is downloading.')
+    updatefound() {
+      console.log('🔄 Ein neues Update wird heruntergeladen.');
     },
-    updated () {
-      console.log('New content is available; please refresh.')
+    updated(registration) {
+      console.log('⚡ Neues Update verfügbar. Bitte die Seite aktualisieren.');
+
+      // Optionale Benachrichtigung für den Benutzer
+      if (confirm('Eine neue Version ist verfügbar. Möchten Sie die Seite aktualisieren?')) {
+        registration.waiting?.postMessage({ type: 'SKIP_WAITING' });
+        window.location.reload();
+      }
     },
-    offline () {
-      console.log('No internet connection found. App is running in offline mode.')
+    offline() {
+      console.log('⚠️ Keine Internetverbindung gefunden. Die App läuft im Offline-Modus.');
     },
-    error (error) {
-      console.error('Error during service worker registration:', error)
-    }
-  })
+    error(error) {
+      console.error('❌ Fehler bei der Registrierung des Service Workers:', error);
+    },
+  });
 }

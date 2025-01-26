@@ -5,44 +5,8 @@ module.exports = {
   pwa: {
     name: 'Kiezjagd',
     themeColor: '#f7f9fc',
-    manifestOptions: {
-      id: '/', 
-      short_name: 'Kiez-Spiel',
-      start_url: '/',
-      display: 'standalone',
-      background_color: '#ffffff',
-      icons: [
-        {
-          src: '/img/icons/web-app-manifest-192x192.png',
-          sizes: '192x192',
-          type: 'image/png',
-        },
-        {
-          src: '/img/icons/web-app-manifest-512x512.png',
-          sizes: '512x512',
-          type: 'image/png',
-        },
-        {
-          src: '/img/icons/web-app-manifest-96x96.png',
-          sizes: '96x96',
-          type: 'image/png',
-        },
-      ],
-      screenshots: [
-        {
-          src: '/img/screenshots/screenshot-desktop-1920x740.png',
-          sizes: '1920x740',
-          type: 'image/png',
-          label: 'Desktop-Version von Kiezjagd'
-        },
-        {
-          src: '/img/screenshots/screenshot-mobile-412x915.png',
-          sizes: '412x915',
-          type: 'image/png',
-          label: 'Mobile-Version von Kiezjagd'
-        }
-      ],
-    },
+    // Entferne manifestOptions, da manifest.json als Datei eingebunden wird
+    manifestPath: 'manifest.json', // Pfad zur eigenen manifest.json
     workboxOptions: {
       runtimeCaching: [
         {
@@ -73,16 +37,26 @@ module.exports = {
       ],
     },
   },
-  
+
+  css: {
+    loaderOptions: {
+      sass: {
+        additionalData: `
+          @use "@/assets/scss/abstracts/variables" as *;
+          @use "@/assets/scss/abstracts/mixins" as *;
+        `,
+      },
+    },
+  },
 
   // ✅ Entwicklungsserver mit Proxy
   devServer: {
     proxy: {
       // Proxy für API-Requests
       '/api': {
-        target: process.env.VUE_APP_API_BASE_URL || 'http://localhost:5000', // Standard-Backend-URL
-        changeOrigin: true, // CORS-Probleme vermeiden
-        secure: false, // HTTPS deaktivieren, wenn Backend lokal ohne SSL läuft
+        target: process.env.VUE_APP_API_BASE_URL || 'http://localhost:5000',
+        changeOrigin: true,
+        secure: false,
         pathRewrite: {
           '^/api': '', // Entfernt das `/api` Präfix
         },
@@ -101,5 +75,4 @@ module.exports = {
       },
     },
   },
-
 };

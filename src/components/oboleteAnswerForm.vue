@@ -9,10 +9,10 @@
 export default {
   data() {
     return {
-      userAnswer: ''
+      userAnswer: "",
     };
   },
-  emits: ['submitAnswer']
+  emits: ["submitAnswer"],
 };
 </script>
 
