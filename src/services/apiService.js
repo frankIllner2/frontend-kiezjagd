@@ -45,10 +45,13 @@ export const apiService = {
     return performRequest('get', '/games/random');
   },
   // 🔹 Ein Spiel anhand der encryptedId abrufen
-  fetchGameById(encryptedId) {
+  fetchGameById(encryptedId, isAdmin = false) {  // 🛑 `isAdmin` als zweiten Parameter hinzufügen
     if (!encryptedId) throw new Error('⚠️ GameId darf nicht leer sein.');
-    return performRequest('get', `/games/${encryptedId}`);
+  
+    const adminParam = isAdmin ? "?admin=true" : ""; // ✅ Jetzt wird isAdmin definiert
+    return performRequest('get', `/games/${encryptedId}${adminParam}`);
   },
+  
   getTop5Results(encryptedId) {
     if (!encryptedId) throw new Error('⚠️ encryptedId darf nicht leer sein.');
     return performRequest('get', `/games/${encryptedId}/top5`);
@@ -77,7 +80,14 @@ export const apiService = {
   // 🔹 Spiel aktualisieren
   updateGame(game) {
     if (!game || !game._id) throw new Error('⚠️ Spiel-Objekt oder _id darf nicht leer sein.');
-    return performRequest('put', `/games/${game._id}`, game);
+    return performRequest('put', `/games/${game._id}`, {
+      ...game,
+      isDisabled: game.isDisabled || false, // Checkbox-Status mit speichern
+    });
+  },
+
+  fetchAllGames() {
+    return performRequest("get", "/games?admin=true"); // Spezieller Admin-Parameter
   },
 
   // 🔹 Spiel löschen

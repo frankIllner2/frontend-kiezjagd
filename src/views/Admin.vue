@@ -82,7 +82,7 @@ export default {
   methods: {
     async fetchGames() {
       try {
-        const games = await apiService.fetchGames();
+        const games = await apiService.fetchAllGames();
         // Lade Ranking und Fragenanzahl für jedes Spiel
         for (const game of games) {
           const ranking = await apiService.fetchRanking(game.encryptedId);

@@ -45,6 +45,14 @@
             placeholder="Altersgruppe eingeben"
           />
         </div>
+        <div class="form-group">
+          <label for="disabled">Spiel deaktivieren:</label>
+          <input 
+            type="checkbox" 
+            id="disabled" 
+            v-model="game.isDisabled" 
+          />
+        </div>
 
         <div class="form-actions">
           <button type="submit" class="btn-primary">Spiel speichern</button>
@@ -96,6 +104,7 @@ export default {
         encryptedId: "",
         description: "",
         questions: [],
+        isDisabled: false, 
       },
       selectedQuestion: { question: "", answer: "" },
       showQuestionForm: false,
@@ -112,12 +121,13 @@ export default {
   methods: {
     async fetchGame(id) {
       try {
-        const response = await apiService.fetchGameById(id);
+        const response = await apiService.fetchGameById(id, true); // 🛑 Admin-Flag setzen
         this.game = { ...response };
       } catch (error) {
         console.error("Fehler beim Laden des Spiels:", error);
       }
     },
+
 
     addQuestion() {
       this.selectedQuestion = { question: "", answer: "" };

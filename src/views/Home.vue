@@ -178,7 +178,7 @@ export default {
     async fetchGames() {
       try {
         const games = await apiService.fetchGames();
-        this.games = games.slice(0, 4);
+        this.games = games.filter(game => !game.isDisabled).slice(0, 4); 
       } catch (error) {
         console.error("Fehler beim Laden der Spiele:", error);
       }
@@ -206,8 +206,12 @@ export default {
       }
     },
     openModal(gameId) {
-      this.currentGameId = gameId;
-      this.showModal = true;
+      const selectedGame = this.games.find(game => game.encryptedId === gameId);
+
+      if (!selectedGame || selectedGame.isDisabled) {
+        alert("Dieses Spiel ist derzeit nicht verfügbar.");
+        return;
+      }
     },
     closeModal() {
       this.showModal = false;
@@ -219,8 +223,17 @@ export default {
         // ✅ Zufällige Spiele abrufen
         console.log("🎲 Zufällige Spiele:");
 
-        const randomGameIds = await apiService.getRandomGames();
+        let randomGameIds = await apiService.getRandomGames();
         console.log("🎲 Zufällige Spiele:", randomGameIds);
+
+          // 🛑 Deaktivierte Spiele herausfiltern
+        const allGames = await apiService.fetchGames();
+        const activeGameIds = allGames
+        .filter(game => !game.isDisabled) // 🛑 Nur aktive Spiele
+        .map(game => game.encryptedId);
+
+        // Entferne zufällige Spiele, die deaktiviert sind
+        randomGameIds = randomGameIds.filter(id => activeGameIds.includes(id));
 
         if (!randomGameIds || randomGameIds.length === 0) {
           console.warn("⚠️ Keine zufälligen Spiele gefunden");
