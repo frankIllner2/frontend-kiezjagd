@@ -195,9 +195,7 @@ export default {
           alert("⚠️ Keine Spiel-ID gefunden!");
           return;
         }
-        console.log("########### gameId ##############");
-        console.log(this.currentGameId);
-        console.log(email);
+   
         const { url } = await apiService.createCheckoutSession(this.currentGameId, email);
         window.location.href = url;
       } catch (error) {
@@ -207,11 +205,12 @@ export default {
     },
     openModal(gameId) {
       const selectedGame = this.games.find(game => game.encryptedId === gameId);
-
+      console.log(selectedGame);
       if (!selectedGame || selectedGame.isDisabled) {
         alert("Dieses Spiel ist derzeit nicht verfügbar.");
         return;
       }
+      this.showModal = true;
     },
     closeModal() {
       this.showModal = false;
