@@ -5,6 +5,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import HomePage from '../views/Home.vue';
 import GamePage from '../views/Game.vue';
 import AdminPage from '../views/Admin.vue';
+import AdminGameView from '../views/AdminGame.vue';
 import GameEditForm from '../components/GameEditForm.vue';
 import AdminLogin from '../views/AdminLogin.vue';
 import SuccessPage from '../views/Success.vue';
@@ -46,11 +47,17 @@ const routes = [
     },
   },
   {
-    // Direkter Aufruf mit gameId (z.B. aus dem Admin-Bereich)
     path: '/game/:gameId',
     name: 'GameDirect',
     component: GamePage,
     props: true,
+  },
+  {
+    path: '/admin/game/:encryptedId',
+    name: 'AdminGame',
+    component: AdminGameView, // Spezielle Admin-Ansicht für das Spiel
+    meta: { requiresAuth: true, isAdmin: true }, // Schutz durch Navigation Guards
+    props: true 
   },
   {
     path: '/admin',

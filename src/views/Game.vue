@@ -31,8 +31,7 @@
         @submitAnswer="handleAnswer"
       />
 
-      <GpsChecker
-        v-if="currentQuestion.type === 'anweisung'"
+      <GpsChecker v-if="currentQuestion && currentQuestion.type === 'anweisung'" 
         :question="currentQuestion"
         :onSuccess="nextQuestion"
       />
@@ -107,6 +106,15 @@ export default {
     } else {
       // Spiel von vorne starten
       this.gameId = this.$route.params.gameId || null;
+    }
+
+  
+    this.gameId = this.$route.params.gameId || this.$route.params.encryptedId;
+
+
+    if (!this.gameId) {
+      console.error("⚠️ Fehler: gameId ist nicht vorhanden!");
+      return;
     }
 
     // Lade Spielinformationen
