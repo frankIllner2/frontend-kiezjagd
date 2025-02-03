@@ -121,7 +121,7 @@ export default {
   methods: {
     async fetchGame(id) {
       try {
-        const response = await apiService.fetchGameById(id, true); // 🛑 Admin-Flag setzen
+        const response = await apiService.fetchGameById(id, true); //
         this.game = { ...response };
       } catch (error) {
         console.error("Fehler beim Laden des Spiels:", error);

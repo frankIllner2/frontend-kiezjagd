@@ -30,6 +30,12 @@
         :currentIndex="currentQuestionIndex"
         @submitAnswer="handleAnswer"
       />
+
+      <GpsChecker
+        v-if="currentQuestion.type === 'anweisung'"
+        :question="currentQuestion"
+        :onSuccess="nextQuestion"
+      />
       <p v-if="feedbackMessage" class="feedback">{{ feedbackMessage }}</p>
     </div>
 
@@ -49,10 +55,11 @@
 import StartForm from '@/components/StartForm.vue';
 import GameQuestion from '@/components/GameQuestion.vue';
 import GameTimer from '@/components/GameTimer.vue';
+import GpsChecker from '@/components/GpsChecker.vue';
 import { apiService } from '@/services/apiService';
 
 export default {
-  components: { StartForm, GameQuestion, GameTimer },
+  components: { StartForm, GameQuestion, GameTimer, GpsChecker },
   data() {
     return {
       gameId: null,
@@ -140,6 +147,7 @@ export default {
       localStorage.setItem('teamName', teamName);
       localStorage.setItem('email', email);
       localStorage.setItem('startTime', this.startTime);
+      localStorage.setItem('playerNames', JSON.stringify(playerNames));
     },
     handleAnswer({ isCorrect }) {
       if (isCorrect) {

@@ -108,23 +108,34 @@ export default {
     },
 
     submitForm() {
-      if (!this.localTeamName.trim() || !this.localEmail.trim()) {
-        console.warn('⚠️ Teamname und E-Mail dürfen nicht leer sein.');
-        return;
-      }
+  if (!this.localTeamName.trim() || !this.localEmail.trim()) {
+    console.warn('⚠️ Teamname und E-Mail dürfen nicht leer sein.');
+    return;
+  }
 
-      if (this.localTeamExists) {
-        console.warn('⚠️ Teamname ist bereits vergeben. Bitte wähle einen anderen.');
-        return;
-      }
+  if (this.localTeamExists) {
+    console.warn('⚠️ Teamname ist bereits vergeben. Bitte wähle einen anderen.');
+    return;
+  }
 
-      this.$emit('startGame', {
-        teamName: this.localTeamName,
-        email: this.localEmail,
-        playerCount: this.localPlayerCount,
-        playerNames: this.localPlayerNames,
-      });
-    },
+  console.log("📢 `localPlayerNames` vor Verarbeitung:", this.localPlayerNames);
+
+  // Vue Proxy in normales Array umwandeln
+  const playerNamesArray = [...this.localPlayerNames];
+
+  if (playerNamesArray.length > 0) {
+    localStorage.setItem('playerNames', JSON.stringify(playerNamesArray));
+    console.log("✅ Spielernamen gespeichert:", localStorage.getItem('playerNames')); // Direkt aus localStorage lesen
+  }
+
+  this.$emit('startGame', {
+    teamName: this.localTeamName,
+    email: this.localEmail,
+    playerCount: this.localPlayerCount,
+    playerNames: playerNamesArray,
+  });
+},
+
 
     adjustPlayerInputs() {
       const currentCount = this.localPlayerNames.length;

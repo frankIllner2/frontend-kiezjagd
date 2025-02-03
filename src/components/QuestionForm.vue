@@ -4,7 +4,9 @@
     <form @submit.prevent="saveQuestion">
       <!-- Frage -->
       <div class="form-group">
-        <label for="question">Frage</label>
+        <label for="question">{{
+          question.type === "anweisung" ? "Anweisung" : "Frage"
+        }}</label>
         <input v-model="question.question" id="question" type="text" required />
       </div>
 
@@ -14,7 +16,27 @@
         <select v-model="question.type" id="type">
           <option value="text">Freitext</option>
           <option value="multiple">Mehrfachauswahl</option>
+          <option value="anweisung">Anweisung (GPS)</option>
         </select>
+      </div>
+
+      <!-- GPS-Koordinaten für Anweisung -->
+      <div v-if="question.type === 'anweisung'" class="form-group">
+        <label>GPS-Koordinaten (Antwort)</label>
+        <input
+          v-model.number="question.coordinates.lat"
+          placeholder="Breitengrad (Latitude)"
+          type="number"
+          step="any"
+          required
+        />
+        <input
+          v-model.number="question.coordinates.lon"
+          placeholder="Längengrad (Longitude)"
+          type="number"
+          step="any"
+          required
+        />
       </div>
 
       <!-- Bild hinzufügen -->
@@ -105,6 +127,7 @@ export default {
         options: [],
         answer: "",
         imageUrl: "",
+        coordinates: { lat: null, lon: null },
       }),
     },
     isEditing: {
@@ -122,6 +145,7 @@ export default {
         options: [],
         answer: "",
         imageUrl: "",
+        coordinates: { lat: null, lon: null },
       },
       previewImage: null,
       uploadedFile: null,
@@ -130,6 +154,9 @@ export default {
   created() {
     if (this.questionData) {
       this.question = { ...this.questionData };
+      if (!this.question.coordinates) {
+        this.question.coordinates = { lat: null, lon: null };
+      }
       this.previewImage = this.question.imageUrl || null;
     }
   },
@@ -177,6 +204,15 @@ export default {
           return;
         }
 
+        // Validierung für GPS-Anweisungen
+        if (
+          this.question.type === "anweisung" &&
+          (!this.question.coordinates.lat || !this.question.coordinates.lon)
+        ) {
+          alert("⚠️ GPS-Koordinaten sind erforderlich.");
+          return;
+        }
+
         // Bild hochladen (falls vorhanden)
         if (this.uploadedFile) {
           const imageUrl = await apiService.uploadImage(this.uploadedFile);
@@ -189,7 +225,6 @@ export default {
         if (this.question._id) {
           console.log("✏️ Bearbeiten einer bestehenden Frage");
           if (this.question.type === "text") {
-            // Bearbeitung von Freitext-Fragen
             await apiService.updateQuestion(this.$route.params.id, this.question._id, {
               question: this.question.question,
               answer: this.question.answer,
@@ -197,12 +232,18 @@ export default {
               imageUrl: this.question.imageUrl,
             });
           } else if (this.question.type === "multiple") {
-            // Bearbeitung von Mehrfachauswahl-Fragen
             await apiService.updateQuestion(this.$route.params.id, this.question._id, {
               question: this.question.question,
               options: this.question.options,
               type: this.question.type,
               imageUrl: this.question.imageUrl,
+            });
+          } else if (this.question.type === "anweisung") {
+            console.log('########### anweisung ###########');
+            await apiService.updateQuestion(this.$route.params.id, this.question._id, {
+              question: this.question.question,
+              type: this.question.type,
+              coordinates: this.question.coordinates,
             });
           }
         } else {
@@ -228,6 +269,7 @@ export default {
         options: [],
         answer: "",
         imageUrl: "",
+        coordinates: { lat: null, lon: null },
       };
       this.previewImage = null;
       this.uploadedFile = null;
@@ -307,7 +349,7 @@ select {
   margin-bottom: 10px;
 }
 
-.option-item .add-image  {
+.option-item .add-image {
   display: flex;
   width: 100%;
 }

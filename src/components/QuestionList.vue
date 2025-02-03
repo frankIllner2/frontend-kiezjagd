@@ -7,11 +7,16 @@
         :key="question._id"
         class="question-card"
       >
-        <div class="question-header">
-          <h4>Frage {{ index + 1 }}</h4>
+        <div v-if="question" class="question-header">
+          <h4>
+            {{ index + 1 }} {{ question?.type === "anweisung" ? "Anweisung" : "Frage" }}
+          </h4>
         </div>
-        <div class="question-content">
-          <p><strong>Frage:</strong> {{ question.question }}</p>
+        <div v-if="question" class="question-content">
+          <p>
+            <strong>{{ question?.type === "anweisung" ? "Anweisung" : "Frage" }}:</strong>
+            {{ question.question }}
+          </p>
 
           <!-- Freitext-Antwort anzeigen -->
           <p v-if="question.type === 'text'">
@@ -34,6 +39,12 @@
             </ul>
           </div>
 
+          <!-- Antwort für Anweisung (GPS-Koordinaten) anzeigen -->
+          <p v-if="question.type === 'anweisung'">
+            <strong>Koordinaten:</strong> {{ question.coordinates.lat }},
+            {{ question.coordinates.lon }}
+          </p>
+
           <!-- Bild anzeigen, falls vorhanden -->
           <div v-if="question.imageUrl" class="question-image">
             <img :src="question.imageUrl" alt="Fragenbild" />
@@ -55,6 +66,11 @@
 
 <script>
 export default {
+  data() {
+    return {
+      question: {}, // ✅ Leeres Objekt als Standardwert
+    };
+  },
   props: {
     questions: {
       type: Array,
