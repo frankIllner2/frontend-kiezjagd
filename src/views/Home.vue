@@ -210,6 +210,7 @@ export default {
         alert("Dieses Spiel ist derzeit nicht verfügbar.");
         return;
       }
+      this.currentGameId = gameId;
       this.showModal = true;
     },
     closeModal() {
