@@ -30,10 +30,6 @@
   align-items: center;
   color: #fac227;
 
-  @include respond-to("desktop") {
-    padding: 130px 0;
-  }
-
   h2 {
     line-height: 1;
     margin-bottom: 1em;
