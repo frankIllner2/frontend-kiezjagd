@@ -36,7 +36,7 @@
               text="lorum lipsum lorum lipsum lorum lipsum lorum lipsum lorum lipsum lorum lipsum
               lorum lipsum lorum lipsum lorum lipsum lorum lipsum lorum lipsum lorum lipsum lorum lipsum
               lorum lipsum lorum lipsum lorum lipsum lorum lipsum lorum lipsum lorum lipsum lorum lipsum
-              lorum lipsum lorum lipsum lorum lipsum lorum lipsum"
+              lorum lipsum lorum lipsum lorum lipsm"
             />
           </div>
 
