@@ -1,2 +1,32 @@
-$primary-color: #f7f9fc;
-$secondary-color: #2ecc71;
+@use "sass:map";
+$primary-text-color: #355b4c;
+$secondary-text-color: #FAC227;
+$third-text-color: #000000;
+$admin-primary-color: #388e3c;
+$admin-secondary-color: #FFFFFF;
+$admin-third-color: #f00713;
+$background-color-1: #355b4c;
+$background-color-2: #E9E2D0;
+$background-color-3: #FAC227;
+$background-color-4: #f9f9f9;
+$background-color-5: #f4ebd0;
+$border-color-1: #DDDDDD;
+
+$breakpoints: (
+  "mobile": 768px,
+  "tablet": 1024px,
+  "desktop": 1440px
+);
+
+$contents-width: (
+  "mobile": 100%,
+  "tablet": 900px,
+  "desktop": 1280px,
+  "desktop-large": 1420px
+);
+
+$cards-width: (
+  "mobile": 300px,
+  "tablet": 600px,
+  "desktop": 900px
+);

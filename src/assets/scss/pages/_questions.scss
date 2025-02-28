@@ -1,0 +1,35 @@
+
+.question-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 15px;
+  }
+  
+  .question-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+  }
+  
+  .question-content {
+    flex: 1;
+    text-align: left;
+  }
+  
+  .question-content p {
+    margin: 5px 0;
+  }
+  
+  /* Buttons vertikal untereinander ausrichten */
+  .question-actions {
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+    justify-content: flex-end;
+    margin-left: 20px;
+  }
+  

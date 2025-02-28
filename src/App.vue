@@ -1,13 +1,21 @@
 <template>
-  <router-view />
+  <div>
+    <Toast ref="toast" />
+    <router-view />
+  </div>
 </template>
 
 <script>
+import Toast from "@/components/ToastMessage.vue";
+
 export default {
-  name: 'App'
+  components: { Toast },
+  methods: {
+    showToast(message, type = "success") {
+      console.log("showToast wurde aufgerufen:", message, type); 
+      this.$refs.toast.showToast(message, type);
+      
+    },
+  },
 };
 </script>
-
-<style>
-@import './assets/global.css';
-</style>

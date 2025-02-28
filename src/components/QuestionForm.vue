@@ -1,5 +1,5 @@
 <template>
-  <div id="edit-question-container" class="question-form">
+  <div ref="questionForm" id="edit-question-container" class="question-form">
     <h3>{{ isEditing ? "Frage bearbeiten" : "Neue Frage hinzufügen" }}</h3>
     <form @submit.prevent="saveQuestion">
       <!-- Frage -->
@@ -45,8 +45,8 @@
         <input type="file" @change="onFileChange" accept="image/*" />
         <div v-if="previewImage" class="image-preview">
           <img :src="previewImage" alt="Vorschau des Bildes" />
-          <button type="button" @click="removeImage">Bild entfernen</button>
-        </div>
+          <button type="button" class="btn btn--delete-image" @click="removeImage">Bild entfernen</button>
+        </div> 
       </div>
 
       <!-- Optionen für Mehrfachauswahl -->
@@ -86,7 +86,7 @@
             <input type="file" @change="onImageChange($event, index)" accept="image/*" />
             <div v-if="option.imageUrl" class="image-preview">
               <img :src="option.imageUrl" alt="Bildantwort" />
-              <button type="button" @click="removeImage(index)">Bild entfernen</button>
+              <button type="button" class="btn btn--delete-image" @click="removeImage(index)">Bild entfernen</button>
             </div>
           </div>
 
@@ -98,7 +98,7 @@
             🗑️
           </button>
         </div>
-        <button @click="addOption" type="button" class="btn-add-option">
+        <button @click="addOption" type="button" class="btn btn-add-option">
           Antwort hinzufügen
         </button>
       </div>
@@ -108,8 +108,8 @@
         <label for="answer">Korrekte Antwort</label>
         <input v-model="question.answer" id="answer" type="text" />
       </div>
-
-      <button type="submit" class="btn-save">Speichern</button>
+      <br />
+      <button type="submit" class="btn btn--save">Speichern</button>
     </form>
   </div>
 </template>
@@ -239,7 +239,7 @@ export default {
               imageUrl: this.question.imageUrl,
             });
           } else if (this.question.type === "anweisung") {
-            console.log('########### anweisung ###########');
+            console.log("########### anweisung ###########");
             await apiService.updateQuestion(this.$route.params.id, this.question._id, {
               question: this.question.question,
               type: this.question.type,
@@ -253,10 +253,11 @@ export default {
 
         // Event feuern
         this.$emit("save", { ...this.question });
+        this.$root.showToast("Daten wurden erfolgreich gespeichert!");
         this.resetForm();
       } catch (error) {
         console.error("❌ Fehler beim Speichern der Frage:", error);
-        alert("❌ Fehler beim Speichern der Frage.");
+        this.$root.showToast("Fehler beim Speichern der Frage");
       } finally {
         this.isSaving = false;
       }
@@ -299,47 +300,13 @@ export default {
 <style scoped>
 .question-form {
   margin: 20px auto;
-  max-width: 700px;
-  padding: 20px;
+  width: 100%;
   background: #f9f9f9;
   border-radius: 8px;
-  border: 1px solid #ddd;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .option-type-selector {
   display: inline-flex;
-}
-
-h3 {
-  text-align: center;
-  margin-bottom: 15px;
-  font-size: 1.4rem;
-  color: #4caf50;
-}
-
-.form-group {
-  margin-bottom: 15px;
-}
-
-label {
-  font-weight: bold;
-  margin-bottom: 5px;
-  display: block;
-  font-size: 12px;
-}
-
-input,
-select {
-  width: 100%;
-  padding: 8px;
-  margin-top: 5px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-.options-group {
-  margin-top: 15px;
 }
 
 .option-item {
@@ -358,46 +325,5 @@ select {
   flex: 1;
 }
 
-.btn-delete {
-  background-color: #f9f9f9;
-  color: white;
-  border-radius: 4px;
-  cursor: pointer;
-}
 
-.btn-add-option {
-  margin-top: 10px;
-  background-color: #1976d2;
-  color: white;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.image-preview {
-  margin-top: 10px;
-  text-align: center;
-}
-
-.image-preview img {
-  max-width: 100%;
-  height: auto;
-  border-radius: 4px;
-  margin-bottom: 10px;
-}
-
-.image-preview button {
-  background-color: #f44336;
-  color: white;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.btn-save {
-  width: 100%;
-  margin-top: 15px;
-  background-color: #4caf50;
-  color: white;
-  border-radius: 4px;
-  cursor: pointer;
-}
 </style>

@@ -12,7 +12,6 @@
     <!-- Freitextantwort -->
     <div v-if="question.type === 'text'" class="text-answer">
       <input v-model="userAnswer" placeholder="Deine Antwort" />
-      <button @click="submitAnswer">Antwort senden</button>
     </div>
 
     <!-- Mehrfachauswahl -->
@@ -29,8 +28,9 @@
           <img :src="getCorrectImageUrl(option.imageUrl)" alt="Option Bild" />
         </span>
       </div>
-      <button @click="submitAnswer">Antwort senden</button>
+
     </div>
+    <button class="btn btn--secondary" @click="submitAnswer">Antwort senden</button>
   </div>
 </template>
 
@@ -163,17 +163,19 @@ export default {
   cursor: pointer;
   max-width: 250px; /* Begrenzte Breite für Bilder */
   text-align: center;
+  align-content: space-around;
 }
 
 .option-card.selected {
-  background-color: #4caf50;
-  color: white;
+  border: 3px solid #FAC227;
+  color:#355b4c;
 }
 .option-image img {
   max-width: 100%;
   height: auto;
   border-radius: 8px;
   margin-top: 5px;
+  width: 100px;
 }
 .question-image img {
   max-width: 100%;

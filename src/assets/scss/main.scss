@@ -1,14 +1,22 @@
 @use "@/assets/scss/abstracts/variables" as *;
 @use "@/assets/scss/abstracts/mixins" as *;
 
-@use './pages/homepage.scss';
-@use './pages/admin.scss';
-@use './pages/game.scss';
+@use './pages/homepage';
+@use './pages/admin';
+@use './pages/game';
+@use './pages/questions';
+@use './base/global';
+@use './base/typography';
 
 @use './components/buttons';
-
+@use './components/layer';
 @use './components/card';
+@use './components/toast';
 @use './components/checkboxes';
 @use './components/forms';
 @use './components/inputs';
 @use './components/selects';
+@use './components/slider';
+@use './components/accordion';
+@use './components/menue';
+@use './layout/grid';

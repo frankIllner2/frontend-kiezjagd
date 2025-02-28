@@ -1,19 +1,73 @@
+@use "@/assets/scss/abstracts/variables" as *;
+@use "@/assets/scss/abstracts/mixins" as *;
+@use "sass:map";
+/* 🎯 Allgemeine Formular-Stile */
 form {
-    margin: 1rem 0;
   
-    .form-group {
-      margin-bottom: 1rem;
+  border-radius: 8px;
+  padding: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin: 20px auto;
+  width: 100%;
+  text-align: left;
   
-      label {
-        display: block;
-        margin-bottom: 0.5rem;
-        font-weight: bold;
+  .form-group {
+    margin-bottom: 20px;
+  }
+  input,
+  select,
+  textarea {
+    padding: 10px;
+    border: 1px solid $border-color-1;
+    border-radius: 4px;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+  }
+  input:focus,
+  select:focus {
+    border-color: $background-color-3;
+    outline: none;
+  }
+
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+    &.has-image {
+      input:invalid {
+        border-color: #FFFFFF; /* Rote Umrandung */
+        background-color: #FFFFFF; /* Leicht roter Hintergrund */
       }
-  
-      .input,
-      .select,
-      .button {
-        margin-top: 0.25rem;
-      }
+      
     }
   }
+  
+  .form-group label {
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  
+  .image-preview {
+    max-width: 100%;
+    width: 200px;
+    height: auto;
+    margin-top: 10px;
+    border-radius: 4px;
+    margin: auto;
+  }
+  
+  /* Desktop: Zwei Spalten */
+  @media (min-width: 768px) {
+    .form-row {
+      display: flex;
+      gap: 20px;
+    }
+  
+    .form-group {
+      flex: 1;
+    }
+  }
+
+  
+}

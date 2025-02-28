@@ -1,115 +1,156 @@
 <template>
   <div class="home-container">
+    <HeaderMenu />
+
     <!-- Hero Section -->
-    <section class="hero-section">
-      <img src="@/assets/hero.webp" alt="Kiezjagd Hero Image" class="hero-image" />
-      <div class="hero-overlay">
-        <h1>Willkommen bei Kiezjagd – Dein Abenteuer beginnt hier!</h1>
-        <p>
-          Entdecke deine Umgebung auf eine völlig neue Weise mit spannenden Rätseln und
-          Herausforderungen. 🌍🔍
-        </p>
-        <button
-          @click="$router.push('/game/aa7c546e650ecb922bb1b920d5e9ef7d')"
-          class="btn-primary"
-        >
-          Jetzt starten!
-        </button>
+    <section class="container top-header">
+      <div>
+        <div class="headline-container">
+          <h1>Interaktive Abenteuer für deinen Kiez</h1>
+          <div class="buttons">
+              <button @click="scrollToSection('game-preview-section')" class="btn btn--primary" id="open-instruction">
+                Spiele entdecken
+              </button>
+              <button @click="scrollToSection('what-is-section')" class="btn btn--third">
+                Was ist Kiezjagd?
+              </button>
+          </div>
+        </div>
+
+        <div class="grid container cards age-group">
+          <div class="card">
+            <div class="img">
+              <img src="@/assets/img/mini.jpg" />
+            </div>
+            <div class="content mini" @click="openInstruction1">
+              <div>
+                <b>3-5</b>
+                <b>Mini</b>
+                <img src="@/assets/img/icons/show-back.svg" />
+              </div>
+            </div>
+            <InstructionLayer
+              :isActive="showInstruction1"
+              @close="closeInstruction1"
+              title="Anleitung Mini - Rätsel uns Sterne"
+              text="lorum lipsum lorum lipsum lorum lipsum lorum lipsum lorum lipsum lorum lipsum
+              lorum lipsum lorum lipsum lorum lipsum lorum lipsum lorum lipsum lorum lipsum lorum lipsum
+              lorum lipsum lorum lipsum lorum lipsum lorum lipsum lorum lipsum lorum lipsum lorum lipsum
+              lorum lipsum lorum lipsum lorum lipsum lorum lipsum"
+            />
+          </div>
+
+          <div class="card">
+            <div class="img">
+              <img src="@/assets/img/medi.jpg" />
+            </div>
+            <div class="content medi" @click="openInstruction2">
+              <div>
+                <b>5-9</b>
+                <b>Medi</b>
+                <img src="@/assets/img/icons/show-back.svg" />
+              </div>
+            </div>
+            <InstructionLayer
+              :isActive="showInstruction2"
+              @close="closeInstruction2"
+              title="Anleitung Medi - Schnitzeljagd"
+              text="Hier kommt die Anleitung für die Medi-Kategorie hin. Hier kommt die Anleitung für die Medi-Kategorie hin.
+              Hier kommt die Anleitung für die Medi-Kategorie hin.Hier kommür die Medi-Kategorie hin.Hier kommt die Anleitung für die Medi-Kategorie hin.
+              Hier kommt die Anleitung für die Medi-Kategorie hin"
+            />
+          </div>
+
+          <div class="card">
+            <div class="img">
+              <img src="@/assets/img/maxi.jpg" />
+            </div>
+            <div class="content maxi" @click="openInstruction3">
+              <div>
+                <b>9-12</b>
+                <b>Maxi</b>
+                <img src="@/assets/img/icons/show-back.svg" />
+              </div>
+            </div>
+            <InstructionLayer
+              :isActive="showInstruction3"
+              @close="closeInstruction3"
+              title="Anleitung Maxi - die Besten"
+              text="ier kommt die Anleitung für die Medi-Kategorie hin. Hier kommt die Anleitung für die Medi-Kategorie hin.
+              Hier kommt die Anleitung für die Medi-Kategorie hin.Hier kommür die Medi-Kategorie hin.Hier kommt die Anleitung für die Medi-Kategorie hin.
+              Hier kommt die Anleitung für die Medi-Kategori"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- Headline Info Text -->
+
+    <section class="container what-is-headline">
+      <div class="headline font-bold ">
+        Entdecke dein Viertel neu: Löse knifflige  <img class="inline-img" src="@/assets/img/icons/girl4.png" alt="Icon-Group"/>
+        Rätsel, finde versteckte Hinweise und meistere spannende Herausforderungen. 
+        Ob alleine oder mit deinem Team – erlebe bekannte <img class="inline-img" src="@/assets/img/icons/game-group.png" alt="Icon-Gril" /> Orte aus völlig neuen Blickwinkeln!
       </div>
     </section>
 
     <!-- Einführungstext -->
-    <section class="why-kiezjagd-section">
-      <h2>🌟 Warum Kiezjagd spielen?</h2>
-      <div class="cards-container">
-        <!-- Card 1 -->
-        <div class="card">
-          <h3>Das interaktive Abenteuer 🌍🚀</h3>
-          <p>
-            Kiezjagd ist mehr als nur ein Spiel – es ist ein interaktives Abenteuer, das
-            dich direkt in deinem Viertel herausfordert! Egal ob du alleine, mit Freunden,
-            der Familie oder deinem Team unterwegs bist, jede Runde ist ein einzigartiges
-            Erlebnis.
-          </p>
-          <p>
-            Während du knifflige Rätsel löst, versteckte Hinweise findest und spannende
-            Herausforderungen meisterst, entdeckst du vertraute Orte aus völlig neuen
-            Perspektiven. 🧩🔍
-          </p>
-        </div>
+    <section id="what-is-section" class="container what-is-section">
+      <div class="wapper">
+        <h4>Was ist Kiezjagd?</h4>
+        <div class="grid container cards">
+        
+          <!-- Card 1 -->
+          <div class="card">
+            <div class="icon">
+              <img src="@/assets/img/icons/hand.png" />
+            </div>
+            <div class="info">
+            
+              <h3>Dein Smartphone als Spielleiter</h3>
+              <p>
+                Das Eichhörnchen Hopsi hat sich im Land der Märchen verlaufen und sucht nun nach der richtigen Prinzessin, die 
+                ihn nach Hause bringen kann. Kannst du ihm helfen, den richtigen Weg zu finden? Auf deinem Abenteuer musst du 
+                Farben, Formen, Zahlen und Pflanzen richtig zuordnen, um Hinweise zu bekommen, wo du die Prinzessin findest.
+              </p>
+            </div>
+          </div>
 
-        <!-- Card 2 -->
-        <div class="card">
-          <h3>Dein Smartphone als Spielleiter 📱🏞️</h3>
-          <p>
-            Mit deinem Smartphone begibst du dich auf eine Reise voller Überraschungen und
-            Spaß. Jede Frage führt dich zu interessanten Plätzen, die du vielleicht noch
-            nie bemerkt hast. Ob historische Denkmäler, versteckte Gassen oder
-            geheimnisvolle Gebäude.
-          </p>
-          <p>
-            Trete gegen andere Teams an, sichere dir deinen Platz in der Bestenliste und
-            werde zum wahren Kiez-Meister! 🏆🔥 Starte jetzt dein Abenteuer und erlebe,
-            wie aufregend deine Nachbarschaft sein kann! 🌟🎲
-          </p>
-        </div>
+          <!-- Card 2 -->
+          <div class="card">
+            <div class="icon">
+              <img src="@/assets/img/icons/hand.png" />
+            </div>
+            <div class="info">
+            
+              <h3>Dein interaktives Abenteuer</h3>
+              <p>
+                Das Eichhörnchen Hopsi hat sich im Land der Märchen verlaufen und sucht nun nach der richtigen Prinzessin, 
+                die ihn nach Hause bringen kann. Kannst du ihm helfen, den richtigen Weg zu finden? Auf deinem Abenteuer 
+                musst du Farben, Formen, Zahlen und Pflanzen richtig zuordnen, um Hinweise zu bekommen, wo du die Prinzessin 
+                findest.
+              </p>
+            </div>
+          </div>
       </div>
+      <div class="button">
+        <button
+            @click="scrollToSection('game-preview-section')"
+            class="btn btn--fourth"
+            id="open-instruction"
+          >
+            Spiele entdecken
+          </button>
+      </div>
+
+    </div>
     </section>
 
-    <!-- Vorteile als Cards -->
-    <section class="features-section">
-      <h2>🔑 Was erwartet dich?</h2>
-      <div class="features-grid">
-        <div class="feature-card card-blue">
-          <font-awesome-icon :icon="['fas', 'puzzle-piece']" class="feature-icon" />
-          <h3>🎯 Maßgeschneiderte Rätsel</h3>
-          <p>Spannende Fragen direkt aus deiner Umgebung.</p>
-        </div>
-        <div class="feature-card card-green">
-          <font-awesome-icon :icon="['fas', 'mobile-alt']" class="feature-icon" />
-          <h3>📱 Immer griffbereit</h3>
-          <p>Spiele bequem auf deinem Smartphone oder Tablet.</p>
-        </div>
-        <div class="feature-card card-yellow">
-          <font-awesome-icon :icon="['fas', 'users']" class="feature-icon" />
-          <h3>🤝 Gemeinsam spielen</h3>
-          <p>Teile das Abenteuer mit Freunden und Familie.</p>
-        </div>
-        <div class="feature-card card-red">
-          <font-awesome-icon :icon="['fas', 'trophy']" class="feature-icon" />
-          <h3>🏆 Werde Kiez-Meister</h3>
-          <p>Erkämpfe dir deinen Platz auf dem Siegerpodest.</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- Top Teams Ranking -->
-    <section class="ranking-section">
-      <h2>🏆 Top Rankings der Spiele</h2>
-      <div class="rankings-container">
-        <div v-for="(ranking, index) in randomRankings" :key="index" class="ranking-card">
-          <h3>{{ ranking.gameName }}</h3>
-          <ul>
-            <li v-for="(result, idx) in ranking.topResults" :key="idx">
-              <strong>{{ idx + 1 }}.</strong> {{ result.teamName }} -
-              {{ result.duration }}
-            </li>
-          </ul>
-        </div>
-      </div>
-    </section>
 
     <!-- Beliebte Spiele -->
-    <section class="game-preview-section">
-      <h2>🎲 Beliebte Spiele</h2>
-      <div class="game-cards">
-        <div v-for="game in games" :key="game._id" class="game-card">
-          <h3>{{ game.name }}</h3>
-          <p>{{ game.description }}</p>
-          <button @click="openModal(game.encryptedId)">Spiel kaufen</button>
-        </div>
-      </div>
-    </section>
+    <HomeSlider :games="games" @open-modal="openModal" />
 
     <!-- Modal Fenster -->
     <div v-if="showModal" class="modal-overlay">
@@ -127,33 +168,84 @@
       </div>
     </div>
 
-    <!-- Call-to-Action -->
-    <section class="cta-section">
-      <h2>🌟 Bereit für dein Abenteuer?</h2>
-      <p>Melde dich jetzt an und werde Teil der Kiezjagd-Community!</p>
-      <button @click="$router.push('/register')" class="btn-primary">
-        Jetzt registrieren
-      </button>
+
+
+    <!-- Vorteile als Cards -->
+    <section class="container features-section">
+      <h2>Warum Kiezjagd?</h2>
+      <p>
+        Kiezjadg ist mehr als nur ein Spiel - es ist ein interaktives Abenteuer dein Viertel zu entdecken.
+      </p>
+      <div class="grid container">
+        <div class="info">
+          <div class="icon">
+            <img src="@/assets/img/icons/boyYellowShoes.png" />
+          </div>
+          <div>
+            <b>Um die Ecke</b><br />
+            <span>
+              Kiezjadg ist mehr als nur ein Spiel - es ist ein interaktives Abenteuer dein Viertel zu entdecken.
+            </span>
+          </div>
+        </div>
+        <div class="info">
+          <div class="icon">
+            <img src="@/assets/img/icons/girlYellowShirt.png" />
+          </div>
+          <div>
+            <b>Immer griffbereit</b><br />
+            <span>Kiezjadg ist mehr als nur ein Spiel - es ist ein interaktives Abenteuer dein Viertel zu entdecken.</span>
+          </div>
+        </div>
+        <div class="info">
+          <div class="icon">
+            <img src="@/assets/img/icons/girlYellowHair.png" />
+          </div>
+          <div>
+            <b>Gemeinsam spielen</b><br />
+            <span>Kiezjadg ist mehr als nur ein Spiel - es ist ein interaktives Abenteuer dein Viertel zu entdecken.</span>
+          </div>
+        </div>
+        <div class="info">
+          <div class="icon">
+            <img src="@/assets/img/icons/boyYellowShirt.png" />
+          </div>
+          <div>
+            <b>Werde KiezMeister</b><br />
+            <span> Kiezjadg ist mehr als nur ein Spiel - es ist ein interaktives Abenteuer dein Viertel zu entdecken. </span>
+          </div>
+        </div>
+      </div>
     </section>
 
-    <!-- Social Media -->
-    <section class="social-media-section">
-      <div class="social-icons">
-        <a href="https://facebook.com" target="_blank">
-          <font-awesome-icon :icon="['fab', 'facebook']" class="social-icon facebook" />
-        </a>
-        <a href="https://twitter.com" target="_blank">
-          <font-awesome-icon :icon="['fab', 'twitter']" class="social-icon twitter" />
-        </a>
-        <a href="https://instagram.com" target="_blank">
-          <font-awesome-icon :icon="['fab', 'instagram']" class="social-icon instagram" />
-        </a>
+    <!-- Top Teams Ranking -->
+    <HomeSlider2 :rankings="randomRankings" />
+
+    <!-- Call-to-Action -->
+    <section class="container community-section">
+      <div class="icons-header">
+          <img src="@/assets/img/icons/boyYellowShoes.png" />
+          <img src="@/assets/img/icons/girlYellowShirt.png" />
+          <img src="@/assets/img/icons/girlYellowHair.png" />
+          <img src="@/assets/img/icons/boyYellowShirt.png" />
+      </div>
+      <h2>Bereit für dein Abenteuer?</h2>
+      <div class="container">
+        <p>Melde dich jetzt an und werde Teil der Kiezjagd-Community</p>
+       
+        <button class="btn btn--fourth" @click="$router.push('/register')">
+          Spiele entdecken
+        </button>
       </div>
       <div class="bottom-menu">
-        <span>Kontakt</span>
-        <span>Abg's</span>
-        <span>Datenschutz</span>
-        <span>Impressum</span>
+        <div class="left">
+          <span>Impressum</span>
+          <span>Datenschutz</span>
+        </div>
+
+        <div class="right">
+          <span>© 2025 Kiezjagd</span>
+        </div>
       </div>
     </section>
   </div>
@@ -161,9 +253,19 @@
 
 <script>
 import { apiService } from "@/services/apiService";
+import HomeSlider from "@/components/HomeSlider.vue";
+import InstructionLayer from '@/components/InstructionLayer.vue';
+import HeaderMenu from "@/components/HeaderMenu.vue";
+import HomeSlider2 from '@/components/HomeSlider2.vue';
 
 export default {
   name: "HomePage",
+  components: {
+    HomeSlider,
+    InstructionLayer,
+    HeaderMenu,
+    HomeSlider2
+  },
   data() {
     return {
       topTeams: [],
@@ -172,13 +274,40 @@ export default {
       userEmail: "",
       showModal: false,
       currentGameId: null,
+      showInstruction1: false,
+      showInstruction2: false,
+      showInstruction3: false,
     };
   },
   methods: {
+    scrollToSection(id) {
+      const target = document.getElementById(id);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth' });
+      }
+    },
+    openInstruction1() {
+      this.showInstruction1 = true;
+    },
+    closeInstruction1() {
+      this.showInstruction1 = false;
+    },
+    openInstruction2() {
+      this.showInstruction2 = true;
+    },
+    closeInstruction2() {
+      this.showInstruction2 = false;
+    },
+    openInstruction3() {
+      this.showInstruction3 = true;
+    },
+    closeInstruction3() {
+      this.showInstruction3 = false;
+    },
     async fetchGames() {
       try {
         const games = await apiService.fetchGames();
-        this.games = games.filter(game => !game.isDisabled).slice(0, 4); 
+        this.games = games.filter((game) => !game.isDisabled);
       } catch (error) {
         console.error("Fehler beim Laden der Spiele:", error);
       }
@@ -195,7 +324,7 @@ export default {
           alert("⚠️ Keine Spiel-ID gefunden!");
           return;
         }
-   
+
         const { url } = await apiService.createCheckoutSession(this.currentGameId, email);
         window.location.href = url;
       } catch (error) {
@@ -204,7 +333,7 @@ export default {
       }
     },
     openModal(gameId) {
-      const selectedGame = this.games.find(game => game.encryptedId === gameId);
+      const selectedGame = this.games.find((game) => game.encryptedId === gameId);
       console.log(selectedGame);
       if (!selectedGame || selectedGame.isDisabled) {
         alert("Dieses Spiel ist derzeit nicht verfügbar.");
@@ -226,14 +355,14 @@ export default {
         let randomGameIds = await apiService.getRandomGames();
         console.log("🎲 Zufällige Spiele:", randomGameIds);
 
-          // 🛑 Deaktivierte Spiele herausfiltern
+        // 🛑 Deaktivierte Spiele herausfiltern
         const allGames = await apiService.fetchGames();
         const activeGameIds = allGames
-        .filter(game => !game.isDisabled) // 🛑 Nur aktive Spiele
-        .map(game => game.encryptedId);
+          .filter((game) => !game.isDisabled) // 🛑 Nur aktive Spiele
+          .map((game) => game.encryptedId);
 
         // Entferne zufällige Spiele, die deaktiviert sind
-        randomGameIds = randomGameIds.filter(id => activeGameIds.includes(id));
+        randomGameIds = randomGameIds.filter((id) => activeGameIds.includes(id));
 
         if (!randomGameIds || randomGameIds.length === 0) {
           console.warn("⚠️ Keine zufälligen Spiele gefunden");
@@ -276,119 +405,19 @@ export default {
 <style scoped>
 /* Container */
 /* 🎯 Allgemeine Layout-Stile */
-.home-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
-}
-
-/* 🎯 Hero Section */
-.hero-section {
-  position: relative;
-  width: 100%;
-  height: 500px;
-  overflow: hidden;
-  margin-bottom: 30px;
-}
-
-.hero-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  filter: brightness(0.7); /* Abdunklung für besseren Kontrast */
-}
-
-.hero-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 35%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  color: #fff;
-}
-
-.hero-overlay h1 {
-  font-size: 2.5rem;
-  margin-bottom: 10px;
-}
-
-.hero-overlay p {
-  font-size: 1.2rem;
-  margin-bottom: 20px;
-}
-
-.hero-overlay .btn-primary {
-  background-color: #ff9800;
-  border: none;
-  color: white;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.hero-overlay .btn-primary:hover {
-  background-color: #e68900;
-}
-
-/* 🌟 Allgemeine Styles für den Abschnitt */
-.why-kiezjagd-section {
-  text-align: center;
-  margin: 50px auto;
-  padding: 30px 20px;
-  border-radius: 12px;
-}
-
-/* 🎯 Überschrift */
-.why-kiezjagd-section h2 {
-  font-size: 2rem;
-  margin-bottom: 20px;
-}
-
-/* 📦 Cards-Container */
-.cards-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
-  margin-top: 20px;
-}
-
-/* 🃏 Einzelne Card */
-.card {
-  background-color: #ffffff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  text-align: left;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-/* 🎨 Hover-Effekt */
-.card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-}
-
-/* 📝 Card Titel */
-.card h3 {
-  font-size: 1.4rem;
-  margin-bottom: 10px;
-}
-
-/* 📄 Card Text */
-.card p {
-  font-size: 1rem;
-  line-height: 1.6;
-}
 
 /* 📱 Mobile Optimierung */
 @media (max-width: 768px) {
   .cards-container {
     grid-template-columns: 1fr;
   }
+}
+
+.home-container .age-group {
+    position: relative;
+}
+.home-container .age-group .card .content {
+    cursor: pointer;
 }
 
 /* 🟢 Vorteile als Cards */
@@ -399,10 +428,7 @@ export default {
   border-radius: 8px;
 }
 
-.features-section h2 {
-  font-size: 1.8rem;
-  margin-bottom: 25px;
-}
+
 
 .features-grid {
   display: grid;
@@ -434,7 +460,6 @@ export default {
 .ranking-section h2 {
   font-size: 1.8rem;
   margin-bottom: 20px;
-
 }
 
 /* 🌟 Container für die Cards */
@@ -538,37 +563,6 @@ export default {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
-/* 📲 Call-to-Action */
-.cta-section {
-  margin: 60px 0;
-  padding: 40px 20px;
-  border-radius: 8px;
-  text-align: center;
-  border: 2px solid #333;
-  width: 40%;
-  margin: auto;
-}
-
-.cta-section h2 {
-  font-size: 1.8rem;
-  margin-bottom: 20px;
-
-}
-
-.cta-section p {
-  font-size: 1rem;
-  margin-bottom: 20px;
-  color: #444;
-}
-
-.cta-section .btn-primary {
-  background-color: #1976d2;
-  color: white;
-  padding: 10px 20px;
-  border-radius: 4px;
-  font-size: 1rem;
-}
-
 /* 🌐 Social Media */
 .social-media-section {
   text-align: center;
@@ -587,17 +581,17 @@ export default {
   display: flex;
   justify-content: center;
   gap: 15px;
-  margin-top: 10px;
+
 }
 
 .social-icon {
   font-size: 2rem;
-  color: whitesmoke;
+  color: $primary-text-color;
   transition: color 0.3s ease;
 }
 
 .social-icon:hover {
-  color: white;
+  color: $secondary-text-color;
 }
 
 /* 🦶 Footer */

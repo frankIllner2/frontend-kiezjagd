@@ -168,6 +168,22 @@ export const apiService = {
             userCoordinates,
         });
     },
+    
+  // Bild hochladen
+  uploadImage(file) {
+    if (!file) throw new Error('⚠️ Keine Datei zum Hochladen ausgewählt.');
+    const formData = new FormData();
+    formData.append('image', file);
+
+    return axiosInstance.post('/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+      .then(res => res.data.imageUrl)
+      .catch(error => handleApiError(error, 'uploadImage'));
+  },
+
   
 };
 export default apiService;

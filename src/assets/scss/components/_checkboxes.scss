@@ -1,0 +1,23 @@
+@use "../abstracts/variables" as *;
+/* Checkbox-Styling */
+.checkbox-group {
+    display: flex;
+    align-items: left;
+    gap: 12px; /* Abstand zwischen Checkbox und Label */
+    cursor: pointer;
+  }
+  
+  .checkbox-group input[type="checkbox"] {
+    width: 24px; /* Größer für bessere Sichtbarkeit */
+    height: 24px;
+    accent-color: $admin-primary-color; /* Farbe passend zu anderen Buttons */
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .checkbox-group label {
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  

@@ -1,0 +1,42 @@
+@use "../abstracts/variables" as *;
+/* _components.scss */
+.accordion {
+  .accordion-header {
+    cursor: pointer;
+    padding: 12px;
+    background: $background-color-1;
+    color: white;
+  }
+  .accordion-content {
+    display: none;
+    padding: 12px;
+    background: $background-color-2;
+  }
+  &.active .accordion-content {
+    display: block;
+  }
+}
+
+.image-slider {
+  position: relative;
+  overflow: hidden;
+
+  .slider-container {
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+  }
+
+  .slider-item {
+    min-width: 100%;
+    transition: opacity 0.5s;
+  }
+
+  .controls {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+  }
+}

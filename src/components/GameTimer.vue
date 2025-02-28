@@ -1,6 +1,9 @@
 <template>
   <div class="timer-container">
-    <p>Zeit: {{ gameDuration }}</p>
+    <div class="icon">
+      <img src="@/assets/img/icons/uhr.png" />
+      <span>{{ gameDuration }}</span>
+    </div>
   </div>
 </template>
 

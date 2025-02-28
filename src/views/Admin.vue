@@ -2,7 +2,7 @@
   <div class="admin-container">
     <div class="logout">
       <h2>🔒 Admin-Bereich</h2>
-      <button @click="logout">Logout</button>
+      <button class="btn btn--logout" @click="logout">Logout</button>
       <router-view />
     </div>
     <!-- Sidebar für Navigation -->
@@ -23,7 +23,7 @@
           <p><strong>Anzahl der Fragen:</strong> {{ game.questions.length }}</p>
 
           <ul class="margin-top-2">
-            <li><b>Top 5 Teams</b></li>
+            <li><span class="underline">Top 5 Teams</span></li>
             <li v-for="team in game.ranking" :key="team.teamName">
               {{ team.teamName }} - {{ team.duration }}
             </li>
@@ -94,9 +94,16 @@ export default {
       }
     },
     async createGame(game) {
-      await apiService.createGame(game);
-      this.fetchGames();
-      this.currentView = "list";
+      try {
+        const gameData = { ...game };  // Nimm die Daten direkt
+        await apiService.createGame(gameData);
+        this.fetchGames();
+        this.currentView = 'list';
+        this.$root.showToast("Daten wurden erfolgreich gespeichert!");
+      } catch (err) {
+        this.$root.showToast("Fehler beim Erstellen des Spiels!!");
+        console.error('Fehler beim Erstellen des Spiels:', err);
+      }
     },
     editGame(game) {
       if (!game.encryptedId) {
@@ -117,6 +124,7 @@ export default {
       }
       await apiService.deleteGame(game_id);
       this.fetchGames();
+      this.$root.showToast("Spiel wurde erfolgreich gelöscht!");
     },
     cancelEdit() {
       this.selectedGame = null;
@@ -132,150 +140,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.logout {
-  display: inline-flex;
-  flex-direction: column-reverse;
-}
-
-/* Allgemeine Container-Stile */
-.admin-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px;
-}
-
-/* Sidebar-Stile */
-.sidebar {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-  justify-content: center;
-}
-
-.sidebar button {
-  background: #4caf50;
-  color: white;
-  padding: 10px 15px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.sidebar button:hover {
-  background: #388e3c;
-}
-
-/* Inhaltsbereich */
-.content {
-  width: 100%;
-  max-width: 1200px;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 20px;
-}
-
-/* Spieleliste */
-.game-list {
-  width: 100%;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  justify-content: center;
-}
-
-/* Spielkarte */
-.game-card {
-  position: relative;
-  display: flex;
-  height: 340px;
-  max-height: 350px;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
-  background: #f9f9f9;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  padding: 15px;
-  width: 100%;
-  max-width: 450px;
-  text-align: center;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.game-card h3 {
-  margin-bottom: 10px;
-  font-size: 1.2rem;
-  color: #333;
-}
-
-.game-card p {
-  margin: 5px 0;
-  font-size: 0.9rem;
-}
-
-.game-card h4 {
-  margin-top: 10px;
-  font-size: 1rem;
-}
-
-ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-ul li {
-  font-size: 0.9rem;
-  margin: 3px 0;
-}
-
-/* Aktionen */
-.game-actions {
-  position: absolute;
-  bottom: 10px;
-  margin-top: 15px;
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-}
-
-.link-button {
-  background-color: #2196f3;
-  color: white;
-  text-decoration: none;
-  padding: 10px;
-  border-radius: 4px;
-}
-
-.link-button:hover {
-  background-color: #1976d2;
-}
-
-button {
-  padding: 5px 10px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-button:hover {
-  background-color: #ddd;
-}
-
-/* Responsive Design */
-@media (min-width: 768px) {
-  .game-card {
-    width: calc(22% - 20px);
-  }
-}
-
-@media (max-width: 767px) {
-  .game-card {
-    width: 100%;
-  }
-}
-</style>

@@ -1,6 +1,6 @@
 <template>
-    <div class="admin-game-container">
-      <h1>🔧 Admin-Modus: Spielansicht</h1>
+    <div class="game-container">
+      <b>🔧 Admin-Modus: Spielansicht</b>
       <GameView :gameId="encryptedId" /> <!-- ✅ Hier wird die ID explizit übergeben -->
     </div>
   </template>

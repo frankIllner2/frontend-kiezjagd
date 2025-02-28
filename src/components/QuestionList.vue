@@ -1,6 +1,6 @@
 <template>
   <div class="question-list">
-    <h3>Fragen für das Spiel</h3>
+
     <div class="questions-container">
       <div
         v-for="(question, index) in questions"
@@ -232,9 +232,6 @@ export default {
     gap: 10px;
   }
 
-  .question-card {
-    width: 100%;
-  }
 
   .question-actions button {
     font-size: 0.8rem;
@@ -251,13 +248,13 @@ export default {
   }
 
   .question-card {
-    width: calc(50% - 20px); /* Zwei Karten pro Zeile */
+    width: 100%
   }
 }
 
 @media (min-width: 1200px) {
   .question-card {
-    width: calc(47.33% - 20px); /* Drei Karten pro Zeile */
+    width: 100%;
   }
 
   .question-actions button {

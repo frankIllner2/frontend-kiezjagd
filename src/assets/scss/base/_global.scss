@@ -1,0 +1,50 @@
+@use "@/assets/scss/abstracts/variables" as *;
+@use "@/assets/scss/abstracts/mixins" as *;
+html {
+   scroll-behavior: smooth;
+}
+
+body {
+    font-size: clamp(14px, 4vw, 16px);
+    width: 100%;
+    margin: auto;
+    background-color: $background-color-2;
+    font-family: 'BN Bergen', sans-serif;
+}
+h1 {
+    font-size: clamp(2rem, 5vw, 6em);
+ }
+ 
+h2 {
+    font-size: clamp(1.8rem, 5vw, 5em);
+}
+
+h3 {
+    font-size: clamp(1.4rem, 3vw, 1.8em);
+    margin: 0;
+}
+p {
+    margin: 0px;
+}
+b {
+    font-size: clamp(1.4rem, 2.3vw, 3em);
+}
+.hidden {
+    display: none;
+ }
+
+ section {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Optional, um Inhalt mittig zu zentrieren */
+    gap: 50px;
+ }
+
+ * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  .underline {
+    text-decoration: underline;
+  }

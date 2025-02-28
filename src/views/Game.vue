@@ -2,8 +2,11 @@
   <div class="game-container">
     <!-- Begrüßung und Spielname -->
     <div class="game-header">
-      <h1>Willkommen bei Kiezjagd</h1>
-      <h2 v-if="gameName">Spiel: {{ gameName }}</h2>
+      <div class="img">
+        <img src="@/assets/img/logo.png" />
+      </div>
+      <h2>Dein Abenteuer startet jetzt!</h2>
+      <h3 v-if="gameName">Du spielst "{{ gameName }}"</h3>
     </div>
 
     <!-- Startformular -->
@@ -22,7 +25,6 @@
 
     <!-- Fragenbereich -->
     <div v-else-if="!gameFinished" class="game-card question-section">
-      <h3>Fragenrunde</h3>
       <GameTimer :gameDuration="gameDuration" />
       <GameQuestion
         v-if="currentQuestion"
@@ -31,7 +33,8 @@
         @submitAnswer="handleAnswer"
       />
 
-      <GpsChecker v-if="currentQuestion && currentQuestion.type === 'anweisung'" 
+      <GpsChecker
+        v-if="currentQuestion && currentQuestion.type === 'anweisung'"
         :question="currentQuestion"
         :onSuccess="nextQuestion"
       />
@@ -51,20 +54,20 @@
 </template>
 
 <script>
-import StartForm from '@/components/StartForm.vue';
-import GameQuestion from '@/components/GameQuestion.vue';
-import GameTimer from '@/components/GameTimer.vue';
-import GpsChecker from '@/components/GpsChecker.vue';
-import { apiService } from '@/services/apiService';
+import StartForm from "@/components/StartForm.vue";
+import GameQuestion from "@/components/GameQuestion.vue";
+import GameTimer from "@/components/GameTimer.vue";
+import GpsChecker from "@/components/GpsChecker.vue";
+import { apiService } from "@/services/apiService";
 
 export default {
   components: { StartForm, GameQuestion, GameTimer, GpsChecker },
   data() {
     return {
       gameId: null,
-      gameName: '',
-      teamName: '',
-      email: '',
+      gameName: "",
+      teamName: "",
+      email: "",
       playerCount: 1,
       playerNames: [],
       teamExists: false,
@@ -72,45 +75,49 @@ export default {
       currentQuestionIndex: 0,
       gameStarted: false,
       gameFinished: false,
-      gameDuration: '0h 0m 0s',
-      feedbackMessage: '',
+      gameDuration: "0h 0m 0s",
+      feedbackMessage: "",
       timerInterval: null,
       startTime: null,
       endTime: null,
     };
   },
-  name: 'GamePage',
+  name: "GamePage",
   computed: {
     currentQuestion() {
-      return this.questions.length > 0 && this.currentQuestionIndex < this.questions.length
+      return this.questions.length > 0 &&
+        this.currentQuestionIndex < this.questions.length
         ? this.questions[this.currentQuestionIndex]
         : null;
-    }
+    },
   },
   async mounted() {
     // Prüfe, ob ein gespeicherter Spielstatus vorhanden ist
-    const savedGameId = localStorage.getItem('currentGameId');
-    const gameInProgress = localStorage.getItem('gameInProgress') === 'true';
-    const savedIndex = parseInt(localStorage.getItem(`currentQuestionIndex_${savedGameId}`), 10);
+    const savedGameId = localStorage.getItem("currentGameId");
+    const gameInProgress = localStorage.getItem("gameInProgress") === "true";
+    const savedIndex = parseInt(
+      localStorage.getItem(`currentQuestionIndex_${savedGameId}`),
+      10
+    );
 
     if (gameInProgress && savedGameId) {
       // Wiederherstellung des gespeicherten Spiels
       this.gameId = savedGameId;
-      this.teamName = localStorage.getItem('teamName') || '';
-      this.email = localStorage.getItem('email') || '';
+      this.teamName = localStorage.getItem("teamName") || "";
+      this.email = localStorage.getItem("email") || "";
       this.currentQuestionIndex = savedIndex || 0;
       this.gameStarted = true;
-      this.startTime = parseInt(localStorage.getItem('startTime'), 10) || Date.now();
-      console.log(`📍 Wiederhergestelltes Spiel: ${this.gameId}, Startzeit: ${this.startTime}`);
+      this.startTime = parseInt(localStorage.getItem("startTime"), 10) || Date.now();
+      console.log(
+        `📍 Wiederhergestelltes Spiel: ${this.gameId}, Startzeit: ${this.startTime}`
+      );
       this.startTimer();
     } else {
       // Spiel von vorne starten
       this.gameId = this.$route.params.gameId || null;
     }
 
-  
     this.gameId = this.$route.params.gameId || this.$route.params.encryptedId;
-
 
     if (!this.gameId) {
       console.error("⚠️ Fehler: gameId ist nicht vorhanden!");
@@ -121,17 +128,16 @@ export default {
     if (this.gameId) {
       await this.loadGameData(this.gameId);
     }
-
   },
   methods: {
     async loadGameData(gameId) {
       try {
         const response = await apiService.fetchGameById(gameId);
-        this.gameName = response.name || 'Unbekanntes Spiel';
+        this.gameName = response.name || "Unbekanntes Spiel";
         this.questions = response.questions || [];
-        console.log('🔄 Spieldaten geladen:', response);
+        console.log("🔄 Spieldaten geladen:", response);
       } catch (error) {
-        console.error('❌ Fehler beim Laden des Spiels:', error);
+        console.error("❌ Fehler beim Laden des Spiels:", error);
       }
     },
     startGame(payload) {
@@ -139,7 +145,7 @@ export default {
       const { teamName, email, playerNames } = payload;
 
       if (!teamName || !email) {
-        alert('⚠️ Bitte Teamname und E-Mail eingeben.');
+        alert("⚠️ Bitte Teamname und E-Mail eingeben.");
         return;
       }
 
@@ -150,22 +156,22 @@ export default {
       this.gameStarted = true;
 
       // Spielstatus in localStorage speichern
-      localStorage.setItem('gameInProgress', 'true');
-      localStorage.setItem('currentGameId', this.gameId);
-      localStorage.setItem('teamName', teamName);
-      localStorage.setItem('email', email);
-      localStorage.setItem('startTime', this.startTime);
-      localStorage.setItem('playerNames', JSON.stringify(playerNames));
+      localStorage.setItem("gameInProgress", "true");
+      localStorage.setItem("currentGameId", this.gameId);
+      localStorage.setItem("teamName", teamName);
+      localStorage.setItem("email", email);
+      localStorage.setItem("startTime", this.startTime);
+      localStorage.setItem("playerNames", JSON.stringify(playerNames));
     },
     handleAnswer({ isCorrect }) {
       if (isCorrect) {
-        this.feedbackMessage = '✅ Antwort richtig!';
+        this.feedbackMessage = "✅ Antwort richtig!";
         setTimeout(() => {
-          this.feedbackMessage = '';
+          this.feedbackMessage = "";
           this.nextQuestion();
         }, 800);
       } else {
-        this.feedbackMessage = '❌ Antwort falsch!';
+        this.feedbackMessage = "❌ Antwort falsch!";
       }
     },
     nextQuestion() {
@@ -177,7 +183,10 @@ export default {
       }
     },
     saveQuestionIndex() {
-      localStorage.setItem(`currentQuestionIndex_${this.gameId}`, this.currentQuestionIndex);
+      localStorage.setItem(
+        `currentQuestionIndex_${this.gameId}`,
+        this.currentQuestionIndex
+      );
       console.log(`📍 Fortschritt gespeichert: Frage ${this.currentQuestionIndex + 1}`);
     },
     startTimer() {
@@ -212,26 +221,25 @@ export default {
           duration: formattedDuration,
         };
 
-        console.log('📤 Ergebnis wird gesendet:', resultPayload);
+        console.log("📤 Ergebnis wird gesendet:", resultPayload);
 
         await apiService.saveGameResult(resultPayload);
 
         // Lokale Daten bereinigen
-        localStorage.removeItem('teamName');
-        localStorage.removeItem('email');
-        localStorage.removeItem('gameInProgress');
-        localStorage.removeItem('startTime');
+        localStorage.removeItem("teamName");
+        localStorage.removeItem("email");
+        localStorage.removeItem("gameInProgress");
+        localStorage.removeItem("startTime");
         localStorage.removeItem(`currentQuestionIndex_${this.gameId}`);
-      
       } catch (error) {
-        console.error('❌ Fehler beim Speichern der Ergebnisse:', error);
-        alert('❌ Fehler beim Speichern der Ergebnisse. Bitte versuche es erneut.');
+        console.error("❌ Fehler beim Speichern der Ergebnisse:", error);
+        alert("❌ Fehler beim Speichern der Ergebnisse. Bitte versuche es erneut.");
       } finally {
         clearInterval(this.timerInterval);
       }
     },
     goToHome() {
-      this.$router.push('/');
+      this.$router.push("/");
     },
   },
   beforeUnmount() {
@@ -240,51 +248,40 @@ export default {
 };
 </script>
 
-
 <style scoped>
 /* Allgemeine Spielcontainer-Stile */
 .game-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
-  padding: 20px;
-  background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
   min-height: 100vh;
 }
 
 /* Header */
 .game-header {
   text-align: center;
-  margin-bottom: 20px;
+ 
 }
 
 .game-header h1 {
-  font-size: 2rem;
-  color: #4caf50;
   margin-bottom: 5px;
 }
 
 .game-header h2 {
-  font-size: 1.2rem;
-  color: #666;
+
+  color: #355b4c;
 }
 
 /* Karten-Design */
 .game-card {
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  padding: 20px;
+
   width: 100%;
-  max-width: 600px;
   text-align: center;
 }
 
 /* Startformular */
 .start-form {
   text-align: left;
-  margin-top: 20px;
 }
 
 /* Fragenbereich */
@@ -342,14 +339,9 @@ export default {
 @media (min-width: 768px) {
   .game-card {
     max-width: 700px;
+        width: 100%;
   }
 
-  .game-header h1 {
-    font-size: 2.5rem;
-  }
 
-  .game-header h2 {
-    font-size: 1.4rem;
-  }
 }
 </style>

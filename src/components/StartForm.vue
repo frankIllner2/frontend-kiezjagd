@@ -1,7 +1,8 @@
 <template>
   <form @submit.prevent="submitForm" @keydown.enter.prevent="submitForm" class="start-form">
+    
     <div class="form-group">
-      <label for="teamName">Teamname</label>
+      <label for="teamName">Dein Team heißt</label>
       <input
         v-model="localTeamName"
         id="teamName"
@@ -15,7 +16,7 @@
     </div>
 
     <div class="form-group">
-      <label for="email">E-Mail</label>
+      <label for="email">Deine E-Maildresse ist</label>
       <input
         v-model="localEmail"
         id="email"
@@ -26,7 +27,7 @@
     </div>
 
     <div class="form-group">
-      <label for="playerCount">Spieleranzahl</label>
+      <label for="playerCount">Wie viele Spieler seid ihr?</label>
       <input
         v-model.number="localPlayerCount"
         id="playerCount"
@@ -38,7 +39,7 @@
     </div>
 
     <div class="form-group">
-      <label>Spielernamen</label>
+      <label>Wie heisst du?</label>
       <div v-for="(player, index) in localPlayerNames" :key="index" class="player-input">
         <input
           v-model="localPlayerNames[index]"
@@ -48,7 +49,7 @@
       </div>
     </div>
 
-    <button type="submit" class="btn-primary" :disabled="localTeamExists">Spiel starten</button>
+    <button type="submit" class="btn btn--secondary" :disabled="localTeamExists">Starte dein Spiel</button>
   </form>
 </template>
 
@@ -159,12 +160,12 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 15px;
-  max-width: 500px;
+  width: 100%;
   margin: 0 auto;
   padding: 20px;
-  background: #f9f9f9;
   border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: none;
+  background: transparent;
 }
 
 .form-group {
@@ -182,24 +183,14 @@ input {
   padding: 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
+  background-color: transparent;
 }
 
 .player-input {
   margin-top: 5px;
 }
 
-button.btn-primary {
-  background-color: #4caf50;
-  color: white;
-  padding: 10px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
 
-button.btn-primary:hover {
-  background-color: #388e3c;
-}
 
 .error {
   color: red;
