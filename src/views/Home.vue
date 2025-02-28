@@ -32,7 +32,7 @@
             <InstructionLayer
               :isActive="showInstruction1"
               @close="closeInstruction1"
-              title="Anleitung Mini - Rätsel uns Sterne"
+              title="Rätsel und Sterne"
               text="lorum lipsum lorum lipsum lorum lipsum lorum lipsum lorum lipsum lorum lipsum
               lorum lipsum lorum lipsum lorum lipsum lorum lipsum lorum lipsum lorum lipsum lorum lipsum
               lorum lipsum lorum lipsum lorum lipsum lorum lipsum lorum lipsum lorum lipsum lorum lipsum
@@ -54,7 +54,7 @@
             <InstructionLayer
               :isActive="showInstruction2"
               @close="closeInstruction2"
-              title="Anleitung Medi - Schnitzeljagd"
+              title="Schnitzeljagd"
               text="Hier kommt die Anleitung für die Medi-Kategorie hin. Hier kommt die Anleitung für die Medi-Kategorie hin.
               Hier kommt die Anleitung für die Medi-Kategorie hin.Hier kommür die Medi-Kategorie hin.Hier kommt die Anleitung für die Medi-Kategorie hin.
               Hier kommt die Anleitung für die Medi-Kategorie hin"
@@ -75,7 +75,7 @@
             <InstructionLayer
               :isActive="showInstruction3"
               @close="closeInstruction3"
-              title="Anleitung Maxi - die Besten"
+              title="die Besten"
               text="ier kommt die Anleitung für die Medi-Kategorie hin. Hier kommt die Anleitung für die Medi-Kategorie hin.
               Hier kommt die Anleitung für die Medi-Kategorie hin.Hier kommür die Medi-Kategorie hin.Hier kommt die Anleitung für die Medi-Kategorie hin.
               Hier kommt die Anleitung für die Medi-Kategori"
