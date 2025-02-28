@@ -209,13 +209,14 @@
   }
   .glide__arrow {
     position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
+    bottom: 0;
+    transform: translateY(-15%);
     background: rgba(0, 0, 0, 0.5);
     color: white;
     border: none;
     cursor: pointer;
-    padding: 10px;
+    padding: 15px;
+    border-radius: 15px;
     z-index: 10;
   }
   .glide__arrow--left {

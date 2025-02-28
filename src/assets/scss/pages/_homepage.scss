@@ -61,7 +61,7 @@
             }
             &.logo {
                 width: 100%;
-                justify-content: center;
+                justify-content: left;
                 height: auto;
                 @include respond-to("desktop") {
                     width: 33.33%;
@@ -341,7 +341,7 @@
     .ranking-section {
         margin: auto;
         width: 100%;
-        padding: 5em 0 8em;
+        
         color: $primary-text-color;
         margin-bottom: 20em;
 
@@ -432,7 +432,7 @@
                 margin: 0;
                 background-color: transparent;
                 max-height: 600px;
-                min-height: 520px;
+                min-height: 465px;
                 justify-content: start;
 
                 @include respond-to("mobile") {
