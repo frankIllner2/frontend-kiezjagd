@@ -62,6 +62,8 @@
         currentIndex: 0,
         perView: 1,
         gap: 20,
+        startX: 0,  // Startposition beim Touch
+        isSwiping: false
       };
     },
     computed: {
@@ -81,14 +83,48 @@
     mounted() {
     this.updatePerView();
     window.addEventListener("resize", this.updatePerView);
+
+    const track = this.$refs.slides;
+    if (track) {
+        track.addEventListener("touchstart", this.onTouchStart);
+        track.addEventListener("touchmove", this.onTouchMove);
+        track.addEventListener("touchend", this.onTouchEnd);
+    }
+
     setTimeout(() => {
       this.updateSlider(false);
     }, 200);
     },
     beforeUnmount() {
         window.removeEventListener("resize", this.updatePerView);
-    },
+        const track = this.$refs.slides;
+        if (track) {
+            track.removeEventListener("touchstart", this.onTouchStart);
+            track.removeEventListener("touchmove", this.onTouchMove);
+            track.removeEventListener("touchend", this.onTouchEnd);
+        }
+        },
     methods: {
+    onTouchStart(event) {
+        this.startX = event.touches[0].clientX; // X-Position des ersten Touches
+        this.isSwiping = true;
+    },
+    onTouchMove(event) {
+        if (!this.isSwiping) return;
+        const moveX = event.touches[0].clientX;
+        const diff = this.startX - moveX;
+
+        if (diff > 50) {
+        this.nextSlide(); // Wische nach links → Nächste Slide
+        this.isSwiping = false;
+        } else if (diff < -50) {
+        this.prevSlide(); // Wische nach rechts → Vorherige Slide
+        this.isSwiping = false;
+        }
+    },
+    onTouchEnd() {
+        this.isSwiping = false;
+    },
       updatePerView() {
         if (window.innerWidth >= 1024) {
           this.perView = 3;
