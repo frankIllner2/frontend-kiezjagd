@@ -12,6 +12,8 @@ import SuccessPage from '../views/Success.vue';
 import CancelPage from '../views/CancelSite.vue';
 import NotFoundPage from '../views/NotFound.vue';
 import LinkFault from '../views/LinkFault.vue';
+import ImpressumSite from '../views/ImpressumSite.vue';
+import AgbSite from '../views/AgbSite.vue';
 
 const routes = [
   {
@@ -93,6 +95,16 @@ const routes = [
     path: '/linkFault',
     name: 'LinkFault',
     component: LinkFault,
+  },
+  {
+    path: '/Impressum',
+    name: 'Impressum',
+    component: ImpressumSite,
+  },
+  {
+    path: '/Agb',
+    name: 'Agb',
+    component: AgbSite,
   },
   {
     path: '/:pathMatch(.*)*',

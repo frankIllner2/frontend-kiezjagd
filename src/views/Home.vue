@@ -239,8 +239,8 @@
       </div>
       <div class="bottom-menu">
         <div class="left">
-          <span>Impressum</span>
-          <span>Datenschutz</span>
+          <a href="/Impressum" target="_blank" rel="noopener">Impressum</a>
+          <a href="/Agb" target="_blank" rel="noopener">AGB</a>
         </div>
 
         <div class="right">

@@ -29,6 +29,9 @@ p {
 b {
     font-size: clamp(1.4rem, 2.3vw, 3em);
 }
+a {
+    font-size: clamp(1rem, 1vw, 1em); 
+}
 .hidden {
     display: none;
  }
