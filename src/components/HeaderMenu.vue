@@ -6,7 +6,7 @@
         <ul>
           <li><a href="#" @click.prevent="scrollToSection('what-is-headline')">Was ist Kiezjagd?</a></li>
           <li><a href="#" @click.prevent="scrollToSection('game-preview-section')">Spiele entdecken</a></li>
-          <li><a href="#" @click.prevent="scrollToSection('community-section')">Wie geht's?</a></li>
+          <li><a href="#" @click.prevent="scrollToSection('features-section')">Wie geht's?</a></li>
         </ul>
       </nav>
 
@@ -18,7 +18,7 @@
       <!-- Desktop-Menü (rechts) -->
       <nav class="desktop-menu desktop-menu-right">
         <ul>
-          <li class="bottom-menu"><a href="#" @click.prevent="scrollToSection('footer-section')">Schreib uns</a></li>
+          <li class="bottom-menu"><a href="mailto:support@kiezjagd.de?subject=Wie%20gehts!&body=Hallo%20Kiezjagd-Team,">Schreib uns</a></li>
         </ul>
         <!-- Social Media (Desktop) -->
         <div class="social-icons">

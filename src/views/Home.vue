@@ -88,7 +88,7 @@
 
     <!-- Headline Info Text -->
 
-    <section class="container what-is-headline">
+    <section id="what-is-headline" class="container what-is-headline">
       <div class="headline font-bold ">
         Entdecke dein Viertel neu: Löse knifflige  <img class="inline-img" src="@/assets/img/icons/girl4.png" alt="Icon-Group"/>
         Rätsel, finde versteckte Hinweise und meistere spannende Herausforderungen. 
@@ -171,7 +171,7 @@
 
 
     <!-- Vorteile als Cards -->
-    <section class="container features-section">
+    <section id="features-section" class="container features-section">
       <h2>Warum Kiezjagd?</h2>
       <p>
         Kiezjadg ist mehr als nur ein Spiel - es ist ein interaktives Abenteuer dein Viertel zu entdecken.
