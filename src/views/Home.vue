@@ -33,10 +33,9 @@
               :isActive="showInstruction1"
               @close="closeInstruction1"
               title="Rätsel und Sterne"
-              text="lorum lipsum lorum lipsum lorum lipsum lorum lipsum lorum lipsum lorum lipsum
-              lorum lipsum lorum lipsum lorum lipsum lorum lipsum lorum lipsum lorum lipsum lorum lipsum
-              lorum lipsum lorum lipsum lorum lipsum lorum lipsum lorum lipsum lorum lipsum lorum lipsum
-              lorum lipsum lorum lipsum lorum lipsm"
+              text="Hier kommt die Anleitung für die Mini-Kategorie hin. Hier kommt die Anleitung für die Mini-Kategorie hin.
+              Hier kommt die Anleitung für die Mini-Kategorie hin.Hier kommür die Mini-Kategorie hin.Hier kommt die Anleitung für die Mini-Kategorie hin.
+              Hier kommt die Anleitung für die Mini-Kategorie hin"
             />
           </div>
 
@@ -76,9 +75,9 @@
               :isActive="showInstruction3"
               @close="closeInstruction3"
               title="die Besten"
-              text="ier kommt die Anleitung für die Medi-Kategorie hin. Hier kommt die Anleitung für die Medi-Kategorie hin.
-              Hier kommt die Anleitung für die Medi-Kategorie hin.Hier kommür die Medi-Kategorie hin.Hier kommt die Anleitung für die Medi-Kategorie hin.
-              Hier kommt die Anleitung für die Medi-Kategori"
+              text="Hier kommt die Anleitung für die Maxi-Kategorie hin. Hier kommt die Anleitung für die Maxi-Kategorie hin.
+              Hier kommt die Anleitung für die Maxi-Kategorie hin.Hier kommür die Maxi-Kategorie hin.Hier kommt die Anleitung für die Maxi-Kategorie hin.
+              Hier kommt die Anleitung für die Maxi-Kategori"
             />
           </div>
         </div>
