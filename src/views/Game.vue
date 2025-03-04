@@ -191,20 +191,27 @@ export default {
       if (isCorrect) {
         this.feedbackMessage = correctMessages[Math.floor(Math.random() * correctMessages.length)];
         this.feedbackImage = require('@/assets/img/correct.gif'); // Pfad zum GIF für richtige Antwort
+        this.showFeedback = true;
+
+        // Nach 7 Sekunden zur nächsten Frage weitergehen
+        setTimeout(() => {
+          this.showFeedback = false;
+          this.feedbackMessage = "";
+          this.feedbackImage = null;
+          this.nextQuestion(); // Nur wenn die Antwort richtig war!
+        }, 7000);
       } else {
         this.feedbackMessage = incorrectMessages[Math.floor(Math.random() * incorrectMessages.length)];
-        this.feedbackImage = require('@/assets/img/false.png'); // Pfad zum Bild für falsche Antwort
+        this.feedbackImage = require('@/assets/img/icons/hand.png'); // Pfad zum Bild für falsche Antwort
+        this.showFeedback = true;
+
+        // Nach 7 Sekunden nur das Overlay ausblenden, aber keine neue Frage laden
+        setTimeout(() => {
+          this.showFeedback = false;
+          this.feedbackMessage = "";
+          this.feedbackImage = null;
+        }, 7000);
       }
-
-      this.showFeedback = true; // Aktiviert das Overlay
-
-      // Zeige das Feedback für 7 Sekunden und gehe dann zur nächsten Frage
-      setTimeout(() => {
-        this.showFeedback = false;
-        this.feedbackMessage = "";
-        this.feedbackImage = null;
-        this.nextQuestion();
-      }, 7000);
     },
 
     nextQuestion() {
@@ -374,7 +381,7 @@ export default {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.9); /* Halbtransparentes Overlay */
+  background: rgba(250, 194, 39, 0.9); 
   display: flex;
   justify-content: center;
   align-items: center;
@@ -383,10 +390,13 @@ export default {
 }
 
 .feedback-content {
-  color: white;
+  color: #355b4c;
   font-size: 5vw;
   font-weight: bold;
   text-align: center;
+  p {
+    padding: 0 3em;
+  }
 }
 
 .feedback-content img {
