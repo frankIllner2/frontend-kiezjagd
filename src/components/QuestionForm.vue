@@ -45,7 +45,7 @@
         <input type="file" @change="onFileChange" accept="image/*" />
         <div v-if="previewImage" class="image-preview">
           <img :src="previewImage" alt="Vorschau des Bildes" />
-          <button type="button" class="btn btn--delete-image" @click="removeImage">Bild entfernen</button>
+          <button type="button" class="btn btn--delete-image" @click="removeImage(null)">Bild entfernen</button>
         </div> 
       </div>
 
@@ -168,8 +168,17 @@ export default {
         this.question.options[index].imageUrl = imageUrl;
       }
     },
-    removeImage(index) {
-      this.question.options[index].imageUrl = null;
+    removeImage(index = null) {
+      if (index !== null) {
+        // Entfernt Bild aus den Antwortoptionen
+        if (this.question.options && this.question.options[index]) {
+          this.question.options[index].imageUrl = null;
+        }
+      } else {
+        // Entfernt das Hauptbild
+        this.previewImage = null;
+        this.question.imageUrl = "";
+      }
     },
     addOption() {
       if (!this.question.options) {
