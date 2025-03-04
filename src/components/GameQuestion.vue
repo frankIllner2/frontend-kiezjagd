@@ -14,13 +14,13 @@
       <input v-model="userAnswer" placeholder="Deine Antwort" />
     </div>
 
-    <!-- Mehrfachauswahl -->
-    <div v-else-if="question.type === 'multiple'" class="multiple-choice">
+    <!-- Einzelne Auswahl (vorher Mehrfachauswahl) -->
+    <div v-else-if="question.type === 'multiple'" class="single-choice">
       <div
         v-for="(option, index) in question.options"
         :key="index"
         class="option-card"
-        :class="{ selected: selectedOptions.includes(index) }"
+        :class="{ selected: selectedOptions === index }"
         @click="toggleOption(index)"
       >
         <span v-if="option.type === 'text'">{{ option.text }}</span>
@@ -28,7 +28,6 @@
           <img :src="getCorrectImageUrl(option.imageUrl)" alt="Option Bild" />
         </span>
       </div>
-
     </div>
     <button class="btn btn--secondary" @click="submitAnswer">Antwort senden</button>
   </div>
@@ -44,7 +43,7 @@ export default {
   data() {
     return {
       userAnswer: '',
-      selectedOptions: [],
+      selectedOptions: null,
       salutations: ["Hallo", "Hey", "Wie geht's", "Na", "Guten Tag", "Hi"],
       players: [], // Liste der Spielernamen
       currentSalutation: '', // Begrüßung + Name
@@ -97,11 +96,7 @@ export default {
       }
     },
     toggleOption(index) {
-      if (this.selectedOptions.includes(index)) {
-        this.selectedOptions = this.selectedOptions.filter(i => i !== index);
-      } else {
-        this.selectedOptions.push(index);
-      }
+      this.selectedOptions = this.selectedOptions === index ? -1 : index;
     },
     submitAnswer() {
       let isCorrect = false;
@@ -109,16 +104,13 @@ export default {
       if (this.question.type === 'text') {
         isCorrect = this.userAnswer.trim().toLowerCase() === this.question.answer.toLowerCase();
       } else if (this.question.type === 'multiple') {
-        const correctIndexes = this.question.options
-          .map((option, index) => (option.correct ? index : null))
-          .filter(index => index !== null);
-
-        isCorrect = JSON.stringify(correctIndexes.sort()) === JSON.stringify(this.selectedOptions.sort());
+        const correctIndex = this.question.options.findIndex(option => option.correct);
+        isCorrect = this.selectedOptions === correctIndex;
       }
 
       this.$emit('submitAnswer', { isCorrect });
       this.userAnswer = '';
-      this.selectedOptions = [];
+      this.selectedOptions = -1; // Setzt die Auswahl zurück
     },
     saveProgress(index) {
       localStorage.setItem('currentQuestionIndex', index);
@@ -134,61 +126,3 @@ export default {
 </script>
 
 
-
-
-<style scoped>
-.game-question {
-  text-align: center;
-  margin: 20px;
-}
-
-.text-answer input {
-  margin-bottom: 10px;
-  padding: 8px;
-  width: 80%;
-}
-
-.multiple-choice {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  justify-content: center;
-}
-
-.option-card {
-  padding: 10px 15px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  background-color: #f9f9f9;
-  cursor: pointer;
-  max-width: 250px; /* Begrenzte Breite für Bilder */
-  text-align: center;
-  align-content: space-around;
-}
-
-.option-card.selected {
-  border: 3px solid #FAC227;
-  color:#355b4c;
-}
-.option-image img {
-  max-width: 100%;
-  height: auto;
-  border-radius: 8px;
-  margin-top: 5px;
-  width: 100px;
-}
-.question-image img {
-  max-width: 100%;
-  height: auto;
-  border-radius: 8px;
-  margin: 10px 0;
-  max-width: 450px;
-}
-/* 📱 Mobile Ansicht */
-@media (max-width: 767px) {
-  .question-image img {
-    max-width: 250px;
-  }
-}
-
-</style>

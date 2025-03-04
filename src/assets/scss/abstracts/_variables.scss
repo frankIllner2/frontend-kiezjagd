@@ -13,6 +13,9 @@ $background-color-5: #f4ebd0;
 $border-color-1: #DDDDDD;
 
 $breakpoints: (
+  "mobilexs": 320px,
+  "mobilem": 375px,
+  "mobilel": 425px,
   "mobile": 768px,
   "tablet": 1024px,
   "desktop": 1440px

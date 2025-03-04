@@ -38,7 +38,14 @@
         :question="currentQuestion"
         :onSuccess="nextQuestion"
       />
-      <p v-if="feedbackMessage" class="feedback">{{ feedbackMessage }}</p>
+      <!-- Feedback Overlay -->
+      <div v-if="showFeedback" class="feedback-overlay">
+        <div class="feedback-content">
+          <p>{{ feedbackMessage }}</p>
+          <img v-if="feedbackImage" :src="feedbackImage" alt="Antwort Feedback" />
+        </div>
+      </div>
+
     </div>
 
     <!-- Spielabschluss -->
@@ -76,6 +83,7 @@ export default {
       gameStarted: false,
       gameFinished: false,
       gameDuration: "0h 0m 0s",
+      showFeedback: false,
       feedbackMessage: "",
       timerInterval: null,
       startTime: null,
@@ -164,16 +172,41 @@ export default {
       localStorage.setItem("playerNames", JSON.stringify(playerNames));
     },
     handleAnswer({ isCorrect }) {
+      const correctMessages = [
+        "Toll! Du hast es geschafft! 🎉",
+        "Antwort war 100% richtig! ✅",
+        "Super gemacht! 👏",
+        "Klasse! Weiter so! 💪",
+        "Du bist ein Rätselmeister! 🏆"
+      ];
+
+      const incorrectMessages = [
+        "Du bist der richtigen Antwort auf der Spur! 🔍",
+        "Versuche es nochmal! Du schaffst das! 💡",
+        "Knapp daneben ist auch vorbei! 😅",
+        "Fast! Vielleicht hilft ein neuer Blickwinkel? 🔄",
+        "Nicht ganz richtig – probiere es noch einmal! ⏳"
+      ];
+
       if (isCorrect) {
-        this.feedbackMessage = "✅ Antwort richtig!";
-        setTimeout(() => {
-          this.feedbackMessage = "";
-          this.nextQuestion();
-        }, 800);
+        this.feedbackMessage = correctMessages[Math.floor(Math.random() * correctMessages.length)];
+        this.feedbackImage = require('@/assets/img/correct.gif'); // Pfad zum GIF für richtige Antwort
       } else {
-        this.feedbackMessage = "❌ Antwort falsch!";
+        this.feedbackMessage = incorrectMessages[Math.floor(Math.random() * incorrectMessages.length)];
+        this.feedbackImage = require('@/assets/img/false.png'); // Pfad zum Bild für falsche Antwort
       }
+
+      this.showFeedback = true; // Aktiviert das Overlay
+
+      // Zeige das Feedback für 7 Sekunden und gehe dann zur nächsten Frage
+      setTimeout(() => {
+        this.showFeedback = false;
+        this.feedbackMessage = "";
+        this.feedbackImage = null;
+        this.nextQuestion();
+      }, 7000);
     },
+
     nextQuestion() {
       if (this.currentQuestionIndex < this.questions.length - 1) {
         this.currentQuestionIndex++;
@@ -334,6 +367,34 @@ export default {
 .btn-primary:hover {
   background-color: #388e3c;
 }
+
+.feedback-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.9); /* Halbtransparentes Overlay */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  text-align: center;
+}
+
+.feedback-content {
+  color: white;
+  font-size: 5vw;
+  font-weight: bold;
+  text-align: center;
+}
+
+.feedback-content img {
+  margin-top: 20px;
+  max-height: 80vh;
+}
+
+
 
 /* Responsive Anpassung */
 @media (min-width: 768px) {
