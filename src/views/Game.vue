@@ -6,7 +6,8 @@
         <img src="@/assets/img/logo.png" />
       </div>
       <h2>Dein Abenteuer startet jetzt!</h2>
-      <h3 v-if="gameName">Du spielst "{{ gameName }}"</h3>
+      <h3 v-if="gameName && !gameFinished">Du spielst "{{ gameName }}"</h3>
+      <h3 v-if="gameFinished">Du hast gespielt: "{{ gameName }}"</h3>
     </div>
 
     <!-- Startformular -->
@@ -50,11 +51,13 @@
 
     <!-- Spielabschluss -->
     <div v-else class="game-card game-finished">
-      <h3>🎉 Spiel erfolgreich abgeschlossen!</h3>
-      <p><strong>Team:</strong> {{ teamName }}</p>
-      <p><strong>E-Mail:</strong> {{ email }}</p>
-      <p><strong>Zeit benötigt:</strong> {{ gameDuration }}</p>
-      <p>Vielen Dank für's Spielen!</p>
+      <h3>Spiel erfolgreich abgeschlossen!</h3>
+      <div>
+        <p><strong>Team:</strong> {{ teamName }}</p>
+        <p><strong>E-Mail:</strong> {{ email }}</p>
+        <p><strong>Zeit benötigt:</strong> {{ gameDuration }}</p>
+        <p>Vielen Dank für's Spielen!</p>
+      </div>
       <button @click="goToHome" class="btn-primary">Zurück zur Startseite</button>
     </div>
   </div>
@@ -173,19 +176,19 @@ export default {
     },
     handleAnswer({ isCorrect }) {
       const correctMessages = [
-        "Toll! Du hast es geschafft! 🎉",
-        "Antwort war 100% richtig! ✅",
-        "Super gemacht! 👏",
-        "Klasse! Weiter so! 💪",
-        "Du bist ein Rätselmeister! 🏆"
+        "Toll! Du hast es geschafft!",
+        "Antwort war 100% richtig!",
+        "Super gemacht!",
+        "Klasse! Weiter so!",
+        "Du bist ein Rätselmeister!"
       ];
 
       const incorrectMessages = [
-        "Du bist der richtigen Antwort auf der Spur! 🔍",
-        "Versuche es nochmal! Du schaffst das! 💡",
-        "Knapp daneben ist auch vorbei! 😅",
-        "Fast! Vielleicht hilft ein neuer Blickwinkel? 🔄",
-        "Nicht ganz richtig – probiere es noch einmal! ⏳"
+        "Du bist der richtigen Antwort auf der Spur!",
+        "Versuche es nochmal! Du schaffst das!",
+        "Knapp daneben ist auch vorbei!",
+        "Fast! Vielleicht hilft ein neuer Blickwinkel?",
+        "Nicht ganz richtig – probiere es noch einmal!"
       ];
 
       if (isCorrect) {
@@ -199,10 +202,10 @@ export default {
           this.feedbackMessage = "";
           this.feedbackImage = null;
           this.nextQuestion(); // Nur wenn die Antwort richtig war!
-        }, 7000);
+        }, 6000);
       } else {
         this.feedbackMessage = incorrectMessages[Math.floor(Math.random() * incorrectMessages.length)];
-        this.feedbackImage = require('@/assets/img/icons/hand.png'); // Pfad zum Bild für falsche Antwort
+        this.feedbackImage = require('@/assets/img/false.png'); // Pfad zum Bild für falsche Antwort
         this.showFeedback = true;
 
         // Nach 7 Sekunden nur das Overlay ausblenden, aber keine neue Frage laden
@@ -210,7 +213,7 @@ export default {
           this.showFeedback = false;
           this.feedbackMessage = "";
           this.feedbackImage = null;
-        }, 7000);
+        }, 6000);
       }
     },
 
@@ -390,12 +393,26 @@ export default {
 }
 
 .feedback-content {
-  color: #355b4c;
-  font-size: 5vw;
-  font-weight: bold;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  max-width: 90%;
+  width: 80vw; /* Feste Breite für mobile Geräte */
   text-align: center;
   p {
-    padding: 0 3em;
+    color: #355b4c;
+    font-size: 7vw; /* Große Schrift auf mobilen Geräten */
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 20px;
+    width: 80vw; /* Feste Breite, damit der Text umbricht */
+    max-width: 600px; /* Begrenzung für größere Bildschirme */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+    line-height: 1.2; /* Guter Zeilenabstand für bessere Lesbarkeit */
+    margin-top: 3em;
   }
 }
 
