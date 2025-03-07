@@ -21,10 +21,13 @@
 
               
               <b>{{ ranking.gameName }}</b>
+             
               <ul>
                 <li v-for="(result, idx) in ranking.topResults" :key="idx">
                   <span>{{ idx + 1 }}.</span> <strong>{{ result.teamName }}</strong>
-                  <span>{{ result.duration }}</span>
+                  <b>{{ result.gameType }}</b>
+                  <span v-if="result.gameType === 'Mini' || result.gameType === 'Medi'">{{ result.stars }} Sterne</span>
+                  <span v-else> {{ parseInt(result.duration.split("h")[1]) }} Minuten</span>
                 </li>
               </ul>
             </li>

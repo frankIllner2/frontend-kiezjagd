@@ -23,6 +23,10 @@
   }
 }
 
+form {
+  box-shadow: 0 4px 8px rgba(18, 38, 61, 0.3)
+}
+
   /* Abschnittsstile */
 .edit-section {
     margin-bottom: 30px;
@@ -34,7 +38,8 @@
   
 .logout {
   display: inline-flex;
-  flex-direction: column-reverse;
+  flex-direction: row;
+  margin: 2em 0 4em;
 }
 
 /* Allgemeine Container-Stile */

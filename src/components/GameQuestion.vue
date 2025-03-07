@@ -107,7 +107,7 @@ export default {
         const correctIndex = this.question.options.findIndex(option => option.correct);
         isCorrect = this.selectedOptions === correctIndex;
       }
-
+      console.log('submitAnswer', isCorrect);
       this.$emit('submitAnswer', { isCorrect });
       this.userAnswer = '';
       this.selectedOptions = -1; // Setzt die Auswahl zurück

@@ -26,7 +26,13 @@
 
     <!-- Fragenbereich -->
     <div v-else-if="!gameFinished" class="game-card question-section">
-      <GameTimer :gameDuration="gameDuration" />
+     <!-- Timer bleibt immer aktiv, wird aber bei Mini & Medi versteckt -->
+      <GameTimer v-if="gameType === 'maxi' || gameType === 'mini' || gameType === 'medi'" 
+      :gameDuration="gameDuration" 
+      class="timer" 
+      :class="{ hidden: gameType !== 'maxi' }" 
+      />
+
       <GameQuestion
         v-if="currentQuestion"
         :question="currentQuestion"
@@ -39,13 +45,28 @@
         :question="currentQuestion"
         :onSuccess="nextQuestion"
       />
-      <!-- Feedback Overlay -->
+
+      <!-- Feedback Overlay mit Sterne-Animation -->
       <div v-if="showFeedback" class="feedback-overlay">
         <div class="feedback-content">
           <p>{{ feedbackMessage }}</p>
           <img v-if="feedbackImage" :src="feedbackImage" alt="Antwort Feedback" />
         </div>
       </div>
+
+      <div v-if="starAnimation" class="star-container">
+        <transition-group name="star-fly">
+          <div v-for="star in flyingStars" :key="star.id" class="star">
+          ⭐
+          </div>
+        </transition-group>
+      </div>
+
+
+      <div class="star-status">
+       <p v-if="gameType === 'maxi'"><strong>Zeit benötigt:</strong> {{ gameDuration }}</p>
+      <p v-else><strong>Gesammelte Sterne:</strong> 🌟 {{ starCount }}</p>
+    </div>
 
     </div>
 
@@ -55,7 +76,8 @@
       <div>
         <p><strong>Team:</strong> {{ teamName }}</p>
         <p><strong>E-Mail:</strong> {{ email }}</p>
-        <p><strong>Zeit benötigt:</strong> {{ gameDuration }}</p>
+        <p v-if="gameType === 'maxi'"><strong>Zeit benötigt:</strong> {{ gameDuration }}</p>
+        <p v-else><strong>Gesammelte Sterne:</strong> 🌟 {{ starCount }}</p>
         <p>Vielen Dank für's Spielen!</p>
       </div>
       <button @click="goToHome" class="btn-primary">Zurück zur Startseite</button>
@@ -91,6 +113,13 @@ export default {
       timerInterval: null,
       startTime: null,
       endTime: null,
+      feedbackImage: null,
+      starCount: 0, // Gesamtzahl der Sterne
+      earnedStars: 0, // Sterne für die aktuelle Antwort
+      starAnimation: false, // Steuerung der Animation
+      attemptCount: 0, // Zählt die Versuche für jede Frage
+      gameType: "", 
+      flyingStars: [],
     };
   },
   name: "GamePage",
@@ -102,6 +131,12 @@ export default {
         : null;
     },
   },
+  watch: {
+    flyingStars(newStars) {
+      console.log("🔥 Sterne im Array: ", newStars);
+    }
+  },
+
   async mounted() {
     // Prüfe, ob ein gespeicherter Spielstatus vorhanden ist
     const savedGameId = localStorage.getItem("currentGameId");
@@ -118,6 +153,7 @@ export default {
       this.email = localStorage.getItem("email") || "";
       this.currentQuestionIndex = savedIndex || 0;
       this.gameStarted = true;
+      this.starCount = parseInt(localStorage.getItem("starCount"), 10) || 0;
       this.startTime = parseInt(localStorage.getItem("startTime"), 10) || Date.now();
       console.log(
         `📍 Wiederhergestelltes Spiel: ${this.gameId}, Startzeit: ${this.startTime}`
@@ -146,6 +182,7 @@ export default {
         const response = await apiService.fetchGameById(gameId);
         this.gameName = response.name || "Unbekanntes Spiel";
         this.questions = response.questions || [];
+        this.gameType = response.ageGroup || "maxi"; 
         console.log("🔄 Spieldaten geladen:", response);
       } catch (error) {
         console.error("❌ Fehler beim Laden des Spiels:", error);
@@ -175,53 +212,79 @@ export default {
       localStorage.setItem("playerNames", JSON.stringify(playerNames));
     },
     handleAnswer({ isCorrect }) {
-      const correctMessages = [
-        "Toll! Du hast es geschafft!",
-        "Antwort war 100% richtig!",
-        "Super gemacht!",
-        "Klasse! Weiter so!",
-        "Du bist ein Rätselmeister!"
-      ];
-
-      const incorrectMessages = [
-        "Du bist der richtigen Antwort auf der Spur!",
-        "Versuche es nochmal! Du schaffst das!",
-        "Knapp daneben ist auch vorbei!",
-        "Fast! Vielleicht hilft ein neuer Blickwinkel?",
-        "Nicht ganz richtig – probiere es noch einmal!"
-      ];
+      console.log('handleAnswer called', isCorrect);
+      this.starAnimation = true; // ✅ Animation aktivieren
 
       if (isCorrect) {
-        this.feedbackMessage = correctMessages[Math.floor(Math.random() * correctMessages.length)];
-        this.feedbackImage = require('@/assets/img/correct.gif'); // Pfad zum GIF für richtige Antwort
+        this.earnedStars = this.calculateStars();
+        this.feedbackMessage = "Richtig!";
+        this.feedbackImage = require('@/assets/img/correct.gif');
         this.showFeedback = true;
 
-        // Nach 7 Sekunden zur nächsten Frage weitergehen
         setTimeout(() => {
-          this.showFeedback = false;
-          this.feedbackMessage = "";
-          this.feedbackImage = null;
-          this.nextQuestion(); // Nur wenn die Antwort richtig war!
-        }, 6000);
+          this.showFeedback = false; // ✅ Feedback-Layer ausblenden
+
+          // 🟢 Warten, bis `.feedback-overlay` entfernt wurde, dann Sterne starten
+          this.$nextTick(() => {
+            setTimeout(() => {
+              this.animateStars(); // 🚀 Jetzt direkt Sterne starten!
+            }, 500); // Kurze Verzögerung, um sicherzustellen, dass `feedback-overlay` weg ist
+          });
+
+        }, 5000);
       } else {
-        this.feedbackMessage = incorrectMessages[Math.floor(Math.random() * incorrectMessages.length)];
-        this.feedbackImage = require('@/assets/img/false.png'); // Pfad zum Bild für falsche Antwort
+        this.attemptCount++;
+        this.feedbackMessage = "Versuche es nochmal!";
+        this.feedbackImage = require('@/assets/img/false.png');
         this.showFeedback = true;
 
-        // Nach 7 Sekunden nur das Overlay ausblenden, aber keine neue Frage laden
         setTimeout(() => {
           this.showFeedback = false;
-          this.feedbackMessage = "";
-          this.feedbackImage = null;
-        }, 6000);
+        }, 5000);
       }
     },
 
+    animateStars() {
+      this.flyingStars = []; // ⭐ Setze Array immer auf leer
+      let addedStars = 0;
+
+      console.log("🚀 Starte Stern-Animation...");
+
+      const interval = setInterval(() => {
+        console.log("🌟 Neuer Stern wird hinzugefügt!", addedStars);
+
+        if (addedStars < this.earnedStars) {
+          this.flyingStars.push({ id: addedStars, flying: true });
+          this.starCount++; // Zahl erhöht sich synchron zur Animation
+          localStorage.setItem("starCount", this.starCount);
+          addedStars++;
+        } else {
+          clearInterval(interval);
+          setTimeout(() => {
+            console.log("🎯 Animation abgeschlossen. Wechsel zur nächsten Frage.");
+            this.starAnimation = false;
+            this.flyingStars = []; // Array zurücksetzen
+            this.nextQuestion(); // ✅ Jetzt erst zur nächsten Frage wechseln!
+          }, 1000);
+        }
+      }, 1000);
+    },
+
+    calculateStars() {
+      if (this.attemptCount === 0) return 5;
+      if (this.attemptCount === 1) return 3;
+      return 1;
+    },
+
     nextQuestion() {
+      this.attemptCount = 0; // ✅ Versuche zurücksetzen
+      console.log("Wechsel zu nächster Frage:", this.currentQuestionIndex);
+      console.log(this.questions.length - 1);
       if (this.currentQuestionIndex < this.questions.length - 1) {
         this.currentQuestionIndex++;
         this.saveQuestionIndex();
       } else {
+        console.log('finishGame');
         this.finishGame();
       }
     },
@@ -252,20 +315,28 @@ export default {
         const hours = Math.floor(durationInSeconds / 3600);
         const minutes = Math.floor((durationInSeconds % 3600) / 60);
         const seconds = durationInSeconds % 60;
-
         const formattedDuration = `${hours}h ${minutes}m ${seconds}s`;
 
         const resultPayload = {
           gameId: this.gameId,
           teamName: this.teamName,
           email: this.email,
+          gameType: this.gameType,
+          gameName: this.gameName,
           startTime: new Date(this.startTime).toISOString(),
           endTime: new Date(this.endTime).toISOString(),
           duration: formattedDuration,
+          stars: this.gameType === "maxi" ? 0 : this.starCount,
         };
 
-        console.log("📤 Ergebnis wird gesendet:", resultPayload);
+        // **Wenn Spieltyp 'maxi' ist, speichere die Zeit, sonst speichere Sterne**
+        if (this.gameType === "maxi") {
+          resultPayload.duration = formattedDuration;
+        } else {
+          resultPayload.stars = this.starCount;
+        }
 
+        console.log("📤 Ergebnis wird gesendet:", resultPayload);
         await apiService.saveGameResult(resultPayload);
 
         // Lokale Daten bereinigen
@@ -274,6 +345,7 @@ export default {
         localStorage.removeItem("gameInProgress");
         localStorage.removeItem("startTime");
         localStorage.removeItem(`currentQuestionIndex_${this.gameId}`);
+        localStorage.removeItem("starCount"); // **Sterne nach Spielende zurücksetzen**
       } catch (error) {
         console.error("❌ Fehler beim Speichern der Ergebnisse:", error);
         alert("❌ Fehler beim Speichern der Ergebnisse. Bitte versuche es erneut.");
@@ -281,6 +353,7 @@ export default {
         clearInterval(this.timerInterval);
       }
     },
+
     goToHome() {
       this.$router.push("/");
     },
@@ -415,12 +488,84 @@ export default {
     margin-top: 3em;
   }
 }
-
+.hidden {
+  display: none;
+}
 .feedback-content img {
   margin-top: 20px;
   max-height: 80vh;
 }
+.feedback-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(250, 194, 39, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  text-align: center;
+}
 
+.feedback-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  max-width: 90%;
+}
+
+.star-container {
+  position: fixed;
+  bottom: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
+}
+
+@keyframes fly-to-status {
+  0% {
+    transform: translateY(100vh) scale(1);
+    opacity: 1;
+  }
+  40% { /* Früher in der Mitte */
+    transform: translate(30vw, -60vh) scale(1.4);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(45vw, -100vh) scale(0.8);
+    opacity: 0;
+  }
+}
+
+.star {
+  font-size: 50px;
+  position: absolute;
+  animation: fly-to-status 3s ease-in-out forwards;
+}
+
+
+
+/* Fixierte Sterne-Anzeige unten */
+.star-status {
+  position: fixed;
+  top: 10px;
+  right: 0;
+  font-size: 20px;
+  font-weight: bold;
+  text-align: center;
+  color: black;
+  z-index: 10; /* Sicherstellen, dass es unter dem Button bleibt */
+  pointer-events: none; /* Verhindert, dass es Klicks blockiert */
+  background-color: #E9E2D0;
+  padding: 0 20px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
 
 
 /* Responsive Anpassung */
@@ -429,7 +574,5 @@ export default {
     max-width: 700px;
         width: 100%;
   }
-
-
 }
 </style>

@@ -148,7 +148,7 @@ export const apiService = {
     },
     // Ergebnis speichern
     saveGameResult(result) {
-        if (!result || !result.gameId || !result.teamName || !result.email || !result.startTime || !result.endTime || !result.duration) {
+        if (!result || !result.gameId || !result.teamName || !result.email || !result.startTime || !result.endTime ) {
             throw new Error('⚠️ Fehlende Felder beim Speichern des Ergebnisses.');
         }
         return performRequest('post', `/results`, result);

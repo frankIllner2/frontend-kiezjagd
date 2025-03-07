@@ -73,11 +73,12 @@
       }
     }
     &--logout {
-      background-color: $background-color-2;
+      background-color: $background-color-3;
       color: $third-text-color;
       border-radius: 10px;
+      
       &:hover {
-        background-color:  $background-color-2;
+        background-color:  $background-color-3;
         color:  $third-text-color;
       }
     }
