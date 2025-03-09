@@ -2,7 +2,8 @@
   <div class="game-container">
     <!-- Begrüßung und Spielname -->
     <div class="game-header">
-      <div class="img">
+  
+      <div v-if="!this.gameStarted" class="img">
         <img src="@/assets/img/logo.png" />
       </div>
       <h2>Dein Abenteuer startet jetzt!</h2>
@@ -26,11 +27,12 @@
 
     <!-- Fragenbereich -->
     <div v-else-if="!gameFinished" class="game-card question-section">
-     <!-- Timer bleibt immer aktiv, wird aber bei Mini & Medi versteckt -->
-      <GameTimer v-if="gameType === 'maxi' || gameType === 'mini' || gameType === 'medi'" 
-      :gameDuration="gameDuration" 
-      class="timer" 
-      :class="{ hidden: gameType !== 'maxi' }" 
+      <!-- Timer bleibt immer aktiv, wird aber bei Mini & Medi versteckt -->
+      <GameTimer
+        v-if="gameType === 'Maxi' || gameType === 'Mini' || gameType === 'Medi'"
+        :gameDuration="gameDuration"
+        class="timer"
+        :class="{ hidden: gameType !== 'Maxi' }"
       />
 
       <GameQuestion
@@ -54,20 +56,18 @@
         </div>
       </div>
 
-      <div v-if="starAnimation" class="star-container">
+      <div v-if="starAnimation && gameType !== 'Maxi'" class="star-container">
         <transition-group name="star-fly">
-          <div v-for="star in flyingStars" :key="star.id" class="star">
-          ⭐
-          </div>
+          <div v-for="star in flyingStars" :key="star.id" class="star">⭐</div>
         </transition-group>
       </div>
 
-
       <div class="star-status">
-       <p v-if="gameType === 'maxi'"><strong>Zeit benötigt:</strong> {{ gameDuration }}</p>
-      <p v-else><strong>Gesammelte Sterne:</strong> 🌟 {{ starCount }}</p>
-    </div>
-
+        <p v-if="gameType === 'Maxi'">
+          <strong>Zeit benötigt:</strong> {{ gameDuration }}
+        </p>
+        <p v-else><strong>Gesammelte Sterne:</strong> 🌟 {{ starCount }}</p>
+      </div>
     </div>
 
     <!-- Spielabschluss -->
@@ -76,7 +76,9 @@
       <div>
         <p><strong>Team:</strong> {{ teamName }}</p>
         <p><strong>E-Mail:</strong> {{ email }}</p>
-        <p v-if="gameType === 'maxi'"><strong>Zeit benötigt:</strong> {{ gameDuration }}</p>
+        <p v-if="gameType === 'Maxi'">
+          <strong>Zeit benötigt:</strong> {{ gameDuration }}
+        </p>
         <p v-else><strong>Gesammelte Sterne:</strong> 🌟 {{ starCount }}</p>
         <p>Vielen Dank für's Spielen!</p>
       </div>
@@ -104,6 +106,7 @@ export default {
       playerNames: [],
       teamExists: false,
       questions: [],
+      currentAnswerQuestion: '',
       currentQuestionIndex: 0,
       gameStarted: false,
       gameFinished: false,
@@ -118,7 +121,7 @@ export default {
       earnedStars: 0, // Sterne für die aktuelle Antwort
       starAnimation: false, // Steuerung der Animation
       attemptCount: 0, // Zählt die Versuche für jede Frage
-      gameType: "", 
+      gameType: "",
       flyingStars: [],
     };
   },
@@ -134,7 +137,7 @@ export default {
   watch: {
     flyingStars(newStars) {
       console.log("🔥 Sterne im Array: ", newStars);
-    }
+    },
   },
 
   async mounted() {
@@ -182,7 +185,8 @@ export default {
         const response = await apiService.fetchGameById(gameId);
         this.gameName = response.name || "Unbekanntes Spiel";
         this.questions = response.questions || [];
-        this.gameType = response.ageGroup || "maxi"; 
+        this.gameType = response.ageGroup || "Maxi";
+       
         console.log("🔄 Spieldaten geladen:", response);
       } catch (error) {
         console.error("❌ Fehler beim Laden des Spiels:", error);
@@ -212,13 +216,14 @@ export default {
       localStorage.setItem("playerNames", JSON.stringify(playerNames));
     },
     handleAnswer({ isCorrect }) {
-      console.log('handleAnswer called', isCorrect);
-      this.starAnimation = true; // ✅ Animation aktivieren
-
+      console.log("handleAnswer called", isCorrect);
+      this.starAnimation = true;
+      this.currentAnswerQuestion = this.currentQuestion;
+  
       if (isCorrect) {
         this.earnedStars = this.calculateStars();
-        this.feedbackMessage = "Richtig!";
-        this.feedbackImage = require('@/assets/img/correct.gif');
+        this.feedbackMessage = this.currentAnswerQuestion.answerquestion;
+        this.feedbackImage = require("@/assets/img/correct.gif");
         this.showFeedback = true;
 
         setTimeout(() => {
@@ -227,15 +232,14 @@ export default {
           // 🟢 Warten, bis `.feedback-overlay` entfernt wurde, dann Sterne starten
           this.$nextTick(() => {
             setTimeout(() => {
-              this.animateStars(); // 🚀 Jetzt direkt Sterne starten!
-            }, 500); // Kurze Verzögerung, um sicherzustellen, dass `feedback-overlay` weg ist
+              this.animateStars(); 
+            }, 500); 
           });
-
         }, 5000);
       } else {
         this.attemptCount++;
         this.feedbackMessage = "Versuche es nochmal!";
-        this.feedbackImage = require('@/assets/img/false.png');
+        this.feedbackImage = require("@/assets/img/false.png");
         this.showFeedback = true;
 
         setTimeout(() => {
@@ -245,6 +249,8 @@ export default {
     },
 
     animateStars() {
+      console.log('animate Stars');
+      if (this.gameType === 'Maxi') this.nextQuestion();
       this.flyingStars = []; // ⭐ Setze Array immer auf leer
       let addedStars = 0;
 
@@ -284,7 +290,7 @@ export default {
         this.currentQuestionIndex++;
         this.saveQuestionIndex();
       } else {
-        console.log('finishGame');
+        console.log("finishGame");
         this.finishGame();
       }
     },
@@ -326,15 +332,8 @@ export default {
           startTime: new Date(this.startTime).toISOString(),
           endTime: new Date(this.endTime).toISOString(),
           duration: formattedDuration,
-          stars: this.gameType === "maxi" ? 0 : this.starCount,
+          stars: this.starCount,
         };
-
-        // **Wenn Spieltyp 'maxi' ist, speichere die Zeit, sonst speichere Sterne**
-        if (this.gameType === "maxi") {
-          resultPayload.duration = formattedDuration;
-        } else {
-          resultPayload.stars = this.starCount;
-        }
 
         console.log("📤 Ergebnis wird gesendet:", resultPayload);
         await apiService.saveGameResult(resultPayload);
@@ -376,7 +375,6 @@ export default {
 /* Header */
 .game-header {
   text-align: center;
- 
 }
 
 .game-header h1 {
@@ -384,13 +382,11 @@ export default {
 }
 
 .game-header h2 {
-
   color: #355b4c;
 }
 
 /* Karten-Design */
 .game-card {
-
   width: 100%;
   text-align: center;
 }
@@ -457,7 +453,7 @@ export default {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(250, 194, 39, 0.9); 
+  background: rgba(250, 194, 39, 0.9);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -475,7 +471,7 @@ export default {
   text-align: center;
   p {
     color: #355b4c;
-    font-size: 7vw; /* Große Schrift auf mobilen Geräten */
+    font-size: clamp(1.4rem, 4vw, 3em);
     font-weight: bold;
     text-align: center;
     margin-bottom: 20px;
@@ -485,7 +481,7 @@ export default {
     overflow-wrap: break-word;
     white-space: normal;
     line-height: 1.2; /* Guter Zeilenabstand für bessere Lesbarkeit */
-    margin-top: 3em;
+    margin-top: 10px;
   }
 }
 .hidden {
@@ -533,7 +529,8 @@ export default {
     transform: translateY(100vh) scale(1);
     opacity: 1;
   }
-  40% { /* Früher in der Mitte */
+  40% {
+    /* Früher in der Mitte */
     transform: translate(30vw, -60vh) scale(1.4);
     opacity: 1;
   }
@@ -549,8 +546,6 @@ export default {
   animation: fly-to-status 3s ease-in-out forwards;
 }
 
-
-
 /* Fixierte Sterne-Anzeige unten */
 .star-status {
   position: fixed;
@@ -562,17 +557,16 @@ export default {
   color: black;
   z-index: 10; /* Sicherstellen, dass es unter dem Button bleibt */
   pointer-events: none; /* Verhindert, dass es Klicks blockiert */
-  background-color: #E9E2D0;
+  background-color: #e9e2d0;
   padding: 0 20px;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
-
 
 /* Responsive Anpassung */
 @media (min-width: 768px) {
   .game-card {
     max-width: 700px;
-        width: 100%;
+    width: 100%;
   }
 }
 </style>

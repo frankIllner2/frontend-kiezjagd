@@ -10,6 +10,13 @@
         <input v-model="question.question" id="question" type="text" required />
       </div>
 
+      <!-- Antwort auf Frage -->
+      <div class="form-group">
+        <label for="question">Individuelle Antwort auf die Frage</label>
+        <input v-model="question.answerquestion" id="answerQuestion" type="text" required />
+      </div>
+
+
       <!-- Fragetyp -->
       <div class="form-group">
         <label for="type">Fragetyp</label>
@@ -123,6 +130,7 @@ export default {
       type: Object,
       default: () => ({
         question: "",
+        answerquestion: "",
         type: "text",
         options: [],
         answer: "",
@@ -236,6 +244,7 @@ export default {
           if (this.question.type === "text") {
             await apiService.updateQuestion(this.$route.params.id, this.question._id, {
               question: this.question.question,
+              answerquestion: this.question.answerquestion,
               answer: this.question.answer,
               type: this.question.type,
               imageUrl: this.question.imageUrl,
@@ -243,14 +252,15 @@ export default {
           } else if (this.question.type === "multiple") {
             await apiService.updateQuestion(this.$route.params.id, this.question._id, {
               question: this.question.question,
+              answerquestion: this.question.answerquestion,
               options: this.question.options,
               type: this.question.type,
               imageUrl: this.question.imageUrl,
             });
           } else if (this.question.type === "anweisung") {
-            console.log("########### anweisung ###########");
             await apiService.updateQuestion(this.$route.params.id, this.question._id, {
               question: this.question.question,
+              answerquestion: this.question.answerquestion,
               type: this.question.type,
               coordinates: this.question.coordinates,
             });
