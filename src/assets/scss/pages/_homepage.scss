@@ -262,8 +262,6 @@
                 @include respond-to("desktop") {
                     flex-direction: row;
                 }
-
-            
                 .card {
                     
                     color: $secondary-text-color;
@@ -349,8 +347,6 @@
             color: $primary-text-color;
             margin-bottom: 1em;
         }
-        
-            
         .card {
             display: flex;
             flex-direction: column;

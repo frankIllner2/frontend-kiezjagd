@@ -161,8 +161,8 @@
         </p>
         <input type="email" v-model="userEmail" placeholder="E-Mail-Adresse" required />
         <div class="modal-actions">
-          <button @click="handleCheckout">Bestätigen</button>
-          <button @click="closeModal">Abbrechen</button>
+          <button class="btn btn--third" @click="closeModal">Abbrechen</button>
+          <button class="btn btn--primary" @click="handleCheckout">Kaufen</button>
         </div>
       </div>
     </div>
@@ -683,15 +683,6 @@ export default {
   cursor: pointer;
 }
 
-.modal-actions button:first-child {
-  background-color: #4caf50;
-  color: white;
-}
-
-.modal-actions button:last-child {
-  background-color: #fbc02d;
-  color: white;
-}
 .bottom-menu {
   display: flex;
   justify-content: flex-end;

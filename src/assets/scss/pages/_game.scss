@@ -14,6 +14,14 @@
             height: auto;
         }
     }
+    .result-container {
+      display: flex;
+      flex-direction: column;
+      .card {
+        gap: 40px;
+        padding: 15px 0;
+      }
+    }
     .game-card {
         color: $primary-text-color;
         label {

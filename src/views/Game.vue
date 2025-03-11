@@ -2,7 +2,6 @@
   <div class="game-container">
     <!-- Begrüßung und Spielname -->
     <div class="game-header">
-  
       <div v-if="!this.gameStarted" class="img">
         <img src="@/assets/img/logo.png" />
       </div>
@@ -27,7 +26,6 @@
 
     <!-- Fragenbereich -->
     <div v-else-if="!gameFinished" class="game-card question-section">
-      <!-- Timer bleibt immer aktiv, wird aber bei Mini & Medi versteckt -->
       <GameTimer
         v-if="gameType === 'Maxi' || gameType === 'Mini' || gameType === 'Medi'"
         :gameDuration="gameDuration"
@@ -48,19 +46,15 @@
         :onSuccess="nextQuestion"
       />
 
-      <!-- Feedback Overlay mit Sterne-Animation -->
-      <div v-if="showFeedback" class="feedback-overlay">
-        <div class="feedback-content">
-          <p>{{ feedbackMessage }}</p>
-          <img v-if="feedbackImage" :src="feedbackImage" alt="Antwort Feedback" />
-        </div>
-      </div>
-
-      <div v-if="starAnimation && gameType !== 'Maxi'" class="star-container">
-        <transition-group name="star-fly">
-          <div v-for="star in flyingStars" :key="star.id" class="star">⭐</div>
-        </transition-group>
-      </div>
+      <FeedbackAnimation
+        ref="feedbackAnimation"
+        :showFeedback="showFeedback"
+        :feedbackMessage="feedbackMessage"
+        :feedbackImage="feedbackImage"
+        :earnedStars="earnedStars"
+        :gameType="gameType"
+        @done="handleAnimationDone"
+      />
 
       <div class="star-status">
         <p v-if="gameType === 'Maxi'">
@@ -72,36 +66,41 @@
 
     <!-- Spielabschluss -->
     <div v-else class="game-card game-finished">
-      <h3>Spiel erfolgreich abgeschlossen!</h3>
-      <div>
-        <p><strong>Team:</strong> {{ teamName }}</p>
-        <p><strong>E-Mail:</strong> {{ email }}</p>
-        <p v-if="gameType === 'Maxi'">
-          <strong>Zeit benötigt:</strong> {{ gameDuration }}
-        </p>
-        <p v-else><strong>Gesammelte Sterne:</strong> 🌟 {{ starCount }}</p>
-        <p>Vielen Dank für's Spielen!</p>
+      <div class="result-container">
+        <div class="card">
+        <h3>Spiel erfolgreich abgeschlossen!</h3>
+        <div>
+          <p><strong>Team:</strong> {{ teamName }}</p>
+          <p><strong>E-Mail:</strong> {{ email }}</p>
+          <p v-if="gameType === 'Maxi'">
+            <strong>Zeit benötigt:</strong> {{ gameDuration }}
+          </p>
+          <p v-else><strong>Gesammelte Sterne:</strong> 🌟 {{ starCount }}</p>
+          <p>Vielen Dank für's Spielen!</p>
+        </div>
+        <button @click="goToHome" class="btn btn--primary">Zurück zur Startseite</button>
       </div>
-      <button @click="goToHome" class="btn-primary">Zurück zur Startseite</button>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
-import StartForm from "@/components/StartForm.vue";
-import GameQuestion from "@/components/GameQuestion.vue";
-import GameTimer from "@/components/GameTimer.vue";
-import GpsChecker from "@/components/GpsChecker.vue";
-import { apiService } from "@/services/apiService";
+import StartForm from '@/components/StartForm.vue';
+import GameQuestion from '@/components/GameQuestion.vue';
+import GameTimer from '@/components/GameTimer.vue';
+import GpsChecker from '@/components/GpsChecker.vue';
+import FeedbackAnimation from '@/components/FeedbackAnimation.vue';
+import { apiService } from '@/services/apiService';
 
 export default {
-  components: { StartForm, GameQuestion, GameTimer, GpsChecker },
+  components: { StartForm, GameQuestion, GameTimer, GpsChecker, FeedbackAnimation },
   data() {
     return {
       gameId: null,
-      gameName: "",
-      teamName: "",
-      email: "",
+      gameName: '',
+      teamName: '',
+      email: '',
       playerCount: 1,
       playerNames: [],
       teamExists: false,
@@ -110,86 +109,67 @@ export default {
       currentQuestionIndex: 0,
       gameStarted: false,
       gameFinished: false,
-      gameDuration: "0h 0m 0s",
+      gameDuration: '0h 0m 0s',
       showFeedback: false,
-      feedbackMessage: "",
+      feedbackMessage: '',
       timerInterval: null,
       startTime: null,
       endTime: null,
       feedbackImage: null,
-      starCount: 0, // Gesamtzahl der Sterne
-      earnedStars: 0, // Sterne für die aktuelle Antwort
-      starAnimation: false, // Steuerung der Animation
-      attemptCount: 0, // Zählt die Versuche für jede Frage
-      gameType: "",
-      flyingStars: [],
+      starCount: 0,
+      earnedStars: 0,
+      attemptCount: 0,
+      gameType: '',
     };
   },
-  name: "GamePage",
   computed: {
     currentQuestion() {
-      return this.questions.length > 0 &&
-        this.currentQuestionIndex < this.questions.length
+      return this.questions.length > 0 && this.currentQuestionIndex < this.questions.length
         ? this.questions[this.currentQuestionIndex]
         : null;
     },
   },
-  watch: {
-    flyingStars(newStars) {
-      console.log("🔥 Sterne im Array: ", newStars);
-    },
-  },
-
   async mounted() {
-    // Prüfe, ob ein gespeicherter Spielstatus vorhanden ist
-    const savedGameId = localStorage.getItem("currentGameId");
-    const gameInProgress = localStorage.getItem("gameInProgress") === "true";
-    const savedIndex = parseInt(
-      localStorage.getItem(`currentQuestionIndex_${savedGameId}`),
-      10
-    );
+    const savedGameId = localStorage.getItem('currentGameId');
+    const gameInProgress = localStorage.getItem('gameInProgress') === 'true';
+    const savedIndex = parseInt(localStorage.getItem(`currentQuestionIndex_${savedGameId}`), 10);
 
     if (gameInProgress && savedGameId) {
-      // Wiederherstellung des gespeicherten Spiels
       this.gameId = savedGameId;
-      this.teamName = localStorage.getItem("teamName") || "";
-      this.email = localStorage.getItem("email") || "";
+      this.teamName = localStorage.getItem('teamName') || '';
+      this.email = localStorage.getItem('email') || '';
       this.currentQuestionIndex = savedIndex || 0;
       this.gameStarted = true;
-      this.starCount = parseInt(localStorage.getItem("starCount"), 10) || 0;
-      this.startTime = parseInt(localStorage.getItem("startTime"), 10) || Date.now();
-      console.log(
-        `📍 Wiederhergestelltes Spiel: ${this.gameId}, Startzeit: ${this.startTime}`
-      );
+      this.starCount = parseInt(localStorage.getItem('starCount'), 10) || 0;
+      this.startTime = parseInt(localStorage.getItem('startTime'), 10) || Date.now();
+      console.log(`📍 Wiederhergestelltes Spiel: ${this.gameId}, Startzeit: ${this.startTime}`);
       this.startTimer();
     } else {
-      // Spiel von vorne starten
       this.gameId = this.$route.params.gameId || null;
     }
 
     this.gameId = this.$route.params.gameId || this.$route.params.encryptedId;
 
     if (!this.gameId) {
-      console.error("⚠️ Fehler: gameId ist nicht vorhanden!");
+      console.error('⚠️ Fehler: gameId ist nicht vorhanden!');
       return;
     }
 
-    // Lade Spielinformationen
     if (this.gameId) {
       await this.loadGameData(this.gameId);
     }
   },
+  name: 'GamePage',
   methods: {
     async loadGameData(gameId) {
       try {
         const response = await apiService.fetchGameById(gameId);
-        this.gameName = response.name || "Unbekanntes Spiel";
+        this.gameName = response.name || 'Unbekanntes Spiel';
         this.questions = response.questions || [];
-        this.gameType = response.ageGroup || "Maxi";
-       
-        console.log("🔄 Spieldaten geladen:", response);
+        this.gameType = response.ageGroup || 'Maxi';
+        console.log('🔄 Spieldaten geladen:', response);
       } catch (error) {
-        console.error("❌ Fehler beim Laden des Spiels:", error);
+        console.error('❌ Fehler beim Laden des Spiels:', error);
       }
     },
     startGame(payload) {
@@ -197,7 +177,7 @@ export default {
       const { teamName, email, playerNames } = payload;
 
       if (!teamName || !email) {
-        alert("⚠️ Bitte Teamname und E-Mail eingeben.");
+        alert('⚠️ Bitte Teamname und E-Mail eingeben.');
         return;
       }
 
@@ -207,98 +187,64 @@ export default {
       this.startTime = Date.now();
       this.gameStarted = true;
 
-      // Spielstatus in localStorage speichern
-      localStorage.setItem("gameInProgress", "true");
-      localStorage.setItem("currentGameId", this.gameId);
-      localStorage.setItem("teamName", teamName);
-      localStorage.setItem("email", email);
-      localStorage.setItem("startTime", this.startTime);
-      localStorage.setItem("playerNames", JSON.stringify(playerNames));
+      localStorage.setItem('gameInProgress', 'true');
+      localStorage.setItem('currentGameId', this.gameId);
+      localStorage.setItem('teamName', teamName);
+      localStorage.setItem('email', email);
+      localStorage.setItem('startTime', this.startTime);
+      localStorage.setItem('playerNames', JSON.stringify(playerNames));
     },
     handleAnswer({ isCorrect }) {
-      console.log("handleAnswer called", isCorrect);
-      this.starAnimation = true;
       this.currentAnswerQuestion = this.currentQuestion;
-  
+      this.earnedStars = this.calculateStars();
+
       if (isCorrect) {
-        this.earnedStars = this.calculateStars();
         this.feedbackMessage = this.currentAnswerQuestion.answerquestion;
-        this.feedbackImage = require("@/assets/img/correct.gif");
-        this.showFeedback = true;
+        this.feedbackImage = require('@/assets/img/correct.gif');
 
-        setTimeout(() => {
-          this.showFeedback = false; // ✅ Feedback-Layer ausblenden
-
-          // 🟢 Warten, bis `.feedback-overlay` entfernt wurde, dann Sterne starten
-          this.$nextTick(() => {
-            setTimeout(() => {
-              this.animateStars(); 
-            }, 500); 
-          });
-        }, 5000);
+        // Setze einen Timer, um das Feedback auszublenden und die Animation zu starten
+        if (this.gameType !== 'Maxi') {
+          setTimeout(() => {
+            this.showFeedback = false; // Feedback ausblenden
+            this.$nextTick(() => {
+              this.$refs.feedbackAnimation.start();
+            });
+          }, 5000);
+        } else {
+          this.handleAnimationDone(); // Direkter Übergang zur nächsten Frage bei Maxi
+        }
       } else {
         this.attemptCount++;
-        this.feedbackMessage = "Versuche es nochmal!";
-        this.feedbackImage = require("@/assets/img/false.png");
+        this.feedbackMessage = 'Versuche es nochmal!';
+        this.feedbackImage = require('@/assets/img/false.png');
         this.showFeedback = true;
-
         setTimeout(() => {
-          this.showFeedback = false;
+          this.showFeedback = false; //Feedback entfernen
         }, 5000);
       }
+       this.showFeedback = true;
     },
-
-    animateStars() {
-      console.log('animate Stars');
-      if (this.gameType === 'Maxi') this.nextQuestion();
-      this.flyingStars = []; // ⭐ Setze Array immer auf leer
-      let addedStars = 0;
-
-      console.log("🚀 Starte Stern-Animation...");
-
-      const interval = setInterval(() => {
-        console.log("🌟 Neuer Stern wird hinzugefügt!", addedStars);
-
-        if (addedStars < this.earnedStars) {
-          this.flyingStars.push({ id: addedStars, flying: true });
-          this.starCount++; // Zahl erhöht sich synchron zur Animation
-          localStorage.setItem("starCount", this.starCount);
-          addedStars++;
-        } else {
-          clearInterval(interval);
-          setTimeout(() => {
-            console.log("🎯 Animation abgeschlossen. Wechsel zur nächsten Frage.");
-            this.starAnimation = false;
-            this.flyingStars = []; // Array zurücksetzen
-            this.nextQuestion(); // ✅ Jetzt erst zur nächsten Frage wechseln!
-          }, 1000);
-        }
-      }, 1000);
-    },
-
     calculateStars() {
       if (this.attemptCount === 0) return 5;
       if (this.attemptCount === 1) return 3;
       return 1;
     },
-
     nextQuestion() {
-      this.attemptCount = 0; // ✅ Versuche zurücksetzen
-      console.log("Wechsel zu nächster Frage:", this.currentQuestionIndex);
-      console.log(this.questions.length - 1);
+      this.attemptCount = 0;
       if (this.currentQuestionIndex < this.questions.length - 1) {
         this.currentQuestionIndex++;
         this.saveQuestionIndex();
       } else {
-        console.log("finishGame");
         this.finishGame();
       }
     },
+    handleAnimationDone() {
+      this.starCount = this.starCount + this.earnedStars; // verdiente Sterne hinzufügen
+      localStorage.setItem('starCount', this.starCount);
+      this.nextQuestion(); // nach Animation zur nächsten Frage
+    },
     saveQuestionIndex() {
-      localStorage.setItem(
-        `currentQuestionIndex_${this.gameId}`,
-        this.currentQuestionIndex
-      );
+      localStorage.setItem(`currentQuestionIndex_${this.gameId}`, this.currentQuestionIndex);
       console.log(`📍 Fortschritt gespeichert: Frage ${this.currentQuestionIndex + 1}`);
     },
     startTimer() {
@@ -335,26 +281,26 @@ export default {
           stars: this.starCount,
         };
 
-        console.log("📤 Ergebnis wird gesendet:", resultPayload);
+        console.log('📤 Ergebnis wird gesendet:', resultPayload);
         await apiService.saveGameResult(resultPayload);
 
-        // Lokale Daten bereinigen
-        localStorage.removeItem("teamName");
-        localStorage.removeItem("email");
-        localStorage.removeItem("gameInProgress");
-        localStorage.removeItem("startTime");
+        localStorage.removeItem('teamName');
+        localStorage.removeItem('email');
+        localStorage.removeItem('gameInProgress');
+        localStorage.removeItem('startTime');
         localStorage.removeItem(`currentQuestionIndex_${this.gameId}`);
-        localStorage.removeItem("starCount"); // **Sterne nach Spielende zurücksetzen**
+        localStorage.removeItem('starCount');
+        localStorage.removeItem('playerNames');
+
       } catch (error) {
-        console.error("❌ Fehler beim Speichern der Ergebnisse:", error);
-        alert("❌ Fehler beim Speichern der Ergebnisse. Bitte versuche es erneut.");
+        console.error('❌ Fehler beim Speichern der Ergebnisse:', error);
+        alert('❌ Fehler beim Speichern der Ergebnisse. Bitte versuche es erneut.');
       } finally {
         clearInterval(this.timerInterval);
       }
     },
-
     goToHome() {
-      this.$router.push("/");
+      this.$router.push('/');
     },
   },
   beforeUnmount() {
@@ -431,120 +377,6 @@ export default {
   color: #333;
 }
 
-/* Button */
-.btn-primary {
-  background-color: #4caf50;
-  color: white;
-  font-size: 1rem;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  margin-top: 15px;
-}
-
-.btn-primary:hover {
-  background-color: #388e3c;
-}
-
-.feedback-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(250, 194, 39, 0.9);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  text-align: center;
-}
-
-.feedback-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  max-width: 90%;
-  width: 80vw; /* Feste Breite für mobile Geräte */
-  text-align: center;
-  p {
-    color: #355b4c;
-    font-size: clamp(1.4rem, 4vw, 3em);
-    font-weight: bold;
-    text-align: center;
-    margin-bottom: 20px;
-    width: 80vw; /* Feste Breite, damit der Text umbricht */
-    max-width: 600px; /* Begrenzung für größere Bildschirme */
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    white-space: normal;
-    line-height: 1.2; /* Guter Zeilenabstand für bessere Lesbarkeit */
-    margin-top: 10px;
-  }
-}
-.hidden {
-  display: none;
-}
-.feedback-content img {
-  margin-top: 20px;
-  max-height: 80vh;
-}
-.feedback-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(250, 194, 39, 0.9);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 2000;
-  text-align: center;
-}
-
-.feedback-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  max-width: 90%;
-}
-
-.star-container {
-  position: fixed;
-  bottom: 50px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  pointer-events: none;
-}
-
-@keyframes fly-to-status {
-  0% {
-    transform: translateY(100vh) scale(1);
-    opacity: 1;
-  }
-  40% {
-    /* Früher in der Mitte */
-    transform: translate(30vw, -60vh) scale(1.4);
-    opacity: 1;
-  }
-  100% {
-    transform: translate(45vw, -100vh) scale(0.8);
-    opacity: 0;
-  }
-}
-
-.star {
-  font-size: 50px;
-  position: absolute;
-  animation: fly-to-status 3s ease-in-out forwards;
-}
 
 /* Fixierte Sterne-Anzeige unten */
 .star-status {
@@ -560,6 +392,14 @@ export default {
   background-color: #e9e2d0;
   padding: 0 20px;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+
+.btn-primary:hover {
+  background-color: #388e3c;
+}
+.hidden {
+  display: none;
 }
 
 /* Responsive Anpassung */
