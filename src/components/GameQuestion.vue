@@ -1,5 +1,6 @@
 <template>
   <div class="game-question">
+
     <h3>Frage {{ currentIndex + 1 }}</h3>
     <p v-if="currentSalutation">{{ currentSalutation }} {{ question.question }}</p>
     <p v-else>{{ question.question }}</p>
@@ -29,7 +30,7 @@
         </span>
       </div>
     </div>
-    <button class="btn btn--secondary" @click="submitAnswer">Antwort senden</button>
+    <button v-if="question.type !== 'anweisung'" class="btn btn--secondary" @click="submitAnswer">Antwort senden</button>
   </div>
 </template>
 
