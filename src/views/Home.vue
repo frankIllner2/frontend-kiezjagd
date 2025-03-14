@@ -17,10 +17,8 @@
           </div>
         </div>
 
-        
         <!-- AgeGroup -->
-        <HomeSlider3  />
-
+        <HomeSlider3 :games="games" />
       </div>
     </section>
 
@@ -83,7 +81,6 @@
             Spiele entdecken
           </button>
       </div>
-
     </div>
     </section>
 
@@ -106,8 +103,6 @@
         </div>
       </div>
     </div>
-
-
 
     <!-- Vorteile als Cards -->
     <section id="features-section" class="container features-section">
@@ -193,7 +188,6 @@
 <script>
 import { apiService } from "@/services/apiService";
 import HomeSlider from "@/components/HomeSlider.vue";
-//import InstructionLayer from '@/components/InstructionLayer.vue';
 import HeaderMenu from "@/components/HeaderMenu.vue";
 import HomeSlider2 from '@/components/HomeSlider2.vue';
 import HomeSlider3 from '@/components/HomeSlider3.vue';
@@ -202,7 +196,6 @@ export default {
   name: "HomePage",
   components: {
     HomeSlider,
-   // InstructionLayer,
     HeaderMenu,
     HomeSlider2,
     HomeSlider3

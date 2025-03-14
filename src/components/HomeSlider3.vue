@@ -6,7 +6,7 @@
       containerClass="container cards age-group"
     >
       <template v-slot:default="{ item, index }">
-        <li class="glide__slide card">
+      
           <div class="short-description">
             <img :src="item.image" class="image-game" />
             <div class="short">
@@ -23,7 +23,7 @@
             :title="item.title"
             :text="item.text"
           />
-        </li>
+     
       </template>
     </BaseSlider>
   </template>
@@ -35,6 +35,9 @@
   
   export default {
     components: { BaseSlider, InstructionLayer },
+    props: {
+        games: Array,
+    },
     data() {
       return {
         activeIndex: null,
@@ -44,21 +47,25 @@
             name: "Mini",
             image: new URL("@/assets/img/mini.jpg", import.meta.url).href, 
             title: "Rätsel und Sterne",
-            text: "Hier kommt die Anleitung für die Mini-Kategorie hin...",
+            text: `Hier kommt die Anleitung für die Mini-Kategorie hin Hier kommt die Anleitung für die Mini-Kategorie hin cyc
+            Hier kommt die Anleitung für die Mini-Kategorie hin Hier kommt die Anleitung für die Mini-Kategorie hin cyc
+            Hier kommt die Anleitung für die Mini-Kategorie hin Hier kommt die Anleitung für ie Anleitung für die Mini-Kategorie hin Hier kommt die Anleitung für die Mini-Kategorie hin cyc`,
           },
           {
             ageRange: "5-9",
             name: "Medi",
             image: new URL("@/assets/img/medi.jpg", import.meta.url).href,
             title: "Schnitzeljagd",
-            text: "Hier kommt die Anleitung für die Medi-Kategorie hin...",
+            text: `Hier kommt die Anleitung für die Medi-Kategorie hin Hier kommt die Anleitung für die Medi-Kategorie hin
+            Hier kommt die Anleitung für die Medi-Kategorie hin Hier kommt die Anleitung für die Medi-Kategorie hin Hier kommt die Anleitung für die Medi-Kategorie hin`,
           },
           {
             ageRange: "9-12",
             name: "Maxi",
             image: new URL("@/assets/img/maxi.jpg", import.meta.url).href,
             title: "Die Besten",
-            text: "Hier kommt die Anleitung für die Maxi-Kategorie hin...",
+            text: `Hier kommt die Anleitung für die Maxi-Kategorie hin Hier kommt die Anleitung für die Maxi-Kategorie hin Hier kommt die Anleitung für die Maxi-Kategorie hin
+            Hier kommt die Anleitung für die Maxi-Kategorie hinHier kommt die Anleitung für die Maxi-Kategorie hinHier kommt die Anleitung für die Maxi-Kategorie hin `,
           },
         ],
       };
@@ -75,23 +82,8 @@
   </script>
   
   <style scoped>
-  .glide__slides {
-    display: flex;
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    gap: 20px;
-    transition: transform 0.4s ease-in-out;
-    width: auto;
-  }
-  
-  .glide__slide {
-    flex: 0 0 auto;
-    text-align: center;
-    min-width: 250px;
-    max-width: 500px; /* Verhindert zu breite Karten */
-  }
-  
+
+
   .short-description {
     display: flex;
     flex-direction: column;

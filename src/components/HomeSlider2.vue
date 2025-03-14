@@ -7,16 +7,18 @@
   >
     <template v-slot:default="{ item }">
       <b>{{ item.gameName }}</b>
+      <span class="game-type">{{ getGameType(item.topResults) }}</span>
       <ul>
         <li v-for="(result, idx) in item.topResults" :key="idx">
           <span>{{ idx + 1 }}.</span> <strong>{{ result.teamName }}</strong>
-          <b>{{ result.gameType }}</b>
+         
           <span v-if="result.gameType === 'Mini' || result.gameType === 'Medi'">
             {{ result.stars }} Sterne
           </span>
           <span v-else>
             {{ parseInt(result.duration.split("h")[1]) }} Minuten
           </span>
+          
         </li>
       </ul>
     </template>
@@ -31,6 +33,12 @@ export default {
   props: {
     rankings: Array,
   },
+  methods: {
+    getGameType(results) {
+      if (!results.length) return "";
+      return results[0].gameType; // Nimmt einfach den ersten gameType des Spiels
+    }
+  }
 };
 </script>
 

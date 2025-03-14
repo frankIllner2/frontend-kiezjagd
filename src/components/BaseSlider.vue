@@ -148,14 +148,15 @@ mounted() {
     flex: 0 0 auto;
     text-align: center;
     min-height: 400px;
+    min-width: 412px;
   }
   .glide__arrow {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    background: #355b4c;
-    color: #FAC227;
-    border: none;
+    background: #FAC227;
+    color: #355b4c;
+    border: 1px solid #355b4c;
     cursor: pointer;
     padding: 10px;
     z-index: 10;
