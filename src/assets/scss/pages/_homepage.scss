@@ -109,7 +109,7 @@
                     margin-top: 10px;
                 }
 
-                @include respond-to("desktop") {
+                @include respond-to("tablet") {
                     flex-direction: row;
                     button:first-child {
                         margin-right: 10px;
@@ -137,11 +137,15 @@
             width: inherit;
             z-index: 10;
             margin: 3em auto;
+            h2 {
+                color: #355b4c;
+                margin-bottom: 1em;
+            }
             .card {
                 position: relative;
                 border-radius: 20px 20px 0 0;
                 padding: 0;
-                margin: 60px 0;
+                margin: 10px 0;
                 .img {
                     width: 100%;
                     img {
@@ -152,6 +156,11 @@
                 }
                 &:hover {
                     box-shadow: none;
+                }
+            }
+            .slide-position {
+                @include respond-to("tablet") {
+                    display: none;
                 }
             }
             .content {
@@ -166,7 +175,7 @@
                 align-items: flex-end;
                 border-radius: 0 0 20px 20px ;
                 @include respond-to("desktop") {
-                    bottom: -194px;
+                    bottom: -170px;
                 }
 
                 div {
@@ -203,7 +212,7 @@
             text-align: center;
             line-height: 1.2;
             color: $primary-text-color;
-            margin-top: 4em;
+            margin-top: 2em;
             display: flex;
             flex-wrap: wrap;
             justify-content: space-around;
@@ -256,9 +265,9 @@
             }
        
             .container {
-                display: flex;
+                display: grid;
                 justify-content: center;
-                flex-direction: column;
+                
                 @include respond-to("desktop") {
                     flex-direction: row;
                 }
@@ -302,11 +311,38 @@
         p {
             font-size: 20px;
         }
+        .grid {
+            display: grid;
+            gap: 20px;
+            justify-content: center;
+            align-items: center;
+          }
+          
+          /* Standard: 1 Spalte (Mobile unter 400px) */
+          @media (max-width: 399px) {
+            .grid {
+              grid-template-columns: 1fr;
+            }
+          }
+          
+          /* Ab 400px: 2 Spalten */
+          @media (min-width: 400px) {
+            .grid {
+              grid-template-columns: repeat(2, 1fr);
+            }
+          }
+          
+          /* Ab 900px: 4 Spalten */
+          @media (min-width: 900px) {
+            .grid {
+              grid-template-columns: repeat(4, 1fr);
+            }
+          }
         .container {
-            display: flex;
+            display: grid;
             justify-content: space-around;
             margin-top: 0em;
-            flex-direction: column;
+            
             @include respond-to("tablet") {
                 flex-direction: row;
             }
@@ -445,6 +481,7 @@
                 
                     .image-game {
                         max-width: 422px;
+                        min-height: 342px;
                         width: 100%;
                         margin-bottom: 10px;
                         border-radius: 20px 20px 0 0;

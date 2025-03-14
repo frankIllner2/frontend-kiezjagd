@@ -79,16 +79,27 @@ nav {
 
 .desktop-menu {
   display: none; /* Auf Desktop verstecken */
-  width: 33.33%; /* Ein Drittel der Breite */
+ 
   align-items: center;
   gap: 20px;
 
   &.desktop-menu-left {
     justify-content: flex-start; /* Links ausrichten */
+    width: 32%;
+    @include respond-to("tablet") {
+        width: 50.33%;
+    }
+    @include respond-to("desktop") {
+      width: 33.33%;
+  }
   }
 
   &.desktop-menu-right {
     justify-content: flex-end; /* Rechts ausrichten */
+    width: 25%;
+      @include respond-to("tablet") {
+        width: 33.33%;
+    }
   }
 
   ul {
@@ -180,7 +191,7 @@ nav {
 }
 
 /* Desktop Ansicht */
-@media (min-width: 769px) {
+@media (min-width: 1024px) {
   .desktop-menu {
     display: flex; /* Auf Desktop anzeigen */
   }
@@ -195,7 +206,7 @@ nav {
 }
 
 /* Mobile Ansicht */
-@media (max-width: 768px) {
+@media (max-width: 1023px) {
   .desktop-menu {
     display: none; /* Auf Mobile verstecken */
   }

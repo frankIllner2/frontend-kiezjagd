@@ -17,70 +17,10 @@
           </div>
         </div>
 
-        <div class="grid container cards age-group">
-          <div class="card">
-            <div class="img">
-              <img src="@/assets/img/mini.jpg" />
-            </div>
-            <div class="content mini" @click="openInstruction1">
-              <div>
-                <b>3-5</b>
-                <b>Mini</b>
-                <img src="@/assets/img/icons/show-back.svg" />
-              </div>
-            </div>
-            <InstructionLayer
-              :isActive="showInstruction1"
-              @close="closeInstruction1"
-              title="Rätsel und Sterne"
-              text="Hier kommt die Anleitung für die Mini-Kategorie hin. Hier kommt die Anleitung für die Mini-Kategorie hin.
-              Hier kommt die Anleitung für die Mini-Kategorie hin.Hier kommür die Mini-Kategorie hin.Hier kommt die Anleitung für die Mini-Kategorie hin.
-              Hier kommt die Anleitung für die Mini-Kategorie hin"
-            />
-          </div>
+        
+        <!-- AgeGroup -->
+        <HomeSlider3  />
 
-          <div class="card">
-            <div class="img">
-              <img src="@/assets/img/medi.jpg" />
-            </div>
-            <div class="content medi" @click="openInstruction2">
-              <div>
-                <b>5-9</b>
-                <b>Medi</b>
-                <img src="@/assets/img/icons/show-back.svg" />
-              </div>
-            </div>
-            <InstructionLayer
-              :isActive="showInstruction2"
-              @close="closeInstruction2"
-              title="Schnitzeljagd"
-              text="Hier kommt die Anleitung für die Medi-Kategorie hin. Hier kommt die Anleitung für die Medi-Kategorie hin.
-              Hier kommt die Anleitung für die Medi-Kategorie hin.Hier kommür die Medi-Kategorie hin.Hier kommt die Anleitung für die Medi-Kategorie hin.
-              Hier kommt die Anleitung für die Medi-Kategorie hin"
-            />
-          </div>
-
-          <div class="card">
-            <div class="img">
-              <img src="@/assets/img/maxi.jpg" />
-            </div>
-            <div class="content maxi" @click="openInstruction3">
-              <div>
-                <b>9-12</b>
-                <b>Maxi</b>
-                <img src="@/assets/img/icons/show-back.svg" />
-              </div>
-            </div>
-            <InstructionLayer
-              :isActive="showInstruction3"
-              @close="closeInstruction3"
-              title="die Besten"
-              text="Hier kommt die Anleitung für die Maxi-Kategorie hin. Hier kommt die Anleitung für die Maxi-Kategorie hin.
-              Hier kommt die Anleitung für die Maxi-Kategorie hin.Hier kommür die Maxi-Kategorie hin.Hier kommt die Anleitung für die Maxi-Kategorie hin.
-              Hier kommt die Anleitung für die Maxi-Kategori"
-            />
-          </div>
-        </div>
       </div>
     </section>
 
@@ -89,9 +29,9 @@
 
     <section id="what-is-headline" class="container what-is-headline">
       <div class="headline font-bold ">
-        Entdecke dein Viertel neu: Löse knifflige  <img class="inline-img" src="@/assets/img/icons/girl4.png" alt="Icon-Group"/>
+        Entdecke dein Viertel neu: Löse knifflige
         Rätsel, finde versteckte Hinweise und meistere spannende Herausforderungen. 
-        Ob alleine oder mit deinem Team – erlebe bekannte <img class="inline-img" src="@/assets/img/icons/game-group.png" alt="Icon-Gril" /> Orte aus völlig neuen Blickwinkeln!
+        Ob alleine oder mit deinem Team – erlebe bekannte Orte aus völlig neuen Blickwinkeln!
       </div>
     </section>
 
@@ -253,17 +193,19 @@
 <script>
 import { apiService } from "@/services/apiService";
 import HomeSlider from "@/components/HomeSlider.vue";
-import InstructionLayer from '@/components/InstructionLayer.vue';
+//import InstructionLayer from '@/components/InstructionLayer.vue';
 import HeaderMenu from "@/components/HeaderMenu.vue";
 import HomeSlider2 from '@/components/HomeSlider2.vue';
+import HomeSlider3 from '@/components/HomeSlider3.vue';
 
 export default {
   name: "HomePage",
   components: {
     HomeSlider,
-    InstructionLayer,
+   // InstructionLayer,
     HeaderMenu,
-    HomeSlider2
+    HomeSlider2,
+    HomeSlider3
   },
   data() {
     return {
