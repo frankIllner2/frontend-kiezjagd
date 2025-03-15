@@ -142,6 +142,13 @@ export default {
     align-items: start;
     line-height: 1.1;
   }
+  img {
+      transition: transform 0.5s ease-in-out;
+  }
+
+  img:hover {
+      transform: rotate(360deg);
+  }
 }
 
 .short-right {

@@ -116,6 +116,14 @@
     b {
       color: #355b4c;
     }
+    img {
+        transition: transform 0.5s ease-in-out;
+    }
+
+    img:hover {
+        transform: rotate(360deg);
+    }
+
   }
   .slide-position {
     text-align: right;
