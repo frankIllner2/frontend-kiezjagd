@@ -177,4 +177,9 @@ mounted() {
     margin-top: 10px;
     color: #355b4c;
   }
+@media (max-width: 600px) {
+  .slide-position {
+    margin: 0 !important;
+  }
+}
   </style>

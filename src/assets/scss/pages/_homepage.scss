@@ -5,6 +5,7 @@
 .home-container {
     display: flex;
     flex-direction: column;
+    padding: 0 5px;
     section.container {
         &>div {
             margin: auto;
@@ -272,13 +273,23 @@
                 @include respond-to("desktop") {
                     flex-direction: row;
                 }
+
                 .card {
-                    
+                    border-radius: 0;
                     color: $secondary-text-color;
+                    padding: 10px;
+                    @include respond-to("tablet") {
+                        border-radius: 20px;
+                    }
                     .icon {
                         padding: 1em 0;
-                        img {
-                            width: 300px;
+                        display: none;
+                        
+                        @include respond-to("tablet") {
+                            display: block;
+                            img {
+                                width: 300px;
+                            }
                         }
                     }
                     .info {
@@ -295,7 +306,20 @@
                 .card:last-child {
                     background-color: $background-color-3;
                 }
-                
+                .card h3 {
+                    cursor: pointer;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                  }
+                  
+                  .arrow {
+                    transition: transform 0.3s ease-in-out;
+                  }
+                  
+                  .rotate {
+                    transform: rotate(180deg);
+                  }
             }
         }
     }
@@ -364,6 +388,7 @@
                 }
                 .icon {
                     margin-bottom: 1.5em;
+                    text-align: center;
                     img {
                         width: 50%;
                         height: auto;

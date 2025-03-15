@@ -108,48 +108,25 @@
     <section id="features-section" class="container features-section">
       <h2>Warum Kiezjagd?</h2>
       <p>
-        Kiezjadg ist mehr als nur ein Spiel - es ist ein interaktives Abenteuer dein Viertel zu entdecken.
+        Kiezjagd ist mehr als nur ein Spiel – es ist ein interaktives Abenteuer dein Viertel zu entdecken.
       </p>
-      <div class="grid container">
-        <div class="info">
+
+      <!-- 🚀 Desktop-Version (wird NUR über 600px angezeigt) -->
+      <div class="grid container" v-if="!isMobile">
+        <div class="info" v-for="(feature, index) in features" :key="index">
           <div class="icon">
-            <img src="@/assets/img/icons/boyYellowShoes.png" />
+            <img :src="feature.image" alt="Feature Icon" />
           </div>
           <div>
-            <b>Um die Ecke</b><br />
-            <span>
-              Kiezjadg ist mehr als nur ein Spiel - es ist ein interaktives Abenteuer dein Viertel zu entdecken.
-            </span>
-          </div>
-        </div>
-        <div class="info">
-          <div class="icon">
-            <img src="@/assets/img/icons/girlYellowShirt.png" />
-          </div>
-          <div>
-            <b>Immer griffbereit</b><br />
-            <span>Kiezjadg ist mehr als nur ein Spiel - es ist ein interaktives Abenteuer dein Viertel zu entdecken.</span>
-          </div>
-        </div>
-        <div class="info">
-          <div class="icon">
-            <img src="@/assets/img/icons/girlYellowHair.png" />
-          </div>
-          <div>
-            <b>Gemeinsam spielen</b><br />
-            <span>Kiezjadg ist mehr als nur ein Spiel - es ist ein interaktives Abenteuer dein Viertel zu entdecken.</span>
-          </div>
-        </div>
-        <div class="info">
-          <div class="icon">
-            <img src="@/assets/img/icons/boyYellowShirt.png" />
-          </div>
-          <div>
-            <b>Werde KiezMeister</b><br />
-            <span> Kiezjadg ist mehr als nur ein Spiel - es ist ein interaktives Abenteuer dein Viertel zu entdecken. </span>
+            <b>{{ feature.title }}</b><br />
+            <span>{{ feature.text }}</span>
           </div>
         </div>
       </div>
+
+      <!-- 📱 Mobile-Version: Zeigt den Slider NUR unter 600px -->
+      <HomeSlider4 v-if="isMobile && features.length > 0" :features="features" />
+
     </section>
 
     <!-- Top Teams Ranking -->
@@ -191,6 +168,11 @@ import HomeSlider from "@/components/HomeSlider.vue";
 import HeaderMenu from "@/components/HeaderMenu.vue";
 import HomeSlider2 from '@/components/HomeSlider2.vue';
 import HomeSlider3 from '@/components/HomeSlider3.vue';
+import HomeSlider4 from '@/components/HomeSlider4.vue';
+import boyYellowShoes from "@/assets/img/icons/boyYellowShoes.png";
+import girlYellowShirt from "@/assets/img/icons/girlYellowShirt.png";
+import girlYellowHair from "@/assets/img/icons/girlYellowHair.png";
+import boyYellowShirt from "@/assets/img/icons/boyYellowShirt.png";
 
 export default {
   name: "HomePage",
@@ -198,10 +180,12 @@ export default {
     HomeSlider,
     HeaderMenu,
     HomeSlider2,
-    HomeSlider3
+    HomeSlider3,
+    HomeSlider4,
   },
   data() {
     return {
+      isMobile: window.innerWidth <= 600, // Initiale Prüfung
       topTeams: [],
       games: [],
       randomRankings: [],
@@ -211,9 +195,38 @@ export default {
       showInstruction1: false,
       showInstruction2: false,
       showInstruction3: false,
+      features: [
+        {
+          title: "Um die Ecke",
+          text: "Kiezjagd ist mehr als nur ein Spiel – es ist ein interaktives Abenteuer dein Viertel zu entdecken.",
+          image: boyYellowShoes,
+        },
+        {
+          title: "Immer griffbereit",
+          text: "Kiezjagd ist mehr als nur ein Spiel – es ist ein interaktives Abenteuer dein Viertel zu entdecken.",
+          image: girlYellowShirt,
+        },
+        {
+          title: "Gemeinsam spielen",
+          text: "Kiezjagd ist mehr als nur ein Spiel – es ist ein interaktives Abenteuer dein Viertel zu entdecken.",
+          image: girlYellowHair,
+        },
+        {
+          title: "Werde KiezMeister",
+          text: "Kiezjagd ist mehr als nur ein Spiel – es ist ein interaktives Abenteuer dein Viertel zu entdecken.",
+          image: boyYellowShirt,
+        },
+      ],
     };
   },
+
   methods: {
+    checkScreenSize() {
+      this.isMobile = window.innerWidth <= 600;
+    },
+    getImagePath(imagePath) {
+      return new URL(imagePath, import.meta.url).href;
+    },
     scrollToSection(id) {
       const target = document.getElementById(id);
       if (target) {
@@ -330,7 +343,13 @@ export default {
       }
     },
   },
+  beforeUnmount() {
+    window.removeEventListener("resize", this.checkScreenSize);
+  },
   async mounted() {
+    console.log("Features Data:", this.features);
+    this.checkScreenSize();
+    window.addEventListener("resize", this.checkScreenSize);
     this.fetchRandomGameRankings();
     await this.fetchGames();
   },

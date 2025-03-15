@@ -117,5 +117,9 @@
       color: #355b4c;
     }
   }
+  .slide-position {
+    text-align: right;
+    
+  }
   </style>
   
