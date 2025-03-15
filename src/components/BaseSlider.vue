@@ -148,7 +148,7 @@ mounted() {
     flex: 0 0 auto;
     text-align: center;
     min-height: 400px;
-    min-width: 412px;
+    min-width: auto;
   }
   .glide__arrow {
     position: absolute;
