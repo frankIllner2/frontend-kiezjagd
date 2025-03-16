@@ -130,34 +130,38 @@ export default {
     },
   },
   async mounted() {
-    const savedGameId = localStorage.getItem('currentGameId');
-    const gameInProgress = localStorage.getItem('gameInProgress') === 'true';
-    const savedIndex = parseInt(localStorage.getItem(`currentQuestionIndex_${savedGameId}`), 10);
+     // Prüfe, ob der Nutzer über einen neuen Spiel-Link kommt
+  const currentUrlGameId = this.$route.params.gameId || this.$route.params.encryptedId;
+  const savedGameId = localStorage.getItem('currentGameId');
 
-    if (gameInProgress && savedGameId) {
-      this.gameId = savedGameId;
-      this.teamName = localStorage.getItem('teamName') || '';
-      this.email = localStorage.getItem('email') || '';
-      this.currentQuestionIndex = savedIndex || 0;
-      this.gameStarted = true;
-      this.starCount = parseInt(localStorage.getItem('starCount'), 10) || 0;
-      this.startTime = parseInt(localStorage.getItem('startTime'), 10) || Date.now();
-      console.log(`📍 Wiederhergestelltes Spiel: ${this.gameId}, Startzeit: ${this.startTime}`);
-      this.startTimer();
-    } else {
-      this.gameId = this.$route.params.gameId || null;
-    }
+  if (currentUrlGameId && currentUrlGameId !== savedGameId) {
+    console.log('🆕 Neuer Spiel-Link erkannt. Lösche den Spielstand.');
+    localStorage.clear();
+  }
 
-    this.gameId = this.$route.params.gameId || this.$route.params.encryptedId;
+  const gameInProgress = localStorage.getItem('gameInProgress') === 'true';
+  const savedIndex = parseInt(localStorage.getItem(`currentQuestionIndex_${savedGameId}`), 10);
 
-    if (!this.gameId) {
-      console.error('⚠️ Fehler: gameId ist nicht vorhanden!');
-      return;
-    }
+  if (gameInProgress && savedGameId) {
+    this.gameId = savedGameId;
+    this.teamName = localStorage.getItem('teamName') || '';
+    this.email = localStorage.getItem('email') || '';
+    this.currentQuestionIndex = savedIndex || 0;
+    this.gameStarted = true;
+    this.starCount = parseInt(localStorage.getItem('starCount'), 10) || 0;
+    this.startTime = parseInt(localStorage.getItem('startTime'), 10) || Date.now();
+    console.log(`📍 Wiederhergestelltes Spiel: ${this.gameId}, Startzeit: ${this.startTime}`);
+    this.startTimer();
+  } else {
+    this.gameId = currentUrlGameId;
+  }
 
-    if (this.gameId) {
-      await this.loadGameData(this.gameId);
-    }
+  if (!this.gameId) {
+    console.error('⚠️ Fehler: gameId ist nicht vorhanden!');
+    return;
+  }
+
+  await this.loadGameData(this.gameId);
   },
   name: 'GamePage',
   methods: {
