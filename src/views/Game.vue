@@ -26,12 +26,7 @@
 
     <!-- Fragenbereich -->
     <div v-else-if="!gameFinished" class="game-card question-section">
-      <GameTimer
-        v-if="gameType === 'Maxi' || gameType === 'Mini' || gameType === 'Medi'"
-        :gameDuration="gameDuration"
-        class="timer"
-        :class="{ hidden: gameType !== 'Maxi' }"
-      />
+  
 
       <GameQuestion
         v-if="currentQuestion"
@@ -59,7 +54,9 @@
 
       <div class="star-status">
         <p v-if="gameType === 'Maxi'">
-          <strong>Zeit benötigt:</strong> {{ gameDuration }}
+          <img src="@/assets/img/icons/uhr.png" />
+          <span>Zeit benötigt:</span> 
+          <strong>{{ gameDuration }}</strong>
         </p>
         <p v-else><strong>Gesammelte Sterne:</strong> 🌟 {{ starCount }}</p>
       </div>
@@ -91,13 +88,13 @@
 <script>
 import StartForm from "@/components/StartForm.vue";
 import GameQuestion from "@/components/GameQuestion.vue";
-import GameTimer from "@/components/GameTimer.vue";
+//import GameTimer from "@/components/GameTimer.vue";
 import GpsChecker from "@/components/GpsChecker.vue";
 import FeedbackAnimation from "@/components/FeedbackAnimation.vue";
 import { apiService } from "@/services/apiService";
 
 export default {
-  components: { StartForm, GameQuestion, GameTimer, GpsChecker, FeedbackAnimation },
+  components: { StartForm, GameQuestion, GpsChecker, FeedbackAnimation },
   data() {
     return {
       gameId: null,
@@ -441,7 +438,7 @@ export default {
 /* Fixierte Sterne-Anzeige unten */
 .star-status {
   position: fixed;
-  top: 10px;
+  top: 5px;
   right: 0;
   font-size: 20px;
   font-weight: bold;
@@ -452,6 +449,17 @@ export default {
   background-color: #e9e2d0;
   padding: 0 20px;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.star-status p {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.star-status img {
+  max-width: 100%;
+  width: 30px;
 }
 
 .btn-primary:hover {

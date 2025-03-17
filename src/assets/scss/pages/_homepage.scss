@@ -650,7 +650,10 @@
         font-size: clamp(1.4rem, 3vw, 2em);
         margin-bottom: 20px;
         color: $secondary-text-color;
-        width: 50%;
+        width: 100%;
+        @include respond-to("desktop") {
+            width: 50%;
+        }
       }
       .icon {
         img {
