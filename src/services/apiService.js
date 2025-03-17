@@ -70,6 +70,8 @@ export const apiService = {
     // Spiel löschen
     deleteGame(id) {
         if (!id) throw new Error('⚠️ ID darf nicht leer sein.');
+        const isConfirmed = window.confirm("Bist du sicher, dass du dieses Spiel löschen möchtest?");
+        if (!isConfirmed) return;
         return performRequest('delete', `/games/${id}`);
     },
     // Bestellstatus abrufen
@@ -100,6 +102,8 @@ export const apiService = {
         if (!encryptedId || !questionId) {
             throw new Error('⚠️ encryptedId und questionId dürfen nicht leer sein.');
         }
+        const isConfirmed = window.confirm("Bist du sicher, dass du diese Frage löschen möchtest?");
+        if (!isConfirmed) return;
         return performRequest('delete', `/games/${encryptedId}/questions/${questionId}`);
     },
     // Ranking eines Spiels abrufen
@@ -158,8 +162,6 @@ export const apiService = {
       console.log(encryptedId);
       console.log(questionId);
       console.log(userCoordinates);
-   
-
         if (!encryptedId || !questionId || !userCoordinates) {
             throw new Error('⚠️ encryptedId, questionId und userCoordinates sind erforderlich.');
         }

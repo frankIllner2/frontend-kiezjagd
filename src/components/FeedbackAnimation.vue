@@ -35,34 +35,36 @@
         this.animateStars();
       },
       animateStars() {
-    console.log('🚀 Starte Stern-Animation...');
-    
-    this.flyingStars = []; // ⭐ Setze Array immer auf leer, um eine neue Animation zu starten
-    this.starAnimation = true; // 🔥 Animation aktivieren, damit die Sterne sichtbar werden
-    
-    let addedStars = 0;
+        console.log("🚀 Starte Stern-Animation...");
+        
+        this.flyingStars = []; // ⭐ Setze Array immer auf leer
+        this.starAnimation = true; // 🔥 Animation aktivieren
+        
+        let addedStars = 0;
+        let countingStarted = false; // ⏳ Wird benutzt, um das Hochzählen zu starten
 
-    const interval = setInterval(() => {
-      console.log("🌟 Neuer Stern wird hinzugefügt!", addedStars);
+        const interval = setInterval(() => {
+          if (addedStars < this.earnedStars) {
+            console.log("🌟 Neuer Stern wird hinzugefügt!", addedStars);
 
-      if (addedStars < this.earnedStars) {this.flyingStars.push({ id: addedStars, flying: true, left: '85vw'  });
-        addedStars++;
-      } else {
-        clearInterval(interval);
+            this.flyingStars.push({
+              id: addedStars,
+              flying: true,
+              left: "85vw", // Immer auf der rechten Seite
+            });
 
-        setTimeout(() => {
-          console.log("🎯 Animation abgeschlossen. Wechsel zur nächsten Frage.");
-          this.starAnimation = false;
-          this.$emit("done");
+            addedStars++;
 
-          // Leere `this.flyingStars` erst nach der Animation
-          setTimeout(() => {
-            this.flyingStars = [];
-          }, 500);
-        }, 2000); // Wartezeit, bis die Sterne komplett verschwinden
+            // 🟢 Starte das Hochzählen, wenn der erste Stern beginnt
+            if (!countingStarted) {
+              countingStarted = true;
+              this.$emit("startCounting"); // 🔥 Signal an `Game.vue`, um das Hochzählen zu starten
+            }
+          } else {
+            clearInterval(interval);
+          }
+        }, 1000);
       }
-    }, 1000);
-  },
     },
   };
   </script>

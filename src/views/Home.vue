@@ -8,12 +8,16 @@
         <div class="headline-container">
           <h1>Interaktive Abenteuer für deinen Kiez</h1>
           <div class="buttons">
-              <button @click="scrollToSection('game-preview-section')" class="btn btn--primary" id="open-instruction">
-                Spiele entdecken
-              </button>
-              <button @click="scrollToSection('what-is-section')" class="btn btn--third">
-                Was ist Kiezjagd?
-              </button>
+            <button
+              @click="scrollToSection('game-preview-section')"
+              class="btn btn--primary"
+              id="open-instruction"
+            >
+              Spiele entdecken
+            </button>
+            <button @click="scrollToSection('what-is-section')" class="btn btn--third">
+              Was ist Kiezjagd?
+            </button>
           </div>
         </div>
 
@@ -22,14 +26,13 @@
       </div>
     </section>
 
-
     <!-- Headline Info Text -->
 
     <section id="what-is-headline" class="container what-is-headline">
-      <div class="headline font-bold ">
-        Entdecke dein Viertel neu: Löse knifflige
-        Rätsel, finde versteckte Hinweise und meistere spannende Herausforderungen. 
-        Ob alleine oder mit deinem Team – erlebe bekannte Orte aus völlig neuen Blickwinkeln!
+      <div class="headline font-bold">
+        Entdecke dein Viertel neu: Löse knifflige Rätsel, finde versteckte Hinweise und
+        meistere spannende Herausforderungen. Ob alleine oder mit deinem Team – erlebe
+        bekannte Orte aus völlig neuen Blickwinkeln!
       </div>
     </section>
 
@@ -38,19 +41,19 @@
       <div class="wapper">
         <h4>Was ist Kiezjagd?</h4>
         <div class="grid container cards">
-        
           <!-- Card 1 -->
           <div class="card">
             <div class="icon">
               <img src="@/assets/img/icons/hand.png" />
             </div>
             <div class="info">
-            
               <h3>Dein Smartphone als Spielleiter</h3>
               <p>
-                Das Eichhörnchen Hopsi hat sich im Land der Märchen verlaufen und sucht nun nach der richtigen Prinzessin, die 
-                ihn nach Hause bringen kann. Kannst du ihm helfen, den richtigen Weg zu finden? Auf deinem Abenteuer musst du 
-                Farben, Formen, Zahlen und Pflanzen richtig zuordnen, um Hinweise zu bekommen, wo du die Prinzessin findest.
+                Das Eichhörnchen Hopsi hat sich im Land der Märchen verlaufen und sucht
+                nun nach der richtigen Prinzessin, die ihn nach Hause bringen kann. Kannst
+                du ihm helfen, den richtigen Weg zu finden? Auf deinem Abenteuer musst du
+                Farben, Formen, Zahlen und Pflanzen richtig zuordnen, um Hinweise zu
+                bekommen, wo du die Prinzessin findest.
               </p>
             </div>
           </div>
@@ -61,29 +64,28 @@
               <img src="@/assets/img/icons/hand.png" />
             </div>
             <div class="info">
-            
               <h3>Dein interaktives Abenteuer</h3>
               <p>
-                Das Eichhörnchen Hopsi hat sich im Land der Märchen verlaufen und sucht nun nach der richtigen Prinzessin, 
-                die ihn nach Hause bringen kann. Kannst du ihm helfen, den richtigen Weg zu finden? Auf deinem Abenteuer 
-                musst du Farben, Formen, Zahlen und Pflanzen richtig zuordnen, um Hinweise zu bekommen, wo du die Prinzessin 
-                findest.
+                Das Eichhörnchen Hopsi hat sich im Land der Märchen verlaufen und sucht
+                nun nach der richtigen Prinzessin, die ihn nach Hause bringen kann. Kannst
+                du ihm helfen, den richtigen Weg zu finden? Auf deinem Abenteuer musst du
+                Farben, Formen, Zahlen und Pflanzen richtig zuordnen, um Hinweise zu
+                bekommen, wo du die Prinzessin findest.
               </p>
             </div>
           </div>
-      </div>
-      <div class="button">
-        <button
+        </div>
+        <div class="button">
+          <button
             @click="scrollToSection('game-preview-section')"
             class="btn btn--fourth"
             id="open-instruction"
           >
             Spiele entdecken
           </button>
+        </div>
       </div>
-    </div>
     </section>
-
 
     <!-- Beliebte Spiele -->
     <HomeSlider :games="games" @open-modal="openModal" />
@@ -108,7 +110,8 @@
     <section id="features-section" class="container features-section">
       <h2>Warum Kiezjagd?</h2>
       <p>
-        Kiezjagd ist mehr als nur ein Spiel – es ist ein interaktives Abenteuer dein Viertel zu entdecken.
+        Kiezjagd ist mehr als nur ein Spiel – es ist ein interaktives Abenteuer dein
+        Viertel zu entdecken.
       </p>
 
       <!-- 🚀 Desktop-Version (wird NUR über 600px angezeigt) -->
@@ -118,7 +121,8 @@
             <img :src="feature.image" alt="Feature Icon" />
           </div>
           <div>
-            <b>{{ feature.title }}</b><br />
+            <b>{{ feature.title }}</b
+            ><br />
             <span>{{ feature.text }}</span>
           </div>
         </div>
@@ -126,7 +130,6 @@
 
       <!-- 📱 Mobile-Version: Zeigt den Slider NUR unter 600px -->
       <HomeSlider4 v-if="isMobile && features.length > 0" :features="features" />
-
     </section>
 
     <!-- Top Teams Ranking -->
@@ -135,16 +138,16 @@
     <!-- Call-to-Action -->
     <section class="container community-section">
       <div class="icons-header">
-          <img src="@/assets/img/icons/boyYellowShoes.png" />
-          <img src="@/assets/img/icons/girlYellowShirt.png" />
-          <img src="@/assets/img/icons/girlYellowHair.png" />
-          <img src="@/assets/img/icons/boyYellowShirt.png" />
+        <img src="@/assets/img/icons/boyYellowShoes.png" />
+        <img src="@/assets/img/icons/girlYellowShirt.png" />
+        <img src="@/assets/img/icons/girlYellowHair.png" />
+        <img src="@/assets/img/icons/boyYellowShirt.png" />
       </div>
       <h2>Bereit für dein Abenteuer?</h2>
       <div class="container">
         <p>Melde dich jetzt an und werde Teil der Kiezjagd-Community</p>
-       
-        <button class="btn btn--fourth" @click="$router.push('/register')">
+
+        <button class="btn btn--third" @click="$router.push('/register')">
           Spiele entdecken
         </button>
       </div>
@@ -166,9 +169,9 @@
 import { apiService } from "@/services/apiService";
 import HomeSlider from "@/components/HomeSlider.vue";
 import HeaderMenu from "@/components/HeaderMenu.vue";
-import HomeSlider2 from '@/components/HomeSlider2.vue';
-import HomeSlider3 from '@/components/HomeSlider3.vue';
-import HomeSlider4 from '@/components/HomeSlider4.vue';
+import HomeSlider2 from "@/components/HomeSlider2.vue";
+import HomeSlider3 from "@/components/HomeSlider3.vue";
+import HomeSlider4 from "@/components/HomeSlider4.vue";
 import boyYellowShoes from "@/assets/img/icons/boyYellowShoes.png";
 import girlYellowShirt from "@/assets/img/icons/girlYellowShirt.png";
 import girlYellowHair from "@/assets/img/icons/girlYellowHair.png";
@@ -198,22 +201,26 @@ export default {
       features: [
         {
           title: "Um die Ecke",
-          text: "Kiezjagd ist mehr als nur ein Spiel – es ist ein interaktives Abenteuer dein Viertel zu entdecken.",
+          text:
+            "Kiezjagd ist mehr als nur ein Spiel – es ist ein interaktives Abenteuer dein Viertel zu entdecken.",
           image: boyYellowShoes,
         },
         {
           title: "Immer griffbereit",
-          text: "Kiezjagd ist mehr als nur ein Spiel – es ist ein interaktives Abenteuer dein Viertel zu entdecken.",
+          text:
+            "Kiezjagd ist mehr als nur ein Spiel – es ist ein interaktives Abenteuer dein Viertel zu entdecken.",
           image: girlYellowShirt,
         },
         {
           title: "Gemeinsam spielen",
-          text: "Kiezjagd ist mehr als nur ein Spiel – es ist ein interaktives Abenteuer dein Viertel zu entdecken.",
+          text:
+            "Kiezjagd ist mehr als nur ein Spiel – es ist ein interaktives Abenteuer dein Viertel zu entdecken.",
           image: girlYellowHair,
         },
         {
           title: "Werde KiezMeister",
-          text: "Kiezjagd ist mehr als nur ein Spiel – es ist ein interaktives Abenteuer dein Viertel zu entdecken.",
+          text:
+            "Kiezjagd ist mehr als nur ein Spiel – es ist ein interaktives Abenteuer dein Viertel zu entdecken.",
           image: boyYellowShirt,
         },
       ],
@@ -230,7 +237,7 @@ export default {
     scrollToSection(id) {
       const target = document.getElementById(id);
       if (target) {
-        target.scrollIntoView({ behavior: 'smooth' });
+        target.scrollIntoView({ behavior: "smooth" });
       }
     },
     openInstruction1() {
@@ -367,10 +374,10 @@ export default {
 }
 
 .home-container .age-group {
-    position: relative;
+  position: relative;
 }
 .home-container .age-group .card .content {
-    cursor: pointer;
+  cursor: pointer;
 }
 
 /* 🟢 Vorteile als Cards */
@@ -380,8 +387,6 @@ export default {
   padding: 40px 20px;
   border-radius: 8px;
 }
-
-
 
 .features-grid {
   display: grid;
@@ -534,7 +539,6 @@ export default {
   display: flex;
   justify-content: center;
   gap: 15px;
-
 }
 
 .social-icon {
@@ -642,7 +646,7 @@ export default {
   justify-content: flex-end;
 }
 .bottom-menu span {
-  color: whitesmoke;
+  color: #fbc02d;
   padding: 0 5px;
 }
 /* Mobile Optimierungen */

@@ -1,5 +1,6 @@
 <template>
   <BaseSlider 
+    v-if="rankings.length > 0"
     title="Mitgemacht" 
     :items="rankings" 
     sliderId="ranking-slider" 

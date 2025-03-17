@@ -44,8 +44,8 @@
         <ul class="menu">
           <li><a href="#" @click.prevent="closeMenu; scrollToSection('what-is-headline')">Was ist Kiezjagd?</a></li>
           <li><a href="#" @click.prevent="closeMenu; scrollToSection('game-preview-section')">Spiele entdecken</a></li>
-          <li><a href="#" @click.prevent="closeMenu; scrollToSection('community-section')">Wie geht's?</a></li>
-          <li><a href="#" @click.prevent="closeMenu; scrollToSection('footer-section')">Schreib uns</a></li>
+          <li><a href="#" @click.prevent="closeMenu; scrollToSection('features-section')">Wie geht's?</a></li>
+          <li><a href="mailto:support@kiezjagd.de?subject=Wie%20gehts!&body=Hallo%20Kiezjagd-Team,">Schreib uns</a></li>
         </ul>
         <div class="social-icons">
           <a href="https://facebook.com" target="_blank">
@@ -74,6 +74,7 @@ const closeMenu = () => {
 };
 
 const scrollToSection = (id) => {
+  console.log(id);
   const target = document.getElementById(id);
   if (target) {
     target.scrollIntoView({ behavior: 'smooth' });

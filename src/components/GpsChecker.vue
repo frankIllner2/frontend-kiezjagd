@@ -43,37 +43,53 @@ export default {
           };
 
           try {
-            const encryptedId = this.$route.params.gameId;
-            let resultApi;
+            const encryptedId = this.$route.params.gameId || localStorage.getItem("currentGameId");
             if (!encryptedId) {
-                console.error("⚠️ Keine encryptedId gefunden!");
-                } else {
-                resultApi = await apiService.verifyLocation(
-                    encryptedId,
-                    this.question._id,
-                    userCoordinates
-                );
-               console.log(resultApi);
-            }
-
-            if (resultApi.success) {
-                console.log('is corret');
-              this.success = true;
-              this.onSuccess(); // Nächste Frage freischalten
+              console.error("⚠️ Keine encryptedId gefunden!");
             } else {
-                console.log('false');
-              this.error = 'Deine Koordinaten sind nicht richtig! Versuche es nochmal!';
+              const resultApi = await apiService.verifyLocation(
+                encryptedId,
+                this.question._id,
+                userCoordinates
+              );
+              console.log(resultApi);
+
+              if (resultApi.success) {
+                console.log('✅ Standort ist korrekt!');
+                this.success = true;
+                this.onSuccess(); // Nächste Frage freischalten
+              } else {
+                console.log('❌ Falsche Koordinaten');
+                this.error = 'Deine Koordinaten sind nicht richtig! Versuche es nochmal!';
+              }
             }
           } catch (error) {
-            this.error = error.message;
+            this.error = "Fehler bei der API-Anfrage: " + error.message;
           }
 
           this.loading = false;
         },
-        () => {
-          this.error = "Standort konnte nicht ermittelt werden.";
+        (error) => {
+          let errorMessage = "Standort konnte nicht ermittelt werden.";
+          switch (error.code) {
+            case error.PERMISSION_DENIED:
+              errorMessage = "⚠️ Standortfreigabe verweigert. Bitte erlaube den Zugriff in den Browsereinstellungen.";
+              break;
+            case error.POSITION_UNAVAILABLE:
+              errorMessage = "📡 Standortinformationen sind nicht verfügbar.";
+              break;
+            case error.TIMEOUT:
+              errorMessage = "⏳ Die Standortanfrage hat zu lange gedauert.";
+              break;
+            case error.UNKNOWN_ERROR:
+              errorMessage = "❓ Ein unbekannter Fehler ist aufgetreten.";
+              break;
+          }
+          console.error(errorMessage);
+          this.error = errorMessage;
           this.loading = false;
-        }
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       );
     },
   },
