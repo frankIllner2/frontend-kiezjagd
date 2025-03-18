@@ -32,6 +32,7 @@
         v-if="currentQuestion"
         :question="currentQuestion"
         :currentIndex="currentQuestionIndex"
+        :gameType="gameType"
         @submitAnswer="handleAnswer"
       />
 
