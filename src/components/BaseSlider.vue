@@ -190,10 +190,10 @@ export default {
     }
   }
   .glide__arrow--left {
-    left: 10px;
+    left: 0px;
   }
   .glide__arrow--right {
-    right: 10px;
+    right: 0px;
   }
   .slide-position {
     text-align: right;

@@ -17,7 +17,7 @@
             {{ result.stars }} Sterne
           </span>
           <span v-else>
-            {{ parseInt(result.duration.split("h")[1]) }} Minuten
+            {{ parseInt(result.duration.split("h")[1]) }} Min.
           </span>
           
         </li>
@@ -43,36 +43,21 @@ export default {
 };
 </script>
 
-
-<style scoped>
-/* Falls spezifische Styles für den Ranking-Slider notwendig sind */
-.card {
-  align-items: flex-start;
-  background-image: url("@/assets/img/icons/girl2.svg");
-  background-size: 70px;
-  background-position: top right;
-  background-repeat: no-repeat;
  
-}
-.card h4 {
-  margin-top: 5px;
-  font-size: 40px;
-}
-.card b {
-  font-size: 24px;
-  margin-top: -25px;
-}
-.card ul {
-  padding-left: 15px;
-}
-.card ul li {
-  display: grid;
-  grid-template-columns: 15px auto 100px;
-  list-style-type: none;
-}
-.card ul li strong {
-  padding: 0 10px;
-  max-width: 160px;
-  width: 100%;
+<style>
+/* Falls spezifische Styles für den Ranking-Slider notwendig sind */
+.ranking-section {
+  
+  .card ul li strong {
+    padding: 0 10px;
+    max-width: 160px;
+    width: 100%;
+  }
+  .glide {
+    button.glide__arrow {
+      display: none !important;
+    }
+  }
+
 }
 </style>
