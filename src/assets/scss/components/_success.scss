@@ -1,0 +1,36 @@
+@use "@/assets/scss/abstracts/variables" as *;
+.success-container {
+  max-width: 600px;
+  width: 100%;
+  margin: 50px auto;
+  padding: 20px;
+  text-align: center;
+  background-color: $background-color-2;
+  border-radius: 10px;
+  border: 1px solid $border-color-1;
+}
+
+h1 {
+  color: $primary-text-color;
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+p {
+  font-size: 1rem;
+  margin-bottom: 15px;
+}
+
+.loading {
+  color: $secondary-text-color;
+  font-size: 1.2rem;
+  margin: 20px 0;
+}
+
+.error {
+  color: $admin-third-color;
+  font-size: 1.2rem;
+  margin: 20px 0;
+}
+
+

@@ -25,44 +25,40 @@
       </div>
     </section>
   </template>
-  <script>
-  export default {
-    props: {
-      title: String,
-      items: Array,
-      sliderId: String,
-      containerClass: String,
-    },
-    data() {
-      return {
-        currentIndex: 0,
-        perView: 1,
-        gap: 20,
-        touchStartX: 0,
-        touchEndX: 0,
-      };
-    },
-    computed: {
-      totalSlides() {
-        return this.items.length;
-      },
-      visibleCount() {
-        return Math.min(this.currentIndex + this.perView, this.totalSlides);
-      },
-      canNext() {
-        console.log('next');
-        return this.items && this.items.length > this.perView && this.currentIndex < this.items.length - this.perView;
-      },
-      canPrev() {
-        console.log('prev');
-        return this.currentIndex > 0;
-      },
-    },
 
-    beforeUnmount() {
-      window.removeEventListener("resize", this.handleResize);
+  <script>
+export default {
+  props: {
+    title: String,
+    items: Array,
+    sliderId: String,
+    containerClass: String,
+  },
+  data() {
+    return {
+      currentIndex: 0,
+      perView: 1,
+      gap: 20,
+      touchStartX: 0, // Für Touch-Gesten
+      touchEndX: 0,
+      isSwiping: false, // ✅ Verhindert Next-Slide bei Klick auf eine Card
+    };
+  },
+  computed: {
+    totalSlides() {
+      return this.items.length;
     },
-    methods: {
+    visibleCount() {
+      return Math.min(this.currentIndex + this.perView, this.totalSlides);
+    },
+    canNext() {
+      return this.currentIndex < this.items.length - this.perView;
+    },
+    canPrev() {
+      return this.currentIndex > 0;
+    },
+  },
+  methods: {
     updatePerView() {
       if (window.innerWidth >= 1024) {
         this.perView = 3;
@@ -71,47 +67,47 @@
       } else {
         this.perView = 1;
       }
-      console.log("updatePerView:", this.perView);
     },
     handleResize() {
-      console.log("Resize detected, updating slider...");
-      this.updatePerView(); // 🔥 Fix: Methode ist jetzt sicher vorhanden
+      this.updatePerView();
       setTimeout(() => {
         this.correctIndex();
         this.updateSlider(false);
       }, 100);
     },
+
+    // ✅ **Fix: Next-Slide geht jetzt nur um 1 Schritt**
     nextSlide() {
       if (this.canNext) {
-        this.currentIndex++;
+        this.currentIndex += 1; // 🔥 Nur um 1 erhöhen!
         this.updateSlider();
       }
     },
+    
     prevSlide() {
       if (this.canPrev) {
-        this.currentIndex--;
+        this.currentIndex -= 1;
         this.updateSlider();
       }
     },
+
     correctIndex() {
       if (this.currentIndex > this.items.length - this.perView) {
         this.currentIndex = Math.max(0, this.items.length - this.perView);
       }
     },
+
     updateSlider(animate = true) {
       if (!this.$refs.slides || !this.$refs.slider) return;
 
       const sliderWidth = this.$refs.slider.offsetWidth;
       if (!sliderWidth || sliderWidth < 50) {
-        console.warn("Slider width ist ungültig:", sliderWidth);
         return;
       }
 
       const totalGaps = (this.perView - 1) * this.gap;
       let slideWidth = Math.floor((sliderWidth - totalGaps) / this.perView);
       slideWidth = Math.max(250, Math.min(slideWidth, 500));
-
-      console.log("sliderWidth:", sliderWidth, "slideWidth:", slideWidth, "perView:", this.perView);
 
       const slideItems = this.$refs.slides.children;
       for (let slide of slideItems) {
@@ -124,35 +120,38 @@
       this.$refs.slides.style.transition = animate ? "transform 0.4s ease-in-out" : "none";
       this.$refs.slides.style.transform = `translateX(-${offset}px)`;
     },
+
+    // ✅ **Fix: Swipen ohne Link/Button-Klick**
     touchStart(event) {
       this.touchStartX = event.touches[0].clientX;
+      this.isSwiping = false; // Beim Start zurücksetzen
     },
     touchMove(event) {
       this.touchEndX = event.touches[0].clientX;
+      this.isSwiping = true; // Nutzer hat bewegt → Swipen erlaubt
     },
-    touchEnd() {
+    touchEnd(event) {
+      console.log(event);
+      if (!this.isSwiping) return; // 🔥 Kein Swipe → Keine Aktion
+
       const swipeDistance = this.touchStartX - this.touchEndX;
       if (swipeDistance > 50) {
-        // 👉 Swipe nach links → Nächster Slide
-        this.nextSlide();
+        this.nextSlide(); // 👉 Swipe nach links → Nächster Slide
       } else if (swipeDistance < -50) {
-        // 👈 Swipe nach rechts → Vorheriger Slide
-        this.prevSlide();
+        this.prevSlide(); // 👈 Swipe nach rechts → Vorheriger Slide
       }
     }
   },
   mounted() {
-    console.log("🚀 BaseSlider mounted!");
-    this.$nextTick(() => {
-      this.updatePerView();
-      setTimeout(() => {
-        this.updateSlider(false);
-      }, 200);
-    });
+    this.updatePerView();
+    setTimeout(() => {
+      this.updateSlider(false);
+    }, 200);
     window.addEventListener("resize", this.handleResize);
   }
 };
 </script>
+
 
   <style>
   /* Gleiche CSS-Stile für den Slider */
