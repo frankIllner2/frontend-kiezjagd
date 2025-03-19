@@ -3,7 +3,7 @@ import axios from 'axios';
 // ✅ Axios-Instanz erstellen
 const axiosInstance = axios.create({
     baseURL: process.env.VUE_APP_API_BASE_URL,
-    timeout: 5000,
+    timeout: 15000,
 });
 
 // ✅ Generische Fehlerbehandlungsfunktion
