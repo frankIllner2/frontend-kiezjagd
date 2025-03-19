@@ -29,13 +29,14 @@
         const voices = window.speechSynthesis.getVoices();
         console.log("🎙️ Verfügbare Stimmen:", voices);
 
-        // Beispiel für eine bessere deutsche Stimme
-        this.selectedVoice = voices.find(voice =>
-            voice.lang.startsWith("de") && voice.name.includes("Google")
-        ) || voices.find(voice => voice.lang.startsWith("de")); // Fallback
+        // Priorität: Google Deutsch → Microsoft Katja → Microsoft Hedda → Microsoft Stefan
+        this.selectedVoice = voices.find(voice => voice.name === "Google Deutsch") ||
+                            voices.find(voice => voice.name === "Microsoft Katja - German (Germany)") ||
+                            voices.find(voice => voice.name === "Microsoft Hedda - German (Germany)") ||
+                            voices.find(voice => voice.name === "Microsoft Stefan - German (Germany)"); 
 
         console.log("✅ Gewählte Stimme:", this.selectedVoice?.name || "Standard");
-      },
+        },
       speakText() {
         if (!this.text) return;
   
