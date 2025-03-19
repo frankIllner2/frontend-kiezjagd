@@ -15,11 +15,27 @@
     },
     data() {
       return {
-        isSpeaking: false
+        isSpeaking: false,
+        selectedVoice: null
       };
     },
-
+    mounted() {
+        this.loadVoices();
+        // Falls Stimmen noch nicht geladen sind, beim Wechsel prüfen
+        window.speechSynthesis.onvoiceschanged = this.loadVoices;
+    },
     methods: {
+      loadVoices() {
+        const voices = window.speechSynthesis.getVoices();
+        console.log("🎙️ Verfügbare Stimmen:", voices);
+
+        // Beispiel für eine bessere deutsche Stimme
+        this.selectedVoice = voices.find(voice =>
+            voice.lang.startsWith("de") && voice.name.includes("Google")
+        ) || voices.find(voice => voice.lang.startsWith("de")); // Fallback
+
+        console.log("✅ Gewählte Stimme:", this.selectedVoice?.name || "Standard");
+      },
       speakText() {
         if (!this.text) return;
   
@@ -28,11 +44,17 @@
   
         const utterance = new SpeechSynthesisUtterance(this.text);
         utterance.lang = "de-DE"; // Deutsche Sprache
-        utterance.rate = 1; // Normale Geschwindigkeit
+        utterance.rate = 0.8; // Normale Geschwindigkeit
+        utterance.pitch = 1; // Tonhöhe (1 = normal)
+        utterance.volume = 1; // Lautstärke (1 = 100%)
   
+        if (this.selectedVoice) {
+            utterance.voice = this.selectedVoice;
+        }
+
         this.isSpeaking = true;
         utterance.onend = () => {
-          this.isSpeaking = false;
+            this.isSpeaking = false;
         };
   
         window.speechSynthesis.speak(utterance);
