@@ -1,99 +1,55 @@
 {
   "name": "Kiezjagd",
   "short_name": "Kiezjagd",
+  "description": "Das Spiel für alle Kinder",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f7f9fc",
-  "theme_color": "#4DBA87",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
   "icons": [
     {
-      "src": "android/android-launchericon-512-512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    },
-    {
-      "src": "android/android-launchericon-192-192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "android/android-launchericon-144-144.png",
-      "sizes": "144x144",
-      "type": "image/png"
-    },
-    {
-      "src": "android/android-launchericon-96-96.png",
-      "sizes": "96x96",
-      "type": "image/png"
-    },
-    {
-      "src": "android/android-launchericon-72-72.png",
-      "sizes": "72x72",
-      "type": "image/png"
-    },
-    {
-      "src": "android/android-launchericon-48-48.png",
+      "src": "pwa_icon_48x48.png",
       "sizes": "48x48",
       "type": "image/png"
     },
     {
-      "src": "ios/180.png",
-      "sizes": "180x180",
-      "type": "image/png"
-    },
-    {
-      "src": "ios/152.png",
-      "sizes": "152x152",
-      "type": "image/png"
-    },
-    {
-      "src": "ios/144.png",
-      "sizes": "144x144",
-      "type": "image/png"
-    },
-    {
-      "src": "ios/120.png",
-      "sizes": "120x120",
-      "type": "image/png"
-    },
-    {
-      "src": "ios/114.png",
-      "sizes": "114x114",
-      "type": "image/png"
-    },
-    {
-      "src": "ios/76.png",
-      "sizes": "76x76",
-      "type": "image/png"
-    },
-    {
-      "src": "ios/72.png",
+      "src": "pwa_icon_72x72.png",
       "sizes": "72x72",
       "type": "image/png"
     },
     {
-      "src": "ios/57.png",
-      "sizes": "57x57",
+      "src": "pwa_icon_96x96.png",
+      "sizes": "96x96",
       "type": "image/png"
     },
     {
-      "src": "windows11/Square150x150Logo.scale-100.png",
-      "sizes": "150x150",
+      "src": "pwa_icon_128x128.png",
+      "sizes": "128x128",
       "type": "image/png"
     },
     {
-      "src": "windows11/LargeTile.scale-100.png",
-      "sizes": "310x310",
+      "src": "pwa_icon_144x144.png",
+      "sizes": "144x144",
       "type": "image/png"
     },
     {
-      "src": "windows11/Wide310x150Logo.scale-100.png",
-      "sizes": "310x150",
+      "src": "pwa_icon_152x152.png",
+      "sizes": "152x152",
       "type": "image/png"
     },
     {
-      "src": "windows11/StoreLogo.scale-100.png",
-      "sizes": "50x50",
+      "src": "pwa_icon_192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "pwa_icon_384x384.png",
+      "sizes": "384x384",
+      "type": "image/png"
+    },
+    {
+      "src": "pwa_icon_512x512.png",
+      "sizes": "512x512",
       "type": "image/png"
     }
   ]
