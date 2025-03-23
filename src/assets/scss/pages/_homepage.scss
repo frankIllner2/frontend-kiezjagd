@@ -218,23 +218,11 @@
             flex-wrap: wrap;
             justify-content: space-around;
             width: 100%;
-            img {
-                display: none;
-            }
-            
+
             @include respond-to("desktop") {
                 width: 60%;
                 img {
                     display: block;
-                }
-                img:first-child {
-                    position: absolute;
-                    right: 44px;
-                }
-                img:last-child {
-                    position: absolute;
-                    left: 26px;
-                    bottom: -10px;
                 }
             }
         }
@@ -275,21 +263,20 @@
                 }
 
                 .card {
-                    border-radius: 0;
                     color: $secondary-text-color;
                     padding: 10px;
+                    position: relative;
                     @include respond-to("tablet") {
                         border-radius: 20px;
                     }
                     .icon {
-                        padding: 1em 0;
-                        display: none;
-                        
-                        @include respond-to("tablet") {
-                            display: block;
-                            img {
-                                width: 300px;
-                            }
+                        position: absolute;
+                        bottom: -7px;
+                        right: 0;
+                    }
+                    @include respond-to("tablet") {
+                        .icon {
+                           position: relative;
                         }
                     }
                     .info {
@@ -303,14 +290,34 @@
                         }
                     }
                 }
+                .card:first-child {
+                    .icon {
+                        img {
+                            width: 60px;
+                        }
+                        @include respond-to("tablet") {
+                            img {
+                                width: 200px;
+                            }
+                        }
+                    }
+                }
                 .card:last-child {
                     background-color: $background-color-3;
+                    .icon {
+                        img {
+                            width:100px;
+                        }
+                        @include respond-to("tablet") {
+                            img {
+                                width: 400px;
+                            }
+                        }
+                    }
                 }
                 .card h3 {
                     cursor: pointer;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
+                    text-align: center;
                   }
                   
                   .arrow {
@@ -522,26 +529,33 @@
                     }
                     .short {
                         position: relative;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        width: 100%;
+                        padding: 0px 15px;
                         b {
                             line-height: 1;
+                            padding: 0 0 10px 0;
                         }
                         .game-infos {
                             display: flex;
                             flex-direction: column;
                             align-content: space-between;
                             align-items: center;
+                            width: 40%;
                         }
                         .short-right {
                             display: flex;
                             align-items: flex-end;
                             flex-direction: row-reverse;
+                            width: 30%;
                          
-                            .button {
-                                margin-left: 10px;
-                                position: absolute;
-                                right: 0;
-                                bottom: -16px;
-                            }
+                        }
+                        .short-left {
+                            display: flex;
+                            flex-direction: row;
+                            width: 30%;
                         }
                         .open-layer {
                             width: 50px;
@@ -549,10 +563,7 @@
                         }
                         .button {
                             display: flex;
-                            button {
-                                padding: 10px 5px;
-                                border-radius: 0 0 20px 0;
-                            }
+                         
                         }
                     }
 

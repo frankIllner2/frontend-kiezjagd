@@ -14,9 +14,14 @@
         />
 
         <div class="short">
+          <div class="short-left">
+            <b>{{ item.startloction }}</b>
+          </div>
           <div class="game-infos" @click="toggleLayer(index)">
             <b>{{ item.name }}</b>
             <b>{{ item.ageGroup }}</b>
+       
+          
             <img src="@/assets/img/icons/open-plus.png" alt="open" class="open-layer" />
           </div>
           <div class="short-right">
@@ -29,6 +34,7 @@
               </button>
             </div>
           </div>
+       
         </div>
       </div>
 
@@ -122,49 +128,27 @@ export default {
   }
 }
 .short {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  padding: 0px 15px;
-}
+  .game-infos {
+    img {
+        transition: transform 0.5s ease-in-out;
+    }
 
-.game-infos {
-  display: flex;
-  align-items: center; /* Zentriert die Elemente vertikal */
-  justify-content: flex-end; /*Richt das Icon rechts aus*/
-  gap: 10px; /* Abstand zwischen den Elementen */
-  width: 100%;
-  cursor: pointer;
-  b {
-    display: flex;
-    flex-direction: column;
-    align-items: start;
-    line-height: 1.1;
-  }
-  img {
-      transition: transform 0.5s ease-in-out;
+    img:hover {
+        transform: rotate(360deg);
+    }
   }
 
-  img:hover {
-      transform: rotate(360deg);
+ 
+  .short-right .open-layer {
+    width: 50px;
+    height: auto;
+    margin-right: 10px; /* Abstand zwischen dem Icon und dem Button */
   }
-}
 
-.short-right {
-  display: flex;
-  align-items: center;
-}
+  .short-right .button button {
+    padding: 10px 5px;
 
-.short-right .open-layer {
-  width: 50px;
-  height: auto;
-  margin-right: 10px; /* Abstand zwischen dem Icon und dem Button */
-}
-
-.short-right .button button {
-  padding: 10px 5px;
-  border-radius: 0 0 20px 0;
+  }
 }
 /* long-description */
 .long-description {
@@ -173,10 +157,11 @@ export default {
   left: 0;
   width: 100%; /* Nimmt die gesamte Breite ein */
   padding: 20px;
-  background-color: #355b4c; /* Hintergrundfarbe */
-  color: #fac227;
+  background-color: #E9E2D0; /* Hintergrundfarbe */
+  color: #355b4c;
+  border: 1px solid #355b4c;
   z-index: 5; /* Unter dem Hover-Layer */
-  transition: bottom 0.5s ease-in-out; /* Animationseffekt */
+  transition: bottom 0.2s ease-in-out; /* Animationseffekt */
   height: 100%;
   border-radius: 20px;
   .game-infos-left,

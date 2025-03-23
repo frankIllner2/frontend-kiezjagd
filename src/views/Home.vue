@@ -30,6 +30,7 @@
 
     <section id="what-is-headline" class="container what-is-headline">
       <div class="headline font-bold">
+        <img class="inline-img" src="@/assets/img/icons/game-group.png" alt="Icon-Gril" />
         Entdecke dein Viertel neu: Löse knifflige Rätsel, finde versteckte Hinweise und
         meistere spannende Herausforderungen. Ob alleine oder mit deinem Team – erlebe
         bekannte Orte aus völlig neuen Blickwinkeln!
@@ -44,16 +45,14 @@
           <!-- Card 1 -->
           <div class="card">
             <div class="icon">
-              <img src="@/assets/img/icons/hand.png" />
+              <img src="@/assets/img/icons/junge.png" />
             </div>
             <div class="info">
               <h3>Dein Smartphone als Spielleiter</h3>
               <p>
-                Das Eichhörnchen Hopsi hat sich im Land der Märchen verlaufen und sucht
-                nun nach der richtigen Prinzessin, die ihn nach Hause bringen kann. Kannst
-                du ihm helfen, den richtigen Weg zu finden? Auf deinem Abenteuer musst du
-                Farben, Formen, Zahlen und Pflanzen richtig zuordnen, um Hinweise zu
-                bekommen, wo du die Prinzessin findest.
+                Mit deinem Smartphone begibst du dich auf eine Reise voller Überraschungen und Spaß.
+                Während du online knifflige Rätsel löst, versteckte Hinweise findest und 
+                spannende Herausforderungen meisterst, entdeckst du vertraute Orte aus völlig neuen Perspektiven
               </p>
             </div>
           </div>
@@ -61,16 +60,14 @@
           <!-- Card 2 -->
           <div class="card">
             <div class="icon">
-              <img src="@/assets/img/icons/hand.png" />
+              <img src="@/assets/img/icons/girls.png" />
             </div>
             <div class="info">
               <h3>Dein interaktives Abenteuer</h3>
               <p>
-                Das Eichhörnchen Hopsi hat sich im Land der Märchen verlaufen und sucht
-                nun nach der richtigen Prinzessin, die ihn nach Hause bringen kann. Kannst
-                du ihm helfen, den richtigen Weg zu finden? Auf deinem Abenteuer musst du
-                Farben, Formen, Zahlen und Pflanzen richtig zuordnen, um Hinweise zu
-                bekommen, wo du die Prinzessin findest.
+                Kiezjagd ist mehr als nur ein Spiel – es ist ein interaktives Abenteuer, 
+                das dich direkt in deinem Viertel herausfordert! Egal ob du allein, mit Freunden oder 
+                deiner Familie unterwegs bist, jede Frage führt dich zu interessanten Plätzen, die du vielleicht noch nie bemerkt hast.
               </p>
             </div>
           </div>

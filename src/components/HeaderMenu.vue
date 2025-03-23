@@ -46,6 +46,8 @@
           <li><a href="#" @click.prevent="closeMenu; scrollToSection('game-preview-section')">Spiele entdecken</a></li>
           <li><a href="#" @click.prevent="closeMenu; scrollToSection('features-section')">Wie geht's?</a></li>
           <li><a href="mailto:support@kiezjagd.de?subject=Wie%20gehts!&body=Hallo%20Kiezjagd-Team,">Schreib uns</a></li>
+          <li><a href="/Impressum" target="_blank" rel="noopener">Impressum</a></li>
+          <li><a href="/Agb" target="_blank" rel="noopener">AGB</a></li>
         </ul>
         <div class="social-icons">
           <a href="https://facebook.com" target="_blank">

@@ -61,35 +61,23 @@
         <h4>Antworten</h4>
         <div v-for="(option, index) in question.options" :key="index" class="option-item">
           <div class="option-type-selector">
-            <label>
-              <input
-                type="radio"
-                :name="'optionType_' + index"
-                value="text"
-                v-model="option.type"
-              />
-              Text
-            </label>
-            <label>
-              <input
-                type="radio"
-                :name="'optionType_' + index"
-                value="image"
-                v-model="option.type"
-              />
-              Bild
-            </label>
+            <label>Antworttyp</label>
+            <select v-model="option.type">
+              <option value="text">Nur Text</option>
+              <option value="image">Nur Bild</option>
+              <option value="both">Text und Bild</option>
+            </select>
           </div>
 
           <!-- Textantwort -->
           <input
-            v-if="option.type === 'text'"
+            v-if="option.type === 'text' || option.type === 'both'"
             v-model="option.text"
             placeholder="Antworttext"
           />
 
           <!-- Bildantwort -->
-          <div class="add-image" v-else-if="option.type === 'image'">
+          <div class="add-image" v-if="option.type === 'image' || option.type === 'both'">
             <input type="file" @change="onImageChange($event, index)" accept="image/*" />
             <div v-if="option.imageUrl" class="image-preview">
               <img :src="option.imageUrl" alt="Bildantwort" />
