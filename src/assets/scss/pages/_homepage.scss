@@ -268,11 +268,7 @@
                     @include respond-to("tablet") {
                         border-radius: 20px;
                     }
-                    .icon {
-                        position: absolute;
-                        bottom: 0;
-                        right: 0;
-                    }
+                  
                     @include respond-to("tablet") {
                         .icon {
                            position: relative;
