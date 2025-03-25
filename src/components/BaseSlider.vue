@@ -203,7 +203,7 @@ export default {
   }
 @media (max-width: 600px) {
   .slide-position {
-    margin: 0 !important;
+    margin: 5px 0 !important;
   }
 }
   </style>

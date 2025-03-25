@@ -12,16 +12,15 @@
           :alt="item.name"
           class="image-game"
         />
-
+        <div class="headline-game-name">
+        <b>{{ item.name }}</b>
+        </div>
         <div class="short">
           <div class="short-left">
             <b>{{ item.startloction }}</b>
           </div>
           <div class="game-infos" @click="toggleLayer(index)">
-            <b>{{ item.name }}</b>
             <b>{{ item.ageGroup }}</b>
-       
-          
             <img src="@/assets/img/icons/open-plus.png" alt="open" class="open-layer" />
           </div>
           <div class="short-right">
@@ -30,48 +29,66 @@
                 class="btn btn--fourth"
                 @click="$emit('open-modal', item.encryptedId)"
               >
-                Spiel kaufen
+                Kaufen
               </button>
             </div>
           </div>
-       
         </div>
       </div>
 
       <!-- ✅ Long-description direkt nach short-description -->
-      <div class="long-description" :class="{ 'long-description-active': activeIndex === index }">
+      <div
+        class="long-description"
+        :class="{ 'long-description-active': activeIndex === index }"
+      >
         <div class="long-description-content">
           <div class="top-content">
             <div class="top-info">
               <b>{{ item.name }}</b>
             </div>
-            <div class="close-btn" @click="closeLayer">×</div>
+            <div class="close-btn" @click="closeLayer">
+              <img
+                src="@/assets/img/icons/show-back.svg"
+                alt="Schließen"
+                class="close-icon-2"
+              />
+            </div>
           </div>
           <div class="game-information">
-            <div class="game-infos-left">
-              <span>Schwierigkeit</span>
-              <span>{{ item.ageGroup }}</span><br />
-              <span>Start</span>
-              <span>{{ item.startloction }}</span>
-            </div>
-            <div class="game-infos-right">
-              <span>Dauer</span>
-              <span>{{ item.playtime }}</span><br />
-              <span>Ende</span>
-              <span>{{ item.endloction }}</span>
+            <div class="game-infos">
+              <p>
+                <span>Schwierigkeit</span>
+                <span>{{ item.ageGroup }}</span>
+              </p>
+              <p>
+                <span>Start</span>
+                <span>{{ item.startloction }}</span>
+              </p>
+              <p>
+                <span>Dauer</span>
+                <span>{{ item.playtime }}</span>
+              </p>
+              <p>
+                <span>Ende</span>
+                <span>{{ item.endloction }}</span>
+              </p>
+              <p>
+                <span>Preis</span>
+                <span>{{ item.price }}</span>
+              </p>
             </div>
           </div>
           <div class="game-description">
             <span>Was wir wissen:</span>
             <span>{{ item.description }}</span>
           </div>
-          <div class="price">
-            <span>Preis</span>
-            <span>{{ item.price }}</span>
-          </div>
+      
           <div class="button">
-            <button class="btn btn--primary" @click="$emit('open-modal', item.encryptedId)">
-              Spiel kaufen
+            <button
+              class="btn btn--primary"
+              @click="$emit('open-modal', item.encryptedId)"
+            >
+              Kaufen
             </button>
           </div>
         </div>
@@ -130,15 +147,14 @@ export default {
 .short {
   .game-infos {
     img {
-        transition: transform 0.5s ease-in-out;
+      transition: transform 0.5s ease-in-out;
     }
 
     img:hover {
-        transform: rotate(360deg);
+      transform: rotate(360deg);
     }
   }
 
- 
   .short-right .open-layer {
     width: 50px;
     height: auto;
@@ -146,8 +162,7 @@ export default {
   }
 
   .short-right .button button {
-    padding: 10px 5px;
-
+    padding: 10px 30px;
   }
 }
 /* long-description */
@@ -157,29 +172,41 @@ export default {
   left: 0;
   width: 100%; /* Nimmt die gesamte Breite ein */
   padding: 20px;
-  background-color: #E9E2D0; /* Hintergrundfarbe */
+  background-color: #e9e2d0; /* Hintergrundfarbe */
   color: #355b4c;
   border: 1px solid #355b4c;
   z-index: 5; /* Unter dem Hover-Layer */
   transition: bottom 0.2s ease-in-out; /* Animationseffekt */
   height: 100%;
   border-radius: 20px;
-  .game-infos-left,
-  .game-infos-right {
+  .game-infos {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    width: 100%;
+    padding: 0 30px;
+    p {
+      display: flex;
+      justify-content: space-between;
+  
+    }
   }
 }
 
 .long-description-active {
   bottom: 0px; /* Zeigt den Container an */
 }
+.long-description-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: inherit;
+
+}
 .long-description .top-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-bottom: 20px;
+ 
 }
 .long-description .close-btn {
   font-size: 30px;
@@ -188,7 +215,7 @@ export default {
 .long-description .game-information {
   display: flex;
   justify-content: stretch;
-  margin-bottom: 2em;
+
 }
 
 .long-description .button {
