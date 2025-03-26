@@ -7,7 +7,25 @@
     containerClass="container ranking-section"
   >
     <template v-slot:default="{ item }">
+      <div class="game-header">
       <b>{{ item.gameName }}</b>
+      <img
+        v-if="getGameType(item.topResults) === 'Mini'"
+        src="@/assets/img/icons/hand.png"
+        alt="Mini Icon"
+      />
+      <img
+        v-else-if="getGameType(item.topResults) === 'Medi'"
+        src="@/assets/img/icons/sterne.png"
+        alt="Medi Icon"
+      />
+      <img
+        v-else
+        src="@/assets/img/icons/krone.png"
+        alt="Default Icon"
+      />
+    </div>
+  
       <span class="game-type">{{ getGameType(item.topResults) }}</span>
       <ul>
         <li v-for="(result, idx) in item.topResults" :key="idx">
@@ -56,6 +74,13 @@ export default {
   .glide {
     button.glide__arrow {
       display: none !important;
+    }
+  }
+  .glide__slide {
+    img {
+      width: 100%;
+      height: auto;
+      max-width: 70px;
     }
   }
 

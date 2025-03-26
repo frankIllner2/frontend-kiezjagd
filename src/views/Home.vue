@@ -199,26 +199,26 @@ export default {
         {
           title: "Um die Ecke",
           text:
-            "Kiezjagd ist mehr als nur ein Spiel – es ist ein interaktives Abenteuer dein Viertel zu entdecken.",
+            "Spannende Fragen direkt aus deiner Umgebung für Minis, Medis, Maxis und ganz Groß.",
           image: boyYellowShoes,
         },
         {
           title: "Immer griffbereit",
           text:
-            "Kiezjagd ist mehr als nur ein Spiel – es ist ein interaktives Abenteuer dein Viertel zu entdecken.",
-          image: girlYellowShirt,
+            "Spiele bequem auf deinem Smartphone oder Tablet.",
+          image: boyYellowShirt,
         },
         {
           title: "Gemeinsam spielen",
           text:
-            "Kiezjagd ist mehr als nur ein Spiel – es ist ein interaktives Abenteuer dein Viertel zu entdecken.",
+            "Teile dein Abenteuer mit Freunden und Familie.",
           image: girlYellowHair,
         },
         {
           title: "Werde KiezMeister",
           text:
-            "Kiezjagd ist mehr als nur ein Spiel – es ist ein interaktives Abenteuer dein Viertel zu entdecken.",
-          image: boyYellowShirt,
+            "Lasse dein Spielergebnis strahlen: verewige dich in unserer “Mitgemacht”- Liste!.",
+          image: girlYellowShirt,
         },
       ],
     };

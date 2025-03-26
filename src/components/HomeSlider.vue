@@ -47,33 +47,33 @@
               <b>{{ item.name }}</b>
             </div>
             <div class="close-btn" @click="closeLayer">
-              <img
-                src="@/assets/img/icons/show-back.svg"
-                alt="Schließen"
-                class="close-icon-2"
-              />
+              <font-awesome-icon
+                  icon="minus-circle"
+                  class="close-icon-2"
+                  aria-label="Schließen"
+                />
             </div>
           </div>
           <div class="game-information">
             <div class="game-infos">
               <p>
-                <span>Schwierigkeit</span>
+                <span>Schwierigkeit:</span>
                 <span>{{ item.ageGroup }}</span>
               </p>
               <p>
-                <span>Start</span>
+                <span>Start:</span>
                 <span>{{ item.startloction }}</span>
               </p>
               <p>
-                <span>Dauer</span>
+                <span>Dauer:</span>
                 <span>{{ item.playtime }}</span>
               </p>
               <p>
-                <span>Ende</span>
+                <span>Ende:</span>
                 <span>{{ item.endloction }}</span>
               </p>
               <p>
-                <span>Preis</span>
+                <span>Preis:</span>
                 <span>{{ item.price }}</span>
               </p>
             </div>
@@ -187,7 +187,7 @@ export default {
     p {
       display: flex;
       justify-content: space-between;
-  
+      margin: 2px 0;
     }
   }
 }
