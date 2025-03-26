@@ -144,8 +144,8 @@
       <div class="container">
         <p>Melde dich jetzt an und werde Teil der Kiezjagd-Community</p>
 
-        <button class="btn btn--third" @click="$router.push('/register')">
-          Spiele entdecken
+        <button class="btn btn--third" @click="showNewsletterForm = true">
+          Sign Up
         </button>
       </div>
       <div class="bottom-menu">
@@ -159,6 +159,8 @@
         </div>
       </div>
     </section>
+    <NewsletterSignup :visible="showNewsletterForm" @close="showNewsletterForm = false" />
+
   </div>
 </template>
 
@@ -173,6 +175,8 @@ import boyYellowShoes from "@/assets/img/icons/boyYellowShoes.png";
 import girlYellowShirt from "@/assets/img/icons/girlYellowShirt.png";
 import girlYellowHair from "@/assets/img/icons/girlYellowHair.png";
 import boyYellowShirt from "@/assets/img/icons/boyYellowShirt.png";
+import NewsletterSignup from "@/components/NewsletterSignup.vue";
+
 
 export default {
   name: "HomePage",
@@ -182,6 +186,7 @@ export default {
     HomeSlider2,
     HomeSlider3,
     HomeSlider4,
+    NewsletterSignup,
   },
   data() {
     return {
@@ -195,6 +200,7 @@ export default {
       showInstruction1: false,
       showInstruction2: false,
       showInstruction3: false,
+      showNewsletterForm: false,
       features: [
         {
           title: "Um die Ecke",

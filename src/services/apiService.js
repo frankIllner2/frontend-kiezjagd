@@ -185,7 +185,16 @@ export const apiService = {
       .then(res => res.data.imageUrl)
       .catch(error => handleApiError(error, 'uploadImage'));
   },
-
+  // Newsletter
+  subscribeToNewsletter(email) {
+    if (!email) throw new Error("E-Mail erforderlich");
+    return performRequest("post", "/newsletter/subscribe", { email });
+  },
   
+  unsubscribeFromNewsletter(email) {
+    if (!email) throw new Error("E-Mail erforderlich");
+    return performRequest("post", "/newsletter/unsubscribe", { email });
+  },
+
 };
 export default apiService;
