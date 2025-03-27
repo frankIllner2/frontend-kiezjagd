@@ -1,23 +1,24 @@
 <template>
     <transition name="slide-up">
-      <div class="newsletter-form" v-if="visible">
+      <div class="newsletter-form" :class="{ 'unsub-mode': isUnsubscribing }" v-if="visible">
         <form @submit.prevent="submit">
-          <input
-            type="email"
-            v-model="email"
-            placeholder="Deine E-Mail"
-            required
-          />
-          <button class="btn btn--secondary" type="submit">Jetzt anmelden</button>
-          <p class="unsubscribe-link" @click="unsubscribe">Abmelden</p>
-          <span class="close-btn" @click="$emit('close')">
-            <font-awesome-icon
-                  icon="minus-circle"
-                  class="close-icon-2"
-                  aria-label="Schließen"
-                />
-            </span>
-        </form>
+            <input
+                type="email"
+                v-model="email"
+                placeholder="Deine E-Mail"
+                required
+            />
+
+            <button class="btn btn--secondary" type="submit">
+                {{ isUnsubscribing ? "Jetzt abmelden" : "Jetzt anmelden" }}
+            </button>
+
+            <p class="toggle-link" @click="toggleMode">
+                {{ isUnsubscribing ? "Wieder anmelden?" : "Jetzt abmelden" }}
+            </p>
+
+            <span class="close-btn" @click="$emit('close')">✖</span>
+            </form>
       </div>
     </transition>
   </template>
@@ -36,32 +37,34 @@
     data() {
       return {
         email: "",
+        isUnsubscribing: false,
       };
     },
     methods: {
-      async submit() {
-        try {
-          await apiService.subscribeToNewsletter(this.email);
-          alert("Danke für deine Anmeldung!");
-          this.email = "";
-          this.$emit("close");
-        } catch (error) {
-          alert("❌ Anmeldung fehlgeschlagen.");
-          console.error(error);
-        }
-      },
-      async unsubscribe() {
-        const emailToUnsub = prompt("Gib deine E-Mail zur Abmeldung ein:");
-        if (!emailToUnsub) return;
-  
-        try {
-          await apiService.unsubscribeFromNewsletter(emailToUnsub);
-          alert("Du wurdest abgemeldet.");
-        } catch (error) {
-          alert("❌ Abmeldung fehlgeschlagen.");
-          console.error(error);
-        }
-      },
+        async submit() {
+            try {
+            if (this.isUnsubscribing) {
+                await apiService.unsubscribeFromNewsletter(this.email);
+                this.$root.showToast("📭 Du wurdest abgemeldet.");
+                this.isUnsubscribing = false;
+            } else {
+                await apiService.subscribeToNewsletter(this.email);
+                this.$root.showToast("🎉 Danke für deine Anmeldung!");
+            }
+
+            this.email = "";
+            this.$emit("close");
+            } catch (error) {
+            console.error("❌ Fehler beim Senden des Formulars:", error);
+            const message =
+                error?.response?.data?.message ||
+                (this.isUnsubscribing ? "Abmeldung fehlgeschlagen." : "Anmeldung fehlgeschlagen.");
+            this.$root.showToast(message, "error");
+            }
+        },
+        toggleMode() {
+            this.isUnsubscribing = !this.isUnsubscribing;
+        },
     },
   };
   </script>
@@ -82,6 +85,15 @@
     background: #FAC227;
     padding: 1rem;
     z-index: 1000;
+    p {
+        color: #355b4c;
+    }
+  }
+  .newsletter-form.unsub-mode {
+    button {
+        background-color: #f00713;
+    }
+
   }
   input[type="email"] {
     padding: 0.5rem;
