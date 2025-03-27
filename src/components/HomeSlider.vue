@@ -161,9 +161,6 @@ export default {
     margin-right: 10px; /* Abstand zwischen dem Icon und dem Button */
   }
 
-  .short-right .button button {
-    padding: 10px 30px;
-  }
 }
 /* long-description */
 .long-description {
