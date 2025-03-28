@@ -28,16 +28,21 @@
   
       <span class="game-type">{{ getGameType(item.topResults) }}</span>
       <ul>
-        <li v-for="(result, idx) in item.topResults" :key="idx">
-          <span>{{ idx + 1 }}.</span> <strong>{{ result.teamName }}</strong>
-         
+        <li
+          v-for="(result, idx) in getSortedResults(item)"
+          :key="idx"
+        >
+          <!-- Nur bei Maxi anzeigen wir das Ranking -->
+          <span v-if="getGameType(item.topResults) === 'Maxi'">{{ idx + 1 }}.</span>
+
+          <strong>{{ result.teamName }}</strong>
+
           <span v-if="result.gameType === 'Mini' || result.gameType === 'Medi'">
             {{ result.stars }} Sterne
           </span>
           <span v-else>
             {{ parseInt(result.duration.split("h")[1]) }} Min.
           </span>
-          
         </li>
       </ul>
     </template>
@@ -55,9 +60,27 @@ export default {
   methods: {
     getGameType(results) {
       if (!results.length) return "";
-      return results[0].gameType; // Nimmt einfach den ersten gameType des Spiels
+      return results[0].gameType;
+    },
+
+    getSortedResults(item) {
+      const results = [...item.topResults];
+      const gameType = this.getGameType(results);
+
+      if (gameType === 'Mini' || gameType === 'Medi') {
+        // Nach startTime sortieren (neueste oben)
+        return results.sort((a, b) => new Date(b.startTime) - new Date(a.startTime));
+      } else {
+        // Nach Zeit sortieren (kürzeste Dauer oben)
+        return results.sort((a, b) => {
+          const timeA = parseInt(a.duration.split("h")[1]);
+          const timeB = parseInt(b.duration.split("h")[1]);
+          return timeA - timeB;
+        });
+      }
     }
   }
+
 };
 </script>
 

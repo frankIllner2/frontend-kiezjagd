@@ -1,8 +1,8 @@
 <template>
     <div class="error-page">
-      <h1>❌ Link abgelaufen</h1>
-      <p>Leider ist der Link für dieses Spiel nicht mehr gültig.</p>
-      <router-link to="/" class="btn-primary">Zurück zur Startseite</router-link>
+      <h1></h1>
+      <p>Leider ist der Link für dieses Spiel nicht mehr gültig.</p><br />
+      <router-link to="/" class="btn btn--primary">Zurück zur Startseite</router-link>
     </div>
   </template>
   
