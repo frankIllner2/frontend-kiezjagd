@@ -18,22 +18,23 @@
 .instruction-content {
   display: flex;
   flex-direction: column;
-  background-color: rgba(53, 91, 76, 0.9);
+  background-color: #E9E2D0;
   border-radius: 20px;
   text-align: center;
   position: relative;
   align-items: center;
-  color: #fac227;
+  color: #355b4c;
   height: 100%;
+  border: 1px solid #355b4c;
 
 
   h2 {
     line-height: 1;
-    margin-bottom: 1em;
+    margin: 0.3em 0 1em 0;
     font-size: clamp(2.4rem, 2.5vw, 2.5em);
   }
   p {
-    line-height: 2;
+    line-height: 1.6;
     padding: 0 5px;
     font-size: clamp(1rem, 1.2vw, 1.2em);
   }
@@ -52,15 +53,25 @@
 }
 /* Filter Farbe geben */
 .close-icon {
-  width: 30px; /* Passe die Größe nach Bedarf an */
+  width: 100%;
   height: auto;
-  filter: invert(88%) sepia(61%) saturate(572%) hue-rotate(355deg)
-    brightness(101%) contrast(101%);
-  /* Filter zum Invertieren der Farbe von Schwarz zu Gelb */
+  max-width: 40px;
+}
+.close-icon {
+  transition: transform 0.6s ease;
 }
 
+/* Rotation bei Hover */
+.close-btn:hover .close-icon {
+  transform: rotate(360deg);
+}
+
+/* Optional: Rotation bei Klick (mit Klasse) */
+.close-btn.clicked .close-icon {
+  transform: rotate(360deg);
+}
 .close-icon-2 {
-  width: 30px; /* Passe die Größe nach Bedarf an */
+  width: 30px; 
   height: auto;
 }
 

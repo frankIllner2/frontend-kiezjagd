@@ -46,10 +46,10 @@
             ageRange: "3-5",
             name: "Mini",
             image: new URL("@/assets/img/mini.jpg", import.meta.url).href, 
-            title: "Rätsel und Sterne",
-            text: `Hier kommt die Anleitung für die Mini-Kategorie hin Hier kommt die Anleitung für die Mini-Kategorie hin cyc
-            Hier kommt die Anleitung für die Mini-Kategorie hin Hier kommt die Anleitung für die Mini-Kategorie hin cyc
-            Hier kommt die Anleitung für die Mini-Kategorie hin Hier kommt die Anleitung für ie Anleitung für die Mini-Kategorie hin Hier kommt die Anleitung für die Mini-Kategorie hin cyc`,
+            title: "So geht's",
+            text: `Bist du 3 bis 5 Jahre alt? Dann ist unsere Mini Kiezjagd genau das Richtige für dich! 
+            Mit spannenden Rätseln über Formen, Farben, Pflanzen, Bäume und vieles mehr entdeckst du spielerisch deinen Kiez. 
+            Mit jedem gelösten Rätsel kommst du dem Ziel näher und sammelst wertvolle Sterne, mit denen du dich auf unserer Mitgemacht-Liste eintragen kannst`,
           },
           {
             ageRange: "5-9",
@@ -63,9 +63,9 @@
             ageRange: "9-12",
             name: "Maxi",
             image: new URL("@/assets/img/maxi.jpg", import.meta.url).href,
-            title: "Die Besten",
-            text: `Hier kommt die Anleitung für die Maxi-Kategorie hin Hier kommt die Anleitung für die Maxi-Kategorie hin Hier kommt die Anleitung für die Maxi-Kategorie hin
-            Hier kommt die Anleitung für die Maxi-Kategorie hinHier kommt die Anleitung für die Maxi-Kategorie hinHier kommt die Anleitung für die Maxi-Kategorie hin `,
+            title: "So geht's",
+            text: `Bist du 9 bis 12 Jahre alt? Dann ist unsere Maxi Kiezjagd genau das Richtige für dich! Mit spannenden Rätseln rund um geheime Zahlencodes, 
+            Wortspielen, Kiezgeschichte, und vielem mehr entdeckst du deinen Kiez. Für jedes gelöste Rätsel kommst du dem Ziel näher und sammelst wertvolle Sterne, mit denen du bei unserer monatlichen Kiezmeisterschaft mitmachen kannst! `,
           },
         ],
       };
@@ -117,6 +117,7 @@
       color: #355b4c;
     }
     img {
+        margin-top: 10px;
         transition: transform 0.5s ease-in-out;
     }
 

@@ -12,7 +12,7 @@
       <p>{{ text }}</p>
       <button
         @click="scrollToSection('game-preview-section')"
-        class="btn btn--fourth"
+        class="btn btn--primary"
         id="open-instruction"
       >
         Spiele entdecken
