@@ -1,9 +1,9 @@
 @use "@/assets/scss/abstracts/variables" as *;
 .success-container {
-
   width: 100%;
   margin: 50px auto;
   text-align: center;
+  padding: 0 20px;
 
   h1 {
     color: $primary-text-color;
@@ -26,6 +26,10 @@
     color: $admin-third-color;
     font-size: 1.2rem;
     margin: 20px 0;
+  }
+
+  a {
+    text-decoration: none;
   }
 
 }

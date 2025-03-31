@@ -444,10 +444,10 @@ export default {
   font-size: 20px;
   font-weight: bold;
   text-align: center;
-  color: black;
+  color: #FAC227;
   z-index: 10; /* Sicherstellen, dass es unter dem Button bleibt */
   pointer-events: none; /* Verhindert, dass es Klicks blockiert */
-  background-color: #e9e2d0;
+  background-color: #355b4c;
   padding: 0 20px;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
