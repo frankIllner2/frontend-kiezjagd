@@ -105,7 +105,7 @@
     overflow-wrap: break-word;
     white-space: normal;
     line-height: 1.2; /* Guter Zeilenabstand für bessere Lesbarkeit */
-    margin-top: 10px;
+    margin-top: 3.5em;
   }
 
   .feedback-content img {

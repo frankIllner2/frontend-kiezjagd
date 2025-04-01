@@ -219,7 +219,7 @@ export default {
             this.$nextTick(() => {
               this.$refs.feedbackAnimation.start();
             });
-          }, 5000);
+          }, 4000);
         } else {
           this.handleAnimationDone(); // Direkter Übergang zur nächsten Frage bei Maxi
         }
