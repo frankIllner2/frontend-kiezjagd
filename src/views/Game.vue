@@ -28,19 +28,18 @@
     <div v-else-if="!gameFinished" class="game-card question-section">
   
 
-      <GameQuestion
-        v-if="currentQuestion"
-        :question="currentQuestion"
-        :currentIndex="currentQuestionIndex"
-        :gameType="gameType"
-        @submitAnswer="handleAnswer"
-      />
-
-      <GpsChecker
-        v-if="currentQuestion && currentQuestion.type === 'anweisung'"
-        :question="currentQuestion"
-        :onSuccess="nextQuestion"
-      />
+      <transition name="fade-question" mode="out-in">
+        <component
+          :is="currentQuestion && currentQuestion.type === 'anweisung' ? 'GpsChecker' : 'GameQuestion'"
+          v-if="currentQuestion"
+          :key="currentQuestionIndex"
+          :question="currentQuestion"
+          :currentIndex="currentQuestionIndex"
+          :gameType="gameType"
+          :onSuccess="nextQuestion"
+          @submitAnswer="handleAnswer"
+        />
+      </transition>
 
       <FeedbackAnimation
         ref="feedbackAnimation"
@@ -241,7 +240,6 @@ export default {
       return 1;
     },
     nextQuestion() {
-      console.log('bin drin');
       this.attemptCount = 0;
       if (this.currentQuestionIndex < this.questions.length - 1) {
         this.currentQuestionIndex++;
@@ -370,6 +368,16 @@ export default {
 
 <style scoped>
 /* Allgemeine Spielcontainer-Stile */
+.fade-question-enter-active,
+.fade-question-leave-active {
+  transition: opacity 0.5s ease;
+}
+.fade-question-enter-from,
+.fade-question-leave-to {
+  opacity: 0;
+}
+
+
 .game-container {
   display: flex;
   flex-direction: column;
@@ -439,7 +447,7 @@ export default {
 /* Fixierte Sterne-Anzeige unten */
 .star-status {
   position: fixed;
-  top: 5px;
+  top: 0;
   right: 0;
   font-size: 20px;
   font-weight: bold;
@@ -448,7 +456,7 @@ export default {
   z-index: 10; /* Sicherstellen, dass es unter dem Button bleibt */
   pointer-events: none; /* Verhindert, dass es Klicks blockiert */
   background-color: #355b4c;
-  padding: 0 20px;
+  padding: 10px 15px;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
 
