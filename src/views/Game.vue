@@ -52,9 +52,16 @@
         @done="handleAnimationDone"
       />
 
+      <TimeBonusAnimation
+        ref="timeBonusAnimation"
+        :gameType="gameType"
+        @applyBonus="applyTimeBonus"
+        @done="onTimeBonusDone"
+      />
+
+
       <div class="star-status">
-        <p v-if="gameType === 'Maxi'">
-          <img src="@/assets/img/icons/uhr.png" />
+        <p v-if="gameType === 'Maxi'" :class="{ 'time-bonus-glow': showTimeGlow }">
           <span>Zeit benötigt:</span> 
           <strong>{{ gameDuration }}</strong>
         </p>
@@ -92,9 +99,11 @@ import GameQuestion from "@/components/GameQuestion.vue";
 import GpsChecker from "@/components/GpsChecker.vue";
 import FeedbackAnimation from "@/components/FeedbackAnimation.vue";
 import { apiService } from "@/services/apiService";
+import TimeBonusAnimation from "@/components/TimeBonusAnimation.vue";
+
 
 export default {
-  components: { StartForm, GameQuestion, GpsChecker, FeedbackAnimation },
+  components: { StartForm, GameQuestion, GpsChecker, FeedbackAnimation, TimeBonusAnimation },
   data() {
     return {
       gameId: null,
@@ -120,6 +129,7 @@ export default {
       earnedStars: 0,
       attemptCount: 0,
       gameType: "",
+      showTimeGlow: false,
     };
   },
   computed: {
@@ -155,7 +165,7 @@ export default {
       this.starCount = parseInt(localStorage.getItem("starCount"), 10) || 0;
       this.startTime = parseInt(localStorage.getItem("startTime"), 10) || Date.now();
       console.log(
-        `📍 Wiederhergestelltes Spiel: ${this.gameId}, Startzeit: ${this.startTime}`
+        `Wiederhergestelltes Spiel: ${this.gameId}, Startzeit: ${this.startTime}`
       );
       this.startTimer();
     } else {
@@ -211,28 +221,48 @@ export default {
       if (isCorrect) {
         this.feedbackMessage = this.currentAnswerQuestion.answerquestion;
         this.feedbackImage = require("@/assets/img/correct.gif");
+        this.showFeedback = true; // ✅ Muss hier rein!
 
-        // Setze einen Timer, um das Feedback auszublenden und die Animation zu starten
-        if (this.gameType !== "Maxi") {
+        if (this.gameType === 'Maxi') {
+          const bonus = this.getTimeBonus();
+          if (bonus > 0) {
+            setTimeout(() => {
+              this.showFeedback = false; // 🎬 Feedback erst ausblenden...
+              this.$refs.timeBonusAnimation.startTimeBonusAnimation(bonus); // ...dann Animation starten
+            }, 4500);
+          } else {
+            console.log('kein Bonus');
+            setTimeout(() => {
+              this.showFeedback = false;
+              this.nextQuestion();
+            }, 1500);
+          }
+        } else {
           setTimeout(() => {
-            this.showFeedback = false; // Feedback ausblenden
+            this.showFeedback = false;
             this.$nextTick(() => {
               this.$refs.feedbackAnimation.start();
             });
           }, 4000);
-        } else {
-          this.handleAnimationDone(); // Direkter Übergang zur nächsten Frage bei Maxi
         }
+
       } else {
         this.attemptCount++;
         this.feedbackMessage = "Versuche es nochmal!";
         this.feedbackImage = require("@/assets/img/false.png");
         this.showFeedback = true;
+
         setTimeout(() => {
-          this.showFeedback = false; //Feedback entfernen
+          this.showFeedback = false;
         }, 5000);
       }
-      this.showFeedback = true;
+    },
+
+    getTimeBonus() {
+      if (this.attemptCount === 0) return 60;
+      if (this.attemptCount === 1) return 30;
+      if (this.attemptCount === 2) return 10;
+      return 0;
     },
     calculateStars() {
       if (this.attemptCount === 0) return 5;
@@ -273,6 +303,12 @@ export default {
         }, 300); // Geschwindigkeit des Hochzählens
       }
     },
+    onTimeBonusDone() {
+      console.log("🕒 Zeitbonus-Animation beendet.");
+      this.showFeedback = false; 
+      this.nextQuestion();
+    },
+
     startCounting() {
       if (this.countingStarted) return; // 🚀 Blockiert doppeltes Hochzählen
       this.countingStarted = true; // ✅ Markiert als gestartet
@@ -297,7 +333,17 @@ export default {
         }
       }, 1000);
     },
+    applyTimeBonus(bonus) {
+      const elapsed = Date.now() - this.startTime; // vergangene Zeit in ms
+      const bonusMs = bonus * 1000;
+      const actualBonus = Math.min(elapsed, bonusMs); // maximal bis 0 zurück
 
+      this.startTime += actualBonus; // Startzeit nach vorne schieben
+      this.showTimeGlow = true;
+      setTimeout(() => {
+        this.showTimeGlow = false;
+      }, 1500);
+    },
     saveQuestionIndex() {
       localStorage.setItem(
         `currentQuestionIndex_${this.gameId}`,
@@ -308,10 +354,15 @@ export default {
     startTimer() {
       this.timerInterval = setInterval(() => {
         const currentTime = Date.now();
-        const elapsedTime = Math.round((currentTime - this.startTime) / 1000);
+
+        let elapsedTime = (currentTime - this.startTime) / 1000;
+        if (elapsedTime < 0) elapsedTime = 0; // ⛔ verhindert negative Anzeige
+        elapsedTime = Math.round(elapsedTime);
+
         const hours = Math.floor(elapsedTime / 3600);
         const minutes = Math.floor((elapsedTime % 3600) / 60);
         const seconds = elapsedTime % 60;
+
         this.gameDuration = `${hours}h ${minutes}m ${seconds}s`;
       }, 1000);
     },
@@ -477,6 +528,36 @@ export default {
 .hidden {
   display: none;
 }
+
+.time-bonus-glow {
+  animation: glow-pulse 1s ease-out;
+  color: #f9f9f9;
+  font-weight: bold;
+}
+
+@keyframes glow-pulse {
+  0% {
+    text-shadow: 0 0 0 rgba(250, 194, 39, 0);
+    transform: scale(1);
+  }
+  25% {
+    text-shadow: 0 0 12px rgba(250, 194, 39, 0.9);
+    transform: scale(1.1);
+  }
+  50% {
+    text-shadow: 0 0 0 rgba(250, 194, 39, 0);
+    transform: scale(1);
+  }
+  75% {
+    text-shadow: 0 0 12px rgba(250, 194, 39, 0.9);
+    transform: scale(1.1);
+  }
+  100% {
+    text-shadow: 0 0 0 rgba(250, 194, 39, 0);
+    transform: scale(1);
+  }
+}
+
 
 /* Responsive Anpassung */
 @media (min-width: 768px) {

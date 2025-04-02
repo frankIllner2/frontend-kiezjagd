@@ -377,6 +377,13 @@
                 flex-direction: row;
                 width: map.get($contents-width, "desktop-large"); 
             }
+            .card {
+                border: 1px solid $primary-text-color;
+                @include respond-to("desktop") {
+                    border: none;
+                }
+            }
+
             .info {
                 display: flex;
                 flex-direction: column;
@@ -403,9 +410,24 @@
     .ranking-section {
         margin: auto;
         width: 100%;
-        
         color: $primary-text-color;
         margin-bottom: 20em;
+
+        .glide {
+            button.glide__arrow {
+            display: none !important;
+                @include respond-to("tablet") {
+                    display: block !important;
+                }
+            }
+        }
+        .glide__slide {
+            img {
+            width: 100%;
+            height: auto;
+            max-width: 70px;
+            }
+        }
 
         h2 {
             color: $primary-text-color;
@@ -429,6 +451,9 @@
                 align-items: center;
                 width: 100%;
                 padding: 5px 15px 30px 15px;
+                b {
+                    font-size: 1.8em;
+                }
             }
         
             h4 {
@@ -440,31 +465,32 @@
                 position: absolute;
                 bottom: 15px;
                 right: 15px;
+                text-transform: uppercase;
             }
             ul{
                 display: flex;
                 flex-direction: column;
                 align-items: flex-start;
                 width: 100%;
+                padding: 0 20px 0 7px;
                 li {
                     display: flex;
-                    justify-content: space-around;
+                    justify-content: space-between;
                     width: 100%;
                     text-align: left;
+                    padding: 2px 0;
                     span:first-child {
-                        width: 6%;
+                        width: 8%;
+                        text-align: center;
                     }
                     span:last-child {
-                        width: 26%;
+                        width: 30%;
                         text-align: right;
                     }
                     strong {
-                        width: 70%;
+                        width: 60%;
+                        padding: 0 10px;
                     }
-               
-                }
-                li:nth-child(-n+3) {
-                    font-size: 1.4em; 
                 }
             }
         }
@@ -477,7 +503,6 @@
         padding: 60px 0 80px;
         border-radius: unset;
         h2 {
-            
             color: $primary-text-color;
             margin-bottom: 1em;
         }

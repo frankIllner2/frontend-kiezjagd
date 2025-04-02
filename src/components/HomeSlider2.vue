@@ -33,7 +33,7 @@
           :key="idx"
         >
           <!-- Nur bei Maxi anzeigen wir das Ranking -->
-          <span v-if="getGameType(item.topResults) === 'Maxi'">{{ idx + 1 }}.</span>
+          <span v-if="getGameType(item.topResults) === 'Maxi' || result.gameType === 'Medi'">{{ idx + 1 }}.</span>
 
           <strong>{{ result.teamName }}</strong>
 
@@ -67,18 +67,30 @@ export default {
       const results = [...item.topResults];
       const gameType = this.getGameType(results);
 
-      if (gameType === 'Mini' || gameType === 'Medi') {
+      if (gameType === 'Mini') {
         // Nach startTime sortieren (neueste oben)
         return results.sort((a, b) => new Date(b.startTime) - new Date(a.startTime));
+      } else if (gameType === 'Medi') {
+        // Nach Anzahl der Sterne sortieren (häufigste zuerst)
+        return results.sort((a, b) => b.stars - a.stars);
       } else {
-        // Nach Zeit sortieren (kürzeste Dauer oben)
+        // Maxi: Dauer in Minuten berechnen und sortieren (kürzeste zuerst)
         return results.sort((a, b) => {
-          const timeA = parseInt(a.duration.split("h")[1]);
-          const timeB = parseInt(b.duration.split("h")[1]);
+          const timeToMinutes = (duration) => {
+            const hMatch = duration.match(/(\d+)h/);
+            const mMatch = duration.match(/(\d+)m/);
+            const hours = hMatch ? parseInt(hMatch[1]) : 0;
+            const minutes = mMatch ? parseInt(mMatch[1]) : 0;
+            return hours * 60 + minutes;
+          };
+
+          const timeA = timeToMinutes(a.duration);
+          const timeB = timeToMinutes(b.duration);
           return timeA - timeB;
         });
       }
     }
+
   }
 
 };
@@ -87,25 +99,5 @@ export default {
  
 <style>
 /* Falls spezifische Styles für den Ranking-Slider notwendig sind */
-.ranking-section {
-  
-  .card ul li strong {
-    padding: 0 10px;
-    max-width: 160px;
-    width: 100%;
-  }
-  .glide {
-    button.glide__arrow {
-      display: none !important;
-    }
-  }
-  .glide__slide {
-    img {
-      width: 100%;
-      height: auto;
-      max-width: 70px;
-    }
-  }
 
-}
 </style>
