@@ -90,22 +90,21 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    max-width: 90%;
+    max-width: 98%;
   }
 
   .feedback-content p {
     color: #355b4c;
-    font-size: clamp(1.4rem, 4vw, 3em);
-    font-weight: bold;
+    font-size: clamp(1.2rem, 2vw, 2em);
     text-align: center;
     margin-bottom: 20px;
-    width: 80vw; /* Feste Breite, damit der Text umbricht */
+    width: 90vw;
     max-width: 600px; /* Begrenzung für größere Bildschirme */
     word-wrap: break-word;
     overflow-wrap: break-word;
     white-space: normal;
     line-height: 1.2; /* Guter Zeilenabstand für bessere Lesbarkeit */
-    margin-top: 3.5em;
+    margin-top: 4.5em;
   }
 
   .feedback-content img {

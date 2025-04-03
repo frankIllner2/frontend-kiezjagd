@@ -65,10 +65,10 @@
         </div>
 
         <div class="form-group">
-          <label for="emaildescription">E-Mail Beschreibung</label>
+          <label for="prehistory">Vorgeschichte zum Spiel</label>
           <textarea 
-            v-model="game.emaildescription" 
-            id="emaildescription" 
+            v-model="game.prehistory" 
+            id="prehistory" 
             placeholder="Text für die E-Mail" 
             rows="4"
             required

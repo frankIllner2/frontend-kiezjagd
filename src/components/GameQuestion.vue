@@ -63,7 +63,7 @@ export default {
     return {
       userAnswer: "",
       selectedOptions: null,
-      salutations: ["Hallo", "Hey", "Wie geht es", "Na", "Guten Tag", "Hi"],
+      salutations: ["Hallo", "Hey"],
       players: [],
       currentSalutation: ""
     };
@@ -113,9 +113,9 @@ export default {
       if (this.players.length > 0) {
         const randomSalutation = this.salutations[Math.floor(Math.random() * this.salutations.length)];
         const randomPlayer = this.players[Math.floor(Math.random() * this.players.length)];
-        this.currentSalutation = `${randomSalutation} ${randomPlayer} und`;
+        this.currentSalutation = `${randomSalutation} ${randomPlayer}!`;
       } else {
-        this.currentSalutation = "Hallo und";
+        this.currentSalutation = "Hallo!";
       }
     },
     toggleOption(index) {

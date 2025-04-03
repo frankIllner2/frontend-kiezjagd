@@ -9,25 +9,36 @@
       <h3 v-if="gameName && !gameFinished">Du spielst "{{ gameName }}"</h3>
       <h3 v-if="gameFinished">Du hast gespielt: "{{ gameName }}"</h3>
     </div>
-
-    <!-- Startformular -->
-    <div v-if="!gameStarted" class="game-card start-form">
-      <StartForm
-        :gameId="gameId"
-        :teamName="teamName"
-        :email="email"
-        :playerCount="playerCount"
-        :playerNames="playerNames"
-        :teamExists="teamExists"
-        @checkTeamName="checkTeamName"
-        @startGame="startGame"
-      />
+    <div v-if="!gameStarted || prehistory" class="card content-prehistory">
+      <h4>Die Geschiechte zum Spiel</h4>
+      <p>{{ prehistory }}</p>
+      <button @click="openForm" class="btn btn--primary">
+        Los gehts! 
+      </button>
     </div>
+
+    <!-- Startformular bleibt vollständig -->
+    <div v-if="!gameStarted" class="game-card start-form">
+      <transition name="slide-up">
+        <div v-show="showStartForm" class="form-inner">
+          <button class="close-button" @click="closeForm">×</button>
+          <StartForm
+            :gameId="gameId"
+            :teamName="teamName"
+            :email="email"
+            :playerCount="playerCount"
+            :playerNames="playerNames"
+            :teamExists="teamExists"
+            @checkTeamName="checkTeamName"
+            @startGame="startGame"
+          />
+        </div>
+      </transition>
+    </div>
+
 
     <!-- Fragenbereich -->
     <div v-else-if="!gameFinished" class="game-card question-section">
-  
-
       <transition name="fade-question" mode="out-in">
         <component
           :is="currentQuestion && currentQuestion.type === 'anweisung' ? 'GpsChecker' : 'GameQuestion'"
@@ -121,6 +132,7 @@ export default {
       gameDuration: "0h 0m 0s",
       showFeedback: false,
       feedbackMessage: "",
+      prehistory: "",
       timerInterval: null,
       startTime: null,
       endTime: null,
@@ -130,6 +142,8 @@ export default {
       attemptCount: 0,
       gameType: "",
       showTimeGlow: false,
+      showStartForm: false,
+
     };
   },
   computed: {
@@ -187,6 +201,7 @@ export default {
         this.gameName = response.name || "Unbekanntes Spiel";
         this.questions = response.questions || [];
         this.gameType = response.ageGroup || "Maxi";
+        this.prehistory = response.prehistory || "";
         console.log("🔄 Spieldaten geladen:", response);
       } catch (error) {
         console.error("❌ Fehler beim Laden des Spiels:", error);
@@ -205,6 +220,7 @@ export default {
       this.email = email;
       this.playerNames = playerNames;
       this.startTime = Date.now();
+      this.showStartForm = false;
       this.gameStarted = true;
 
       localStorage.setItem("gameInProgress", "true");
@@ -243,7 +259,7 @@ export default {
             this.$nextTick(() => {
               this.$refs.feedbackAnimation.start();
             });
-          }, 4000);
+          }, 16000);
         }
 
       } else {
@@ -257,7 +273,6 @@ export default {
         }, 5000);
       }
     },
-
     getTimeBonus() {
       if (this.attemptCount === 0) return 60;
       if (this.attemptCount === 1) return 30;
@@ -308,7 +323,6 @@ export default {
       this.showFeedback = false; 
       this.nextQuestion();
     },
-
     startCounting() {
       if (this.countingStarted) return; // 🚀 Blockiert doppeltes Hochzählen
       this.countingStarted = true; // ✅ Markiert als gestartet
@@ -410,6 +424,13 @@ export default {
     goToHome() {
       this.$router.push("/");
     },
+    openForm() {
+      this.showStartForm = true;
+    },
+    closeForm() {
+      this.showStartForm = false;
+    },
+
   },
   beforeUnmount() {
     clearInterval(this.timerInterval);
@@ -556,6 +577,37 @@ export default {
     text-shadow: 0 0 0 rgba(250, 194, 39, 0);
     transform: scale(1);
   }
+}
+/* Overlay-Zustände */
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: transform 0.4s ease, opacity 0.4s ease;
+}
+.slide-up-enter-from,
+.slide-up-leave-to {
+  transform: translateY(100%);
+  opacity: 0;
+}
+
+.form-inner {
+  position: fixed; 
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #f4ebd0;
+  padding: 1rem;
+  z-index: 1000; /* wichtig: höher als alles darunter */
+}
+
+
+.close-button {
+  position: absolute;
+  right: 1rem;
+  top: 1rem;
+  font-size: 1.5rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
 }
 
 

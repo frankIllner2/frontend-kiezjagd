@@ -29,7 +29,7 @@
         setTimeout(() => {
           this.showBonus = false;
           this.$emit("done");
-        }, 4000);
+        }, 6000);
       },
   
     },
