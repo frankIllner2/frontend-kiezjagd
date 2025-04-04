@@ -13,7 +13,7 @@
           class="image-game"
         />
         <div class="headline-game-name">
-        <b>{{ item.name }}</b>
+        <h2>{{ item.name }}</h2>
         </div>
         <div class="short">
           <div class="short-left">
@@ -146,6 +146,7 @@ export default {
 }
 .short {
   .game-infos {
+  
     img {
       transition: transform 0.5s ease-in-out;
     }

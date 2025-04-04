@@ -115,6 +115,7 @@
     cursor: pointer;
     b {
       color: #355b4c;
+      font-size: clamp(1.8rem, 1.5vw, 2em); 
     }
     img {
         margin-top: 10px;

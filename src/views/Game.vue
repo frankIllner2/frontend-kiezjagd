@@ -456,7 +456,7 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-height: 100vh;
+  min-height: 80vh;
 }
 
 /* Header */
@@ -542,8 +542,8 @@ export default {
 
 .star-status p {
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  flex-direction: row;
+  justify-content: space-between;
 }
 
 .star-status img {
