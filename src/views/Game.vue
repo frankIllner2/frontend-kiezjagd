@@ -108,7 +108,6 @@
 <script>
 import StartForm from "@/components/StartForm.vue";
 import GameQuestion from "@/components/GameQuestion.vue";
-//import GameTimer from "@/components/GameTimer.vue";
 import GpsChecker from "@/components/GpsChecker.vue";
 import FeedbackAnimation from "@/components/FeedbackAnimation.vue";
 import { apiService } from "@/services/apiService";
@@ -239,29 +238,40 @@ export default {
       if (isCorrect) {
         this.feedbackMessage = this.currentAnswerQuestion.answerquestion;
         this.feedbackImage = require("@/assets/img/correct.gif");
-        this.showFeedback = true; // ✅ Muss hier rein!
+        this.showFeedback = true;
 
         if (this.gameType === 'Maxi') {
           const bonus = this.getTimeBonus();
+
           if (bonus > 0) {
+            // ⭐ Startzeitbonus-Animation nach 1 Sekunde
             setTimeout(() => {
-              this.showFeedback = false; // 🎬 Feedback erst ausblenden...
-              this.$refs.timeBonusAnimation.startTimeBonusAnimation(bonus); // ...dann Animation starten
-            }, 4500);
+              this.$refs.timeBonusAnimation.startTimeBonusAnimation(bonus);
+            }, 1000);
+
+            // 🚪 Feedback nach 6 Sekunden ausblenden (Animation läuft vorher los)
+            setTimeout(() => {
+              this.showFeedback = false;
+            }, 6000);
+
           } else {
-            console.log('kein Bonus');
+            // Kein Bonus → nur GIF anzeigen, dann zur nächsten Frage
             setTimeout(() => {
               this.showFeedback = false;
               this.nextQuestion();
-            }, 1500);
+            }, 6000);
           }
+
         } else {
+          // 🌟 Sternanimation startet nach 1 Sekunde
+          setTimeout(() => {
+            this.$refs.feedbackAnimation.start();
+          }, 1000);
+
+          // 🚪 Feedback wird 6 Sekunden angezeigt, dann ausgeblendet
           setTimeout(() => {
             this.showFeedback = false;
-            this.$nextTick(() => {
-              this.$refs.feedbackAnimation.start();
-            });
-          }, 16000);
+          }, 8000);
         }
 
       } else {
@@ -270,6 +280,7 @@ export default {
         this.feedbackImage = require("@/assets/img/false.png");
         this.showFeedback = true;
 
+        // ❌ Falsche Antwort → Feedback 5 Sekunden sichtbar
         setTimeout(() => {
           this.showFeedback = false;
         }, 5000);
@@ -538,6 +549,7 @@ export default {
   background-color: #355b4c;
   padding: 10px 15px;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+  z-index: 20001;
 }
 
 .star-status p {

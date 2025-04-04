@@ -1,18 +1,24 @@
-  <template>
-    <div v-if="showFeedback" class="feedback-overlay">
-      <div class="feedback-content">
-        <p>{{ feedbackMessage }}</p>
-        <img v-if="feedbackImage" :src="feedbackImage" alt="Antwort Feedback" />
-      </div>
+<template>
+  <div v-if="showFeedback" class="feedback-overlay">
+    <div class="feedback-content">
+      <p>{{ feedbackMessage }}</p>
+      <img v-if="feedbackImage" :src="feedbackImage" alt="Antwort Feedback" />
     </div>
-    <!-- Sterne-Animation -->
+
+    <!-- ⭐ Sterne-Animation innerhalb des Feedbacks -->
     <div v-show="starAnimation && gameType !== 'Maxi'" class="star-container">
-      <div v-for="star in flyingStars" :key="star.id" class="star" :class="{ flying: star.flying }">
+      <div
+        v-for="star in flyingStars"
+        :key="star.id"
+        class="star"
+        :class="{ flying: star.flying }"
+      >
         ⭐
       </div>
     </div>
-   
-  </template>
+  </div>
+</template>
+
 
   <script>
   export default {
@@ -77,7 +83,7 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(250, 194, 39, 0.9);
+    background: #E9E2D0;
     display: flex;
     justify-content: center;
     align-items: center;
