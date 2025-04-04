@@ -9,12 +9,14 @@
       <h3 v-if="gameName && !gameFinished">Du spielst "{{ gameName }}"</h3>
       <h3 v-if="gameFinished">Du hast gespielt: "{{ gameName }}"</h3>
     </div>
-    <div v-if="!gameStarted || prehistory" class="card content-prehistory">
-      <h4>Die Geschiechte zum Spiel</h4>
-      <p>{{ prehistory }}</p>
-      <button @click="openForm" class="btn btn--primary">
-        Los gehts! 
-      </button>
+    <div v-if="!gameStarted" class="game-card-prehistory">
+      <div v-if="prehistory" class="card content-prehistory">
+        <h4>Die Geschiechte zum Spiel</h4>
+        <p>{{ prehistory }}</p>
+        <button @click="openForm" class="btn btn--primary">
+          Los gehts! 
+        </button>
+      </div>
     </div>
 
     <!-- Startformular bleibt vollständig -->
@@ -475,6 +477,11 @@ export default {
   width: 100%;
   text-align: center;
 }
+.game-card-prehistory {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+}
 
 /* Startformular */
 .start-form {
@@ -519,6 +526,7 @@ export default {
 /* Fixierte Sterne-Anzeige unten */
 .star-status {
   position: fixed;
+  width: 100%;
   top: 0;
   right: 0;
   font-size: 20px;
