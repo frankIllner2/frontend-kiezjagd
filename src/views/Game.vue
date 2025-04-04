@@ -246,6 +246,7 @@ export default {
           if (bonus > 0) {
             // ⭐ Startzeitbonus-Animation nach 1 Sekunde
             setTimeout(() => {
+              
               this.$refs.timeBonusAnimation.startTimeBonusAnimation(bonus);
             }, 1000);
 
