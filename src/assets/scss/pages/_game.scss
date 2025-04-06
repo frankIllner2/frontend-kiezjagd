@@ -115,13 +115,19 @@
     max-width: 250px; /* Begrenzte Breite für Bilder */
     text-align: center;
     align-content: space-around;
+    span {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
   }
 
   .option-card.selected {
     border: 3px solid #FAC227;
     color:#355b4c;
   }
-  .option-image img {
+  .option-image img, .text-image img {
     width: 100%;
     height: auto;
     border-radius: 8px;

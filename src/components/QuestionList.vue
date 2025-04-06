@@ -34,6 +34,10 @@
                 <span v-else-if="option.type === 'image'" class="option-image">
                   <img :src="option.imageUrl" alt="Option Bild" />
                 </span>
+                <span v-else-if="option.type === 'both'" class="option-image">
+                  <img :src="option.imageUrl" alt="Option Bild" />
+                  <span>{{ option.text }}</span>
+                </span>
                 <span v-if="option.correct"> ✅</span>
               </li>
             </ul>

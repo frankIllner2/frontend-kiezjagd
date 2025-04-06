@@ -84,14 +84,15 @@
               <button type="button" class="btn btn--delete-image" @click="removeImage(index)">Bild entfernen</button>
             </div>
           </div>
-
-          <label>
-            <input type="checkbox" v-model="option.correct" />
-            Korrekt
-          </label>
-          <button @click="removeOption(index)" type="button" class="btn-delete">
-            🗑️
-          </button>
+          <div class="edit-question-container">
+            <label>
+              <input type="checkbox" v-model="option.correct" />
+              Korrekt
+            </label>
+            <button @click="removeOption(index)" type="button" class="btn-delete">
+              🗑️
+            </button>
+          </div>
         </div>
         <button @click="addOption" type="button" class="btn btn-add-option">
           Antwort hinzufügen
@@ -314,18 +315,58 @@ export default {
 
 .option-type-selector {
   display: inline-flex;
+  flex-direction: column;
+  width: 100%;
 }
 
 .option-item {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: start;
   gap: 5px;
   margin-bottom: 10px;
+  background-color: #E9E2D0;
+  padding: 10px;
+    &:nth-child(even){
+    background-color: #f4ebd0;
+  }
+  input, select {
+    width: 100%;
+    padding: 5px;
+  }
+  .edit-question-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    label {
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+    }
+    button {
+      display: flex;
+      align-items: center;
+      font-size: 20px;
+    }
+  }
 }
 
 .option-item .add-image {
   display: flex;
   width: 100%;
+  align-items: center;
+  .image-preview {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    flex-direction: column;
+    button {
+      font-size: 16px;
+      padding: 0;
+      background-color: transparent;
+    }
+  }
 }
 
 .option-item input[type="text"] {

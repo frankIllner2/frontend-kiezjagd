@@ -37,6 +37,11 @@
         <span v-else-if="option.type === 'image'" class="option-image">
           <img :src="getCorrectImageUrl(option.imageUrl)" alt="Option Bild" />
         </span>
+        <span v-else-if="option.type === 'both'" class="text-image">
+          <img :src="getCorrectImageUrl(option.imageUrl)" alt="Option Bild" />
+          {{ option.text }}
+          <SpeechButton v-if="gameType === 'Mini' && option.text" :text="option.text" />
+        </span>
       </div>
     </div>
 
