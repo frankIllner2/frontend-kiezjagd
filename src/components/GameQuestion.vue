@@ -1,6 +1,6 @@
 <template>
   <div class="game-question">
-    <p>{{ feedbackMessage }}</p>
+    <p>{{ question.answerquestion }}</p>
     <h3>Frage {{ currentIndex + 1 }}</h3>
 
     <p v-if="currentSalutation">
