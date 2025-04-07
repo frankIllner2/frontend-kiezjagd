@@ -56,7 +56,7 @@
     </div>
 
     <div class="form-group">
-      <label for="prehistory">Email Beschreibung - Anleitung</label>
+      <label for="prehistory">Vorgeschiechte</label>
       <textarea 
         v-model="localGame.prehistory" 
         id="prehistory" 

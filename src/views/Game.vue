@@ -50,6 +50,7 @@
           :currentIndex="currentQuestionIndex"
           :gameType="gameType"
           :onSuccess="nextQuestion"
+          :feedbackMessage="feedbackMessage"
           @submitAnswer="handleAnswer"
         />
       </transition>
@@ -57,7 +58,7 @@
       <FeedbackAnimation
         ref="feedbackAnimation"
         :showFeedback="showFeedback"
-        :feedbackMessage="feedbackMessage"
+        
         :feedbackImage="feedbackImage"
         :earnedStars="earnedStars"
         :gameType="gameType"

@@ -1,7 +1,7 @@
 <template>
   <div v-if="showFeedback" class="feedback-overlay">
     <div class="feedback-content">
-      <p>{{ feedbackMessage }}</p>
+   
       <img v-if="feedbackImage" :src="feedbackImage" alt="Antwort Feedback" />
     </div>
 
