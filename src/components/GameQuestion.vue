@@ -1,14 +1,14 @@
 <template>
   <div class="game-question">
-    <p>{{ question.answerquestion }}</p>
+    <p v-html="question.answerquestion"></p>
     <h3>Frage {{ currentIndex + 1 }}</h3>
 
     <p v-if="currentSalutation">
-      {{ currentSalutation }} {{ question.question }}
+      {{ currentSalutation }} <span v-html=" question.question"></span>
       <SpeechButton v-if="gameType === 'Mini'" :text="fullQuestionText" />
     </p>
     <p v-else>
-      {{ question.question }}
+      <span v-html=" question.question"></span>
       <SpeechButton v-if="gameType === 'Mini'" :text="fullQuestionText" />
     </p>
 

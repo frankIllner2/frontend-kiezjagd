@@ -1,6 +1,6 @@
 <template>
     <div class="gps-checker">
-      <p>{{ question.text }}</p>
+      <h3>{{ question.question }}</h3>
       <button @click="getLocation" :disabled="loading">
         {{ loading ? "Bestimme Standort..." : "Koordinaten senden" }}
       </button>
@@ -22,10 +22,21 @@ export default {
       loading: false,
       error: null,
       success: false,
+      attemptCount: 0, // Neuer Zähler
+      maxAttempts: 3,
     };
   },
   methods: {
     async getLocation() {
+      this.attemptCount++;
+
+      if (this.attemptCount > this.maxAttempts) {
+        this.success = true;
+        this.error = null;
+        this.onSuccess(); // Automatisch weiterschalten
+        return;
+      }
+
       this.loading = true;
       this.error = null;
 
@@ -60,7 +71,7 @@ export default {
                 this.onSuccess(); // Nächste Frage freischalten
               } else {
                 console.log('❌ Falsche Koordinaten');
-                this.error = 'Deine Koordinaten sind nicht richtig! Versuche es nochmal!';
+               
               }
             }
           } catch (error) {
@@ -86,7 +97,7 @@ export default {
               break;
           }
           console.error(errorMessage);
-          this.error = errorMessage;
+          this.error = `${errorMessage} (${this.attemptCount}/${this.maxAttempts})`;
           this.loading = false;
         },
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
@@ -95,6 +106,7 @@ export default {
   },
 };
 </script>
+
 
 <style scoped>
 .gps-checker {

@@ -4,8 +4,8 @@
   "description": "Das Spiel für alle Kinder",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#000000",
+  "background_color": "#E9E2D0",
+  "theme_color": "#E9E2D0",
   "icons": [
       {
         "src": "/icons/icon-48x48.png",

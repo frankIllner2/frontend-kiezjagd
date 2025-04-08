@@ -67,6 +67,17 @@
     </div>
 
     <div class="form-group">
+      <label for="infohistory">Infos zur Geschichte</label>
+      <textarea 
+        v-model="localGame.infohistory" 
+        id="infohistory" 
+        placeholder="Infos zur Geschichte" 
+        rows="4"
+        required
+      ></textarea>
+    </div>
+
+    <div class="form-group">
       <label for="ageGroup">Altersgruppe</label>
       <select v-model="localGame.ageGroup" id="ageGroup" required>
         <option value="">Altersgruppe auswählen</option>

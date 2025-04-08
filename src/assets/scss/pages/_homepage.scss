@@ -535,7 +535,9 @@
                     border-radius: 20px;
                     padding-bottom: 15px;
                     width: 100%;
-                
+                    h2 {
+                        font-size: clamp(2.2rem,3vw,3em);
+                    }
                     .image-game {
                         width: 100%;
                         height: auto;

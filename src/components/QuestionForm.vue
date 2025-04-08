@@ -7,15 +7,22 @@
         <label for="question">{{
           question.type === "anweisung" ? "Anweisung" : "Frage"
         }}</label>
-        <input v-model="question.question" id="question" type="text" required />
+        <textarea v-model="question.question" id="question" rows="2"   required />
       </div>
 
       <!-- Antwort auf Frage -->
-      <div class="form-group">
+      <div class="form-group"  
+        v-if="questionIndex > 0">
+        <b>{{ questionIndex }}</b>
         <label for="question">Individuelle Antwort auf die Frage</label>
-        <input v-model="question.answerquestion" id="answerQuestion" type="text" required />
-      </div>
+        <textarea
+          v-model="question.answerquestion"
+          id="answerQuestion"
+          rows="2"
+          :required="questionIndex > 0"
+        />
 
+      </div>
 
       <!-- Fragetyp -->
       <div class="form-group">
@@ -131,6 +138,10 @@ export default {
       type: Boolean,
       default: false,
       isSaving: false, // Sperre hinzufügen
+    },
+    questionIndex: {
+      type: Number,
+      default: 0,
     },
   },
   data() {

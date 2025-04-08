@@ -12,7 +12,7 @@
     <div v-if="!gameStarted" class="game-card-prehistory">
       <div v-if="prehistory" class="card content-prehistory">
         <h4>Die Geschiechte zum Spiel</h4>
-        <p>{{ prehistory }}</p>
+        <p v-html="prehistory"></p>
         <button @click="openForm" class="btn btn--primary">
           Los gehts! 
         </button>
@@ -56,6 +56,7 @@
       </transition>
 
       <FeedbackAnimation
+        v-if="showFeedback"
         ref="feedbackAnimation"
         :showFeedback="showFeedback"
         
@@ -88,7 +89,7 @@
       <div class="result-container">
         <div class="card">
           <h3>Spiel erfolgreich abgeschlossen!</h3>
-          <div>
+          <div class="result-content">
             <p><strong>Team:</strong> {{ teamName }}</p>
             <p><strong>E-Mail:</strong> {{ email }}</p>
             <p v-if="gameType === 'Maxi'">
@@ -96,6 +97,9 @@
             </p>
             <p v-else><strong>Gesammelte Sterne:</strong> 🌟 {{ starCount }}</p>
             <p>Vielen Dank für's Spielen!</p>
+          </div>
+          <div>
+            <p>{{ infohistory }}</p>
           </div>
           <button @click="goToHome" class="btn btn--primary">
             Zurück zur Startseite
@@ -234,9 +238,10 @@ export default {
     },
     handleAnswer({ isCorrect }) {
       this.currentAnswerQuestion = this.currentQuestion;
-      this.earnedStars = this.calculateStars();
+      
 
       if (isCorrect) {
+        this.earnedStars = this.calculateStars();
         this.feedbackMessage = this.currentAnswerQuestion.answerquestion;
         this.feedbackImage = require("@/assets/img/correct.gif");
         this.showFeedback = true;
@@ -267,8 +272,11 @@ export default {
         } else {
           // 🌟 Sternanimation startet nach 1 Sekunde
           setTimeout(() => {
-            this.$refs.feedbackAnimation.start();
+            if (this.earnedStars > 0) {
+              this.$refs.feedbackAnimation.start(this.earnedStars);
+            }
           }, 1000);
+
 
           // 🚪 Feedback wird 6 Sekunden angezeigt, dann ausgeblendet
           setTimeout(() => {
@@ -277,10 +285,12 @@ export default {
         }
 
       } else {
+        this.earnedStars = 0; 
         this.attemptCount++;
         this.feedbackMessage = "Versuche es nochmal!";
         this.feedbackImage = require("@/assets/img/false.png");
         this.showFeedback = true;
+        console.log('flasche Antwort');
 
         // ❌ Falsche Antwort → Feedback 5 Sekunden sichtbar
         setTimeout(() => {

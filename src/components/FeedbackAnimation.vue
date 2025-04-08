@@ -1,12 +1,11 @@
 <template>
   <div v-if="showFeedback" class="feedback-overlay">
     <div class="feedback-content">
-   
       <img v-if="feedbackImage" :src="feedbackImage" alt="Antwort Feedback" />
     </div>
 
     <!-- ⭐ Sterne-Animation innerhalb des Feedbacks -->
-    <div v-show="starAnimation && gameType !== 'Maxi'" class="star-container">
+    <div v-if="starAnimation && gameType !== 'Maxi'" class="star-container">
       <div
         v-for="star in flyingStars"
         :key="star.id"
@@ -35,12 +34,29 @@
         flyingStars: [],
       };
     },
+    beforeUnmount() {
+      this.flyingStars = [];
+      this.starAnimation = false;
+    },
     methods: {
-      start() {
+      start(stars) {
+        console.log("🎬 Animation gestartet mit", stars, "Sternen");
+
+        if (!stars || stars <= 0) {
+          console.log("⛔ Keine Animation – earnedStars war:", stars);
+          return;
+        }
+
         this.starAnimation = true;
-        this.animateStars();
+        this.flyingStars = [];
+        this.animateStars(stars);
       },
-      animateStars() {
+      animateStars(stars) {
+        
+        if (!stars || stars <= 0) {
+          console.log("⛔ Keine Animation – earnedStars war:", stars);
+          return;
+        }
         console.log("🚀 Starte Stern-Animation...");
         
         this.flyingStars = []; // ⭐ Setze Array immer auf leer
@@ -50,7 +66,7 @@
         let countingStarted = false; // ⏳ Wird benutzt, um das Hochzählen zu starten
 
         const interval = setInterval(() => {
-          if (addedStars < this.earnedStars) {
+          if (addedStars < stars) {
             console.log("🌟 Neuer Stern wird hinzugefügt!", addedStars);
 
             this.flyingStars.push({

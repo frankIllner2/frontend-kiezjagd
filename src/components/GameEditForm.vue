@@ -69,7 +69,18 @@
           <textarea 
             v-model="game.prehistory" 
             id="prehistory" 
-            placeholder="Text für die E-Mail" 
+            placeholder="Text für die Vorgeschichte des Spiels" 
+            rows="4"
+            required
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="infohistory">Infogeschichte zum Spiel</label>
+          <textarea 
+            v-model="game.infohistory" 
+            id="infohistory" 
+            placeholder="Infos zur Geschichte" 
             rows="4"
             required
           ></textarea>
@@ -102,7 +113,14 @@
     </section>
     <div v-if="successMessage" class="success-message">{{ this.successMessage }}</div>
     <section v-if="showQuestionForm" class="edit-section">
-      <QuestionForm ref="questionForm" :questionData="selectedQuestion" :editing="editingQuestion" @save="handleQuestionSave" @cancel="cancelQuestionEdit" />
+      <QuestionForm 
+        ref="questionForm" 
+        :questionData="selectedQuestion" 
+        :editing="editingQuestion" 
+        :questionIndex="selectedQuestion.index" 
+        @save="handleQuestionSave" 
+        @cancel="cancelQuestionEdit" 
+      />
     </section>
   </div>
 </div>
@@ -165,7 +183,7 @@ export default {
       this.game.gameImage = "";
     },
     addQuestion() {
-      this.selectedQuestion = { question: "", answer: "" };
+      this.selectedQuestion = { question: "", answer: "" , index: this.game.questions.length};
       this.showQuestionForm = true;
       this.editingQuestion = false;
       
@@ -184,7 +202,8 @@ export default {
       this.selectedQuestion = { ...question };
       this.showQuestionForm = true;
       this.editingQuestion = true;
-     
+      const index = this.game.questions.findIndex(q => q._id === question._id);
+      this.selectedQuestion.index = index;
     },
     async deleteQuestion(questionId) {
       await apiService.deleteQuestion(this.id, questionId);

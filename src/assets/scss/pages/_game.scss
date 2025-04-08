@@ -129,11 +129,9 @@
   }
   .option-image img, .text-image img {
     width: 100%;
-    height: auto;
-    border-radius: 8px;
     margin-top: 5px;
-    min-width: auto;
-    max-height: 125px;
+    height: auto;
+    max-width: 125px;
   }
   .question-image img {
     width: 100%;
