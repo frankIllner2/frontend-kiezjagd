@@ -87,7 +87,7 @@
     <!-- Spielabschluss -->
     <div v-else class="game-card game-finished">
       <div class="result-container">
-        <div class="card">
+        <div class="result">
           <h3>Spiel erfolgreich abgeschlossen!</h3>
           <div class="result-content">
             <p><strong>Team:</strong> {{ teamName }}</p>
@@ -96,10 +96,14 @@
               <strong>Zeit benötigt:</strong> {{ gameDuration }}
             </p>
             <p v-else><strong>Gesammelte Sterne:</strong> 🌟 {{ starCount }}</p>
+            <p>Hat dir das Spiel gefallen und hast du ein paar Anmerkungen - dann schreib uns!</p>
+            <p><a href="mailto:mail@kiezjagd.de">Team Kiezjagd</a></p><br />
             <p>Vielen Dank für's Spielen!</p>
           </div>
-          <div>
-            <p>{{ infohistory }}</p>
+        </div>
+        <div class="info-container">
+          <div class="info">
+            <p v-html="infohistory"></p>
           </div>
           <button @click="goToHome" class="btn btn--primary">
             Zurück zur Startseite
@@ -138,7 +142,8 @@ export default {
       gameDuration: "0h 0m 0s",
       showFeedback: false,
       feedbackMessage: "",
-      prehistory: "",
+      prehistory: "", 
+      infohistory: "",
       timerInterval: null,
       startTime: null,
       endTime: null,
@@ -208,6 +213,8 @@ export default {
         this.questions = response.questions || [];
         this.gameType = response.ageGroup || "Maxi";
         this.prehistory = response.prehistory || "";
+        this.infohistory = response.infohistory || "";
+        
         console.log("🔄 Spieldaten geladen:", response);
       } catch (error) {
         console.error("❌ Fehler beim Laden des Spiels:", error);
@@ -534,11 +541,6 @@ export default {
   text-align: center;
 }
 
-.game-finished h3 {
-  font-size: 1.5rem;
-  margin-bottom: 10px;
-  color: #4caf50;
-}
 
 .game-finished p {
   margin: 5px 0;

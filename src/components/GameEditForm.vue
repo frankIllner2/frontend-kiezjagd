@@ -76,7 +76,7 @@
         </div>
 
         <div class="form-group">
-          <label for="infohistory">Infogeschichte zum Spiel</label>
+          <label for="infohistory">Infogeschichte zum Spiel (letzte Seite)</label>
           <textarea 
             v-model="game.infohistory" 
             id="infohistory" 
