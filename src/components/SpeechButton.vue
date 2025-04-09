@@ -69,8 +69,7 @@
     background: none;
     border: none;
     cursor: pointer;
-    font-size: 1.5rem;
-    margin-left: 8px;
+    font-size: 1.5rem;    
   }
   .speech-btn:disabled {
     opacity: 0.5;
