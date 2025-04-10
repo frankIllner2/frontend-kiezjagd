@@ -13,7 +13,7 @@
       <!-- Antwort auf Frage -->
       <div class="form-group"  
         v-if="questionIndex > 0">
-        <b>{{ questionIndex }}</b>
+       
         <label for="question">Individuelle Antwort auf die Frage</label>
         <textarea
           v-model="question.answerquestion"

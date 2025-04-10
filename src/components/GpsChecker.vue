@@ -1,7 +1,7 @@
 <template>
     <div class="gps-checker">
       <h3>{{ question.question }}</h3>
-      <button @click="getLocation" :disabled="loading">
+      <button class="btn btn--primary" @click="getLocation" :disabled="loading">
         {{ loading ? "Bestimme Standort..." : "Koordinaten senden" }}
       </button>
       <p v-if="error" class="error">{{ error }}</p>
@@ -113,14 +113,11 @@ export default {
   text-align: center;
   margin: 20px;
 }
-button {
-  background-color: #007bff;
-  color: white;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 16px;
+
+h3 {
+  margin-bottom: 1em;
 }
+
 button:disabled {
   background-color: gray;
 }

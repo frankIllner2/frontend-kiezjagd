@@ -1,6 +1,13 @@
 <template>
   <div class="game-question">
-    <p v-html="question.answerquestion"></p>
+    <div v-if="question.answerquestion" class="answer-section">
+      <div v-html="question.answerquestion"></div>
+      <SpeechButton
+        v-if="gameType === 'Mini'"
+        :text="question.answerquestion"
+      />
+    </div>
+
     <h3>Frage {{ currentIndex + 1 }}</h3>
 
     <p v-if="currentSalutation">
@@ -31,7 +38,7 @@
         :class="{ selected: selectedOptions === index }"
         @click="toggleOption(index)"
       >
-        <span v-if="option.type === 'text'">
+        <span v-if="option.type === 'text'" class="only-text">
           {{ option.text }}
           <SpeechButton v-if="gameType === 'Mini' && option.text" :text="option.text" />
         </span>
@@ -40,7 +47,7 @@
         </span>
         <span v-else-if="option.type === 'both'" class="text-image">
           <img :src="getCorrectImageUrl(option.imageUrl)" alt="Option Bild" />
-          {{ option.text }}
+          <strong>{{ option.text }}</strong>
           <SpeechButton v-if="gameType === 'Mini' && option.text" :text="option.text" />
         </span>
       </div>

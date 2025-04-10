@@ -6,8 +6,7 @@
         <img src="@/assets/img/logo.png" />
       </div>
       <h2 v-if="!this.gameStarted">Dein Abenteuer startet jetzt!</h2>
-      <h3 v-if="gameName && !gameFinished">Du spielst "{{ gameName }}"</h3>
-      <h3 v-if="gameFinished">Du hast gespielt: "{{ gameName }}"</h3>
+      <h3 v-if="!this.gameStarted && !gameFinished">Du spielst "{{ gameName }}"</h3>
     </div>
     <div v-if="!gameStarted" class="game-card-prehistory">
       <div v-if="prehistory" class="card content-prehistory">
@@ -90,21 +89,28 @@
         <div class="result">
           <h3>Spiel erfolgreich abgeschlossen!</h3>
           <div class="result-content">
-            <p><strong>Team:</strong> {{ teamName }}</p>
-            <p><strong>E-Mail:</strong> {{ email }}</p>
-            <p v-if="gameType === 'Maxi'">
-              <strong>Zeit benötigt:</strong> {{ gameDuration }}
-            </p>
-            <p v-else><strong>Gesammelte Sterne:</strong> 🌟 {{ starCount }}</p>
-            <p>Hat dir das Spiel gefallen und hast du ein paar Anmerkungen - dann schreib uns!</p>
-            <p><a href="mailto:mail@kiezjagd.de">Team Kiezjagd</a></p><br />
-            <p>Vielen Dank für's Spielen!</p>
+            <div>
+              <p><strong>Team:</strong> {{ teamName }}</p>
+              <p v-if="gameType === 'Maxi'">
+                <strong>Zeit benötigt:</strong> {{ gameDuration }}
+              </p>
+              <p v-else><strong>Gesammelte Sterne:</strong> 🌟 {{ starCount }}</p>
+            </div>
+            <div>
+              <p>Hat dir das Spiel gefallen und hast du ein paar Anmerkungen - dann schreib uns!</p>
+              <p><a href="mailto:mail@kiezjagd.de">Team Kiezjagd</a></p><br />
+            </div>
           </div>
         </div>
         <div class="info-container">
-          <div class="info">
-            <p v-html="infohistory"></p>
+          <div v-if="infohistory" class="info-container">
+            <div v-html="infohistory"></div>
+            <SpeechButton
+              v-if="gameType === 'Mini'"
+              :text="infohistory"
+            />
           </div>
+
           <button @click="goToHome" class="btn btn--primary">
             Zurück zur Startseite
           </button>
@@ -121,10 +127,11 @@ import GpsChecker from "@/components/GpsChecker.vue";
 import FeedbackAnimation from "@/components/FeedbackAnimation.vue";
 import { apiService } from "@/services/apiService";
 import TimeBonusAnimation from "@/components/TimeBonusAnimation.vue";
+import SpeechButton from "@/components/SpeechButton.vue";
 
 
 export default {
-  components: { StartForm, GameQuestion, GpsChecker, FeedbackAnimation, TimeBonusAnimation },
+  components: { StartForm, GameQuestion, GpsChecker, FeedbackAnimation, TimeBonusAnimation, SpeechButton },
   data() {
     return {
       gameId: null,
@@ -153,7 +160,8 @@ export default {
       attemptCount: 0,
       gameType: "",
       showTimeGlow: false,
-      showStartForm: false,
+      showStartForm: false, 
+      correctSound: null,
 
     };
   },
@@ -245,13 +253,14 @@ export default {
     },
     handleAnswer({ isCorrect }) {
       this.currentAnswerQuestion = this.currentQuestion;
-      
-
       if (isCorrect) {
         this.earnedStars = this.calculateStars();
         this.feedbackMessage = this.currentAnswerQuestion.answerquestion;
         this.feedbackImage = require("@/assets/img/correct.gif");
         this.showFeedback = true;
+
+        this.correctSound = new Audio(require('@/assets/sound/correct.flac'));
+        this.correctSound.play();
 
         if (this.gameType === 'Maxi') {
           const bonus = this.getTimeBonus();
@@ -259,7 +268,6 @@ export default {
           if (bonus > 0) {
             // ⭐ Startzeitbonus-Animation nach 1 Sekunde
             setTimeout(() => {
-              
               this.$refs.timeBonusAnimation.startTimeBonusAnimation(bonus);
             }, 1000);
 
@@ -485,8 +493,7 @@ export default {
 .game-container {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  min-height: 80vh;
+  align-items: stretch;
 }
 
 /* Header */
