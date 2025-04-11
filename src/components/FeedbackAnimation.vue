@@ -4,7 +4,7 @@
       <img v-if="feedbackImage" :src="feedbackImage" alt="Antwort Feedback" />
     </div>
 
-    <!-- ⭐ Sterne-Animation innerhalb des Feedbacks -->
+    <!-- Sterne-Animation innerhalb des Feedbacks -->
     <div v-if="starAnimation && gameType !== 'Maxi'" class="star-container">
       <div
         v-for="star in flyingStars"
@@ -12,7 +12,7 @@
         class="star"
         :class="{ flying: star.flying }"
       >
-        ⭐
+      <font-awesome-icon icon="star" />
       </div>
     </div>
   </div>

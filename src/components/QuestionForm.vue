@@ -7,7 +7,14 @@
         <label for="question">{{
           question.type === "anweisung" ? "Anweisung" : "Frage"
         }}</label>
-        <textarea v-model="question.question" id="question" rows="2"   required />
+        <textarea 
+          v-model="question.question" 
+          id="question" 
+          rows="2"   
+          required 
+          maxlength="300"
+          />
+          <small>{{ question.question?.length || 0 }}/300 Zeichen</small>
       </div>
 
       <!-- Antwort auf Frage -->
@@ -18,10 +25,11 @@
         <textarea
           v-model="question.answerquestion"
           id="answerQuestion"
+          maxlength="250" 
           rows="2"
           :required="questionIndex > 0"
         />
-
+        <small>{{ question.answerquestion?.length || 0 }}/250 Zeichen</small>
       </div>
 
       <!-- Fragetyp -->
@@ -125,13 +133,15 @@ export default {
     questionData: {
       type: Object,
       default: () => ({
-        question: "",
-        answerquestion: "",
         type: "text",
         options: [],
         answer: "",
         imageUrl: "",
         coordinates: { lat: null, lon: null },
+        question: {
+          question: "",
+          answerquestion: "",
+        }
       }),
     },
     isEditing: {

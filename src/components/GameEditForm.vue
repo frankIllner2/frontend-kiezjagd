@@ -58,10 +58,12 @@
           <textarea 
             v-model="game.description" 
             id="description" 
+            maxlength="420" 
             placeholder="Kurze Beschreibung des Spiels hinzufügen" 
             rows="4"
             required
           ></textarea>
+          <small>{{ game.description?.length || 0 }}/420 Zeichen</small>
         </div>
 
         <div class="form-group">
@@ -69,21 +71,25 @@
           <textarea 
             v-model="game.prehistory" 
             id="prehistory" 
+            maxlength="550" 
             placeholder="Text für die Vorgeschichte des Spiels" 
             rows="4"
             required
           ></textarea>
+          <small>{{ game.prehistory?.length || 0 }}/550 Zeichen</small>
         </div>
 
         <div class="form-group">
           <label for="infohistory">Infogeschichte zum Spiel (letzte Seite)</label>
           <textarea 
             v-model="game.infohistory" 
-            id="infohistory" 
+            id="infohistory"
+            maxlength="1200" 
             placeholder="Infos zur Geschichte" 
             rows="4"
             required
           ></textarea>
+          <small>{{ game.infohistory?.length || 0}}/1200 Zeichen</small>
         </div>
 
         <div class="form-group">
@@ -142,6 +148,8 @@ export default {
         ageGroup: "",
         encryptedId: "",
         description: "",
+        prehistory: "",
+        infohistory: "",
         questions: [],
         isDisabled: false,
         gameImage: "",

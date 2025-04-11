@@ -120,10 +120,10 @@
   </div>
 </template>
 
-<script>
+<script> 
 import StartForm from "@/components/StartForm.vue";
 import GameQuestion from "@/components/GameQuestion.vue";
-import GpsChecker from "@/components/GpsChecker.vue";
+import GpsChecker from "@/components/GpsChecker.vue"; 
 import FeedbackAnimation from "@/components/FeedbackAnimation.vue";
 import { apiService } from "@/services/apiService";
 import TimeBonusAnimation from "@/components/TimeBonusAnimation.vue";
@@ -493,7 +493,7 @@ export default {
 .game-container {
   display: flex;
   flex-direction: column;
-  align-items: stretch;
+  align-items: center;
 }
 
 /* Header */

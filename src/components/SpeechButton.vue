@@ -1,9 +1,12 @@
 <template>
   <button @click="speakText" :disabled="isSpeaking" class="speech-btn">
-    <span v-if="isSpeaking">🔊...</span>
-    <span v-else>🔊</span>
+    <font-awesome-icon
+      icon="volume-up"
+      :class="{ 'is-speaking': isSpeaking }"
+    />
   </button>
 </template>
+
 
 <script>
 export default {
@@ -20,8 +23,12 @@ export default {
     };
   },
   mounted() {
-    this.loadVoices();
-    window.speechSynthesis.onvoiceschanged = this.loadVoices;
+    if (speechSynthesis.getVoices().length > 0) {
+      this.loadVoices();
+    } else {
+      // Stimmen werden async geladen
+      speechSynthesis.onvoiceschanged = this.loadVoices;
+    }
   },
   methods: {
     loadVoices() {
@@ -80,8 +87,30 @@ export default {
   cursor: pointer;
   font-size: 1.5rem;
 }
+
+.speech-btn svg {
+  color: #355b4c;
+  margin-left: 5px;
+}
+
+/* 🎯 Wiggle-Animation auf das gerenderte SVG, wenn über .is-speaking */
+:v-deep(.is-speaking > svg) {
+  animation: wiggle 0.6s ease-in-out infinite;
+  transform-origin: center;
+}
+
 .speech-btn:disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: not-allowed;
+}
+</style>
+
+<style>
+@keyframes wiggle {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(5deg); }
+  50% { transform: rotate(0deg); }
+  75% { transform: rotate(-5deg); }
+  100% { transform: rotate(0deg); }
 }
 </style>

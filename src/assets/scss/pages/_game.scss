@@ -127,7 +127,7 @@
     justify-content: flex-end;
     padding: 4px;
     border-radius: 8px;
-    background-color: #f9f9f9;
+    border: 1px solid $primary-text-color;
     cursor: pointer;
     max-width: 250px; /* Begrenzte Breite für Bilder */
     text-align: center;
@@ -137,6 +137,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: flex-end;
+      padding: 2px 4px;
     }
     strong {
       margin-top: 2px;
