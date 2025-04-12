@@ -90,7 +90,7 @@
     }
     .game-question {
       text-align: center;
-      margin: 20px;
+      margin: 3em 20px 20px 20px;
       p {
         font-size: clamp(1.2rem, 2vw, 2em);
         margin: 0.5em 0;
@@ -137,7 +137,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: flex-end;
-      padding: 2px 4px;
+      padding: 2px;
     }
     strong {
       margin-top: 2px;
@@ -153,6 +153,12 @@
     width: 100%;
     height: auto;
     max-width: 100px;
+
+
+    @include respond-to("mobile") {
+      max-width: 140px;
+    }
+
   }
   .question-image img {
     width: 100%;

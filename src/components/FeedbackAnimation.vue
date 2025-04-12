@@ -166,5 +166,6 @@
     position: absolute;
     animation: fly-to-status 4s ease-in-out forwards;
     right: 5vw; 
+    color: #FAC227;
   }
   </style>
