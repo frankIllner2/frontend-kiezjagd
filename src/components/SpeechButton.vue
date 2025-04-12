@@ -61,8 +61,8 @@ export default {
 
       const utterance = new SpeechSynthesisUtterance(plainText);
       utterance.lang = "de-DE";
-      utterance.rate = 0.8;
-      utterance.pitch = 1;
+      utterance.rate = 0.85;
+      utterance.pitch = 1.1;
       utterance.volume = 1;
 
       if (this.selectedVoice) {
