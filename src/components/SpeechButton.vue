@@ -26,7 +26,6 @@ export default {
     if (speechSynthesis.getVoices().length > 0) {
       this.loadVoices();
     } else {
-      // Stimmen werden async geladen
       speechSynthesis.onvoiceschanged = this.loadVoices;
     }
   },
@@ -43,9 +42,6 @@ export default {
       console.log("✅ Gewählte Stimme:", this.selectedVoice?.name || "Standard");
     },
 
-    /**
-     * Wandelt HTML in reinen Text um, damit keine Tags vorgelesen werden.
-     */
     sanitizeText(html) {
       const div = document.createElement("div");
       div.innerHTML = html;
@@ -53,9 +49,14 @@ export default {
     },
 
     speakText() {
-      if (!this.text) return;
+      // Toggle-Funktion: Wenn bereits gesprochen wird, dann abbrechen
+      if (this.isSpeaking || speechSynthesis.speaking) {
+        window.speechSynthesis.cancel();
+        this.isSpeaking = false;
+        return;
+      }
 
-      window.speechSynthesis.cancel();
+      if (!this.text) return;
 
       const plainText = this.sanitizeText(this.text);
 
@@ -70,6 +71,7 @@ export default {
       }
 
       this.isSpeaking = true;
+
       utterance.onend = () => {
         this.isSpeaking = false;
       };
@@ -79,6 +81,7 @@ export default {
   }
 };
 </script>
+
 
 <style scoped>
 .speech-btn {

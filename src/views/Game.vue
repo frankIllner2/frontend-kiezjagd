@@ -10,12 +10,22 @@
     </div>
     <div v-if="!gameStarted" class="game-card-prehistory">
       <div v-if="prehistory" class="card content-prehistory">
-        <h4>Die Geschiechte zum Spiel</h4>
-        <p v-html="prehistory"></p>
+        <h4>Die Geschichte zum Spiel</h4>
+
+        <!-- Text wird als HTML angezeigt -->
+        <div v-html="prehistory"></div>
+
+        <!-- Sprachausgabe für Mini-Spieltyp -->
+        <SpeechButton
+          v-if="gameType === 'Mini'"
+          :text="prehistory"
+        />
+
         <button @click="openForm" class="btn btn--primary">
-          Los gehts! 
+          Los geht’s!
         </button>
       </div>
+
     </div>
 
     <!-- Startformular bleibt vollständig -->
