@@ -93,6 +93,11 @@
       </select>
     </div>
 
+    <div class="form-group checkbox-group">
+        <input type="checkbox" id="disabled" v-model="localGame.isDisabled" />
+        <label for="disabled">Spiel deaktivieren</label>
+      </div>
+
     <div class="form-actions">
       <button type="submit" class="btn btn--save">Speichern</button>
     </div>
