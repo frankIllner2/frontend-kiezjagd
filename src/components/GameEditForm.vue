@@ -24,9 +24,7 @@
 
         <div class="form-group"  :class="{ 'has-image': previewImage }">
           <label for="gameImage">Spielbild</label>
-          <input type="file" @change="handleImageUpload" id="gameImage" accept="image/*"  />
-          <img v-if="previewImage" :src="previewImage" alt="Vorschau" class="image-preview" />
-          <button v-if="previewImage" type="button" @click="removeImage" class="btn btn--delete-image">Bild entfernen</button>
+          <OptimizedImageUploader v-model="uploadedImage" />
         </div>
 
         <div class="form-row">
@@ -135,10 +133,11 @@
 <script>
 import QuestionList from "@/components/QuestionList.vue";
 import QuestionForm from "@/components/QuestionForm.vue";
+import OptimizedImageUploader from "@/components/OptimizedImageUploader.vue";
 import apiService from "@/services/apiService";
 
 export default {
-  components: { QuestionList, QuestionForm },
+  components: { QuestionList, QuestionForm, OptimizedImageUploader },
   props: ["id"],
   data() {
     return {

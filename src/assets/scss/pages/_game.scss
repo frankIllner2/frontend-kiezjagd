@@ -63,6 +63,26 @@
             margin-bottom: 1em;
             
         }
+
+        ul {
+          padding-left: 1.5em; /* rückt alles ein */
+          list-style: none; /* entfernt Standard-Bullets */
+          text-align: left;
+        }
+        
+        ul li {
+          position: relative;
+          padding-left: 1.2em; /* Platz für das neue Symbol */
+          margin-bottom: 0.5em;
+        }
+        
+        ul li::before {
+          content: "-"; /* hier kannst du das Symbol ändern */
+          position: absolute;
+          left: 0;
+          color: #333; /* Farbe des Symbols */
+        }
+
     }
     .content-prehistory {
       width: 100%;
