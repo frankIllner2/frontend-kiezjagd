@@ -172,6 +172,8 @@ export default {
         const response = await apiService.fetchGameById(id, true); //
         this.game = { ...response };
         this.uploadedImage = response.gameImage;
+        console.log("🖼️ gameImage aus Response:", response.gameImage);
+
       } catch (error) {
         console.error("Fehler beim Laden des Spiels:", error);
       }
@@ -237,9 +239,7 @@ export default {
     async updateGame() {
       try {
         let imageUrl = this.game.gameImage;
-        console.log("Upload-Datei:", this.uploadedImage);
-        console.log("📦 Typ:", typeof this.uploadedImage); // sollte „object“ sein
-        console.log("📂 instanceof File?", this.uploadedImage instanceof File); // sollte true sein
+
 
         if (this.uploadedImage) imageUrl = await apiService.uploadImage(this.uploadedImage);
         const gameData = { ...this.game, gameImage: imageUrl };

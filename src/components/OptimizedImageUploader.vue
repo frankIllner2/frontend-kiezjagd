@@ -20,7 +20,8 @@
         resizedFile: null,
       };
     },
-    mounted() {
+    mounted() { 
+      console.log("👀 modelValue bei Mount:", this.modelValue);
       if (this.modelValue) {
         this.previewImage = typeof this.modelValue === "string"
           ? this.modelValue
@@ -28,12 +29,16 @@
       }
     },
     watch: {
-      modelValue(newVal) {
-        if (!newVal) {
-          this.previewImage = null;
-        }
-      }
-    },
+  modelValue(newVal) {
+    if (!newVal) {
+      this.previewImage = null;
+    } else {
+      this.previewImage = typeof newVal === "string"
+        ? newVal
+        : URL.createObjectURL(newVal);
+    }
+  }
+},
     methods: {
       handleImageResize(event) {
         const file = event.target.files[0];
