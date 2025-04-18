@@ -49,12 +49,12 @@
       <textarea 
         v-model="localGame.description" 
         id="description"
-        maxlength="420" 
+        maxlength="560" 
         placeholder="Kurze Beschreibung des Spiels hinzufügen" 
         rows="4"
         required
       ></textarea>
-      <small>{{ localGame.description?.length || 0 }}/420 Zeichen</small>
+      <small>{{ localGame.description?.length || 0 }}/560 Zeichen</small>
     </div>
 
     <div class="form-group">
@@ -62,12 +62,12 @@
       <textarea 
         v-model="localGame.prehistory" 
         id="prehistory"
-        maxlength="550" 
+        maxlength="650" 
         placeholder="Die Geschichte des Spiels" 
         rows="4"
         required
       ></textarea>
-      <small>{{ localGame.prehistory?.length || 0 }}/550 Zeichen</small>
+      <small>{{ localGame.prehistory?.length || 0 }}/650 Zeichen</small>
     </div>
 
     <div class="form-group">

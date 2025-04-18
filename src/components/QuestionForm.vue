@@ -12,9 +12,9 @@
           id="question" 
           rows="2"   
           required 
-          maxlength="300"
+          maxlength="400"
           />
-          <small>{{ question.question?.length || 0 }}/300 Zeichen</small>
+          <small>{{ question.question?.length || 0 }}/400 Zeichen</small>
       </div>
 
       <!-- Antwort auf Frage -->
@@ -25,11 +25,11 @@
         <textarea
           v-model="question.answerquestion"
           id="answerQuestion"
-          maxlength="250" 
+          maxlength="350" 
           rows="2"
           :required="questionIndex > 0"
         />
-        <small>{{ question.answerquestion?.length || 0 }}/250 Zeichen</small>
+        <small>{{ question.answerquestion?.length || 0 }}/350 Zeichen</small>
       </div>
 
       <!-- Fragetyp -->
