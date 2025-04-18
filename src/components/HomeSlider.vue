@@ -138,8 +138,7 @@ export default {
   padding-bottom: 15px;
 
   .image-game {
-    max-width: 422px;
-    width: 100%;
+    max-height: 318px;
     margin-bottom: 10px;
     border-radius: 20px 20px 0 0;
   }
