@@ -172,19 +172,20 @@ export const apiService = {
     },
     
   // Bild hochladen
-  uploadImage(file) {
-    if (!file) throw new Error('⚠️ Keine Datei zum Hochladen ausgewählt.');
-    const formData = new FormData();
-    formData.append('image', file);
+    uploadImage(file) {
+        console.log('das File' + file);
+        if (!file) throw new Error('⚠️ Keine Datei zum Hochladen ausgewählt.');
+        const formData = new FormData();
+        formData.append('image', file);
 
-    return axiosInstance.post('/upload', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    })
-      .then(res => res.data.imageUrl)
-      .catch(error => handleApiError(error, 'uploadImage'));
-  },
+        return axiosInstance.post('/upload', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        })
+        .then(res => res.data.imageUrl)
+        .catch(error => handleApiError(error, 'uploadImage'));
+    },
   // Newsletter
   subscribeToNewsletter(email) {
     if (!email) throw new Error("E-Mail erforderlich");

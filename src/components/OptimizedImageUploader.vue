@@ -10,19 +10,35 @@
   </template>
   
   <script>
-  export default {
-    props: ["value"],
+    export default {
+    props: {
+      modelValue: File
+    },
     data() {
       return {
         previewImage: null,
         resizedFile: null,
       };
     },
+    mounted() {
+      if (this.modelValue) {
+        this.previewImage = typeof this.modelValue === "string"
+          ? this.modelValue
+          : URL.createObjectURL(this.modelValue);
+      }
+    },
+    watch: {
+      modelValue(newVal) {
+        if (!newVal) {
+          this.previewImage = null;
+        }
+      }
+    },
     methods: {
       handleImageResize(event) {
         const file = event.target.files[0];
         if (!file) return;
-  
+
         const reader = new FileReader();
         reader.onload = (e) => {
           const img = new Image();
@@ -32,17 +48,20 @@
             const scale = maxWidth / img.width;
             canvas.width = maxWidth;
             canvas.height = img.height * scale;
-  
+
             const ctx = canvas.getContext("2d");
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-  
+
             canvas.toBlob((blob) => {
               if (blob) {
-                this.resizedFile = new File([blob], file.name, { type: "image/jpeg" });
+                const webpFile = new File([blob], file.name.replace(/\.(jpe?g|png)$/i, ".webp"), {
+                  type: "image/webp",
+                });
                 this.previewImage = URL.createObjectURL(blob);
-                this.$emit("input", this.resizedFile); // Emit zur Nutzung mit v-model
+                this.$emit("update:modelValue", webpFile); // ← das ist entscheidend!
+                
               }
-            }, "image/jpeg", 0.85);
+            }, "image/webp", 0.85);
           };
           img.src = e.target.result;
         };
@@ -50,11 +69,11 @@
       },
       removeImage() {
         this.previewImage = null;
-        this.resizedFile = null;
-        this.$emit("input", null);
+        this.$emit("update:modelValue", null);
       },
     },
   };
+
   </script>
   
   <style scoped>

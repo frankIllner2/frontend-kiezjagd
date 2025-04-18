@@ -23,7 +23,6 @@
         </div>
 
         <div class="form-group"  :class="{ 'has-image': previewImage }">
-          <label for="gameImage">Spielbild</label>
           <OptimizedImageUploader v-model="uploadedImage" />
         </div>
 
@@ -172,7 +171,7 @@ export default {
       try {
         const response = await apiService.fetchGameById(id, true); //
         this.game = { ...response };
-        this.previewImage = response.gameImage;
+        this.uploadedImage = response.gameImage;
       } catch (error) {
         console.error("Fehler beim Laden des Spiels:", error);
       }
@@ -238,6 +237,10 @@ export default {
     async updateGame() {
       try {
         let imageUrl = this.game.gameImage;
+        console.log("Upload-Datei:", this.uploadedImage);
+        console.log("📦 Typ:", typeof this.uploadedImage); // sollte „object“ sein
+        console.log("📂 instanceof File?", this.uploadedImage instanceof File); // sollte true sein
+
         if (this.uploadedImage) imageUrl = await apiService.uploadImage(this.uploadedImage);
         const gameData = { ...this.game, gameImage: imageUrl };
         await apiService.updateGame({ _id: this.id, ...gameData });
