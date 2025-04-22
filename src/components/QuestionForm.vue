@@ -4,9 +4,14 @@
     <form @submit.prevent="saveQuestion">
       <!-- Frage -->
       <div class="form-group">
-        <label for="question">{{
-          question.type === "anweisung" ? "Anweisung" : "Frage"
-        }}</label>
+        <label for="question">
+          <template v-if="question.type === 'anweisung'">Anweisung</template>
+          <template v-else-if="question.type === 'next'">
+            Weiter
+            <span style="color: red; margin-left: 10px;">Hinweis!</span>
+          </template>
+          <template v-else>Frage</template>
+        </label>
         <textarea 
           v-model="question.question" 
           id="question" 
@@ -19,7 +24,7 @@
 
       <!-- Antwort auf Frage -->
       <div class="form-group"  
-        v-if="questionIndex > 0">
+        v-if="questionIndex > 0 && question.type !== 'next'">
        
         <label for="question">Individuelle Antwort auf die Frage</label>
         <textarea
@@ -27,7 +32,6 @@
           id="answerQuestion"
           maxlength="350" 
           rows="2"
-          :required="questionIndex > 0"
         />
         <small>{{ question.answerquestion?.length || 0 }}/350 Zeichen</small>
       </div>
@@ -39,6 +43,7 @@
           <option value="text">Freitext</option>
           <option value="multiple">Mehrfachauswahl</option>
           <option value="anweisung">Anweisung (GPS)</option>
+          <option value="next">Weiter (ohne Wertung)</option>
         </select>
       </div>
 
@@ -273,6 +278,12 @@ export default {
               answerquestion: this.question.answerquestion,
               type: this.question.type,
               coordinates: this.question.coordinates,
+            });
+          } else if (this.question.type === "next") {
+            await apiService.updateQuestion(this.$route.params.id, this.question._id, {
+              question: this.question.question,
+              answerquestion: this.question.answerquestion,
+              type: this.question.type,
             });
           }
         } else {

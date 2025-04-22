@@ -65,10 +65,9 @@
       </transition>
 
       <FeedbackAnimation
-        v-if="showFeedback"
+        v-if="showFeedback && currentQuestion?.type !== 'next'"
         ref="feedbackAnimation"
         :showFeedback="showFeedback"
-        
         :feedbackImage="feedbackImage"
         :earnedStars="earnedStars"
         :gameType="gameType"
@@ -77,6 +76,7 @@
       />
 
       <TimeBonusAnimation
+        v-if="currentQuestion?.type !== 'next'"
         ref="timeBonusAnimation"
         :gameType="gameType"
         @applyBonus="applyTimeBonus"
@@ -84,7 +84,7 @@
       />
 
 
-      <div class="star-status">
+      <div class="star-status" v-if="currentQuestion?.type !== 'next'">
         <p v-if="gameType === 'Maxi'" :class="{ 'time-bonus-glow': showTimeGlow }">
           <span>Zeit benötigt:</span> 
           <strong>{{ gameDuration }}</strong>
@@ -263,6 +263,12 @@ export default {
     },
     handleAnswer({ isCorrect }) {
       this.currentAnswerQuestion = this.currentQuestion;
+
+      if (this.currentAnswerQuestion.type === 'next') {
+        this.nextQuestion();
+        return;
+      }
+
       if (isCorrect) {
         this.earnedStars = this.calculateStars();
         this.feedbackMessage = this.currentAnswerQuestion.answerquestion;

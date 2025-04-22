@@ -1,6 +1,6 @@
 <template>
     <div class="error-page">
-      <h1></h1>
+      <h1>Link abgelaufen</h1>
       <p>Leider ist der Link für dieses Spiel nicht mehr gültig.</p><br />
       <router-link to="/" class="btn btn--primary">Zurück zur Startseite</router-link>
     </div>
@@ -16,6 +16,7 @@
   .error-page {
     text-align: center;
     margin-top: 50px;
+    width: 50%;
   }
   h1 {
     color: #f44336;
@@ -26,6 +27,10 @@
     color: white;
     padding: 10px 20px;
     border-radius: 5px;
+    text-decoration: none;
+  }
+  a {
+    color: #4caf50;
     text-decoration: none;
   }
   </style>

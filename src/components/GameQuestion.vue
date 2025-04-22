@@ -52,10 +52,24 @@
         </span>
       </div>
     </div>
+      <!-- Standard-Antwort Button -->
+      <button
+        v-if="!['anweisung', 'next'].includes(question.type)"
+        class="btn btn--secondary"
+        @click="submitAnswer"
+      >
+        Antwort senden
+      </button>
 
-    <button v-if="question.type !== 'anweisung'" class="btn btn--secondary" @click="submitAnswer">
-      Antwort senden
-    </button>
+      <!-- Weiter-Button für "next" -->
+      <button
+        v-else-if="question.type === 'next'"
+        class="btn btn--primary"
+        @click="$emit('submitAnswer', { isCorrect: true })"
+      >
+        Weiter
+      </button>
+
   </div>
 </template>
 
