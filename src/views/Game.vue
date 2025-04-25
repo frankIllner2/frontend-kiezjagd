@@ -16,16 +16,10 @@
         <div v-html="prehistory"></div>
 
         <!-- Sprachausgabe für Mini-Spieltyp -->
-        <SpeechButton
-          v-if="gameType === 'Mini'"
-          :text="prehistory"
-        />
+        <SpeechButton v-if="gameType === 'Mini'" :text="prehistory" />
 
-        <button @click="openForm" class="btn btn--primary">
-          Los geht’s!
-        </button>
+        <button @click="openForm" class="btn btn--primary">Los geht’s!</button>
       </div>
-
     </div>
 
     <!-- Startformular bleibt vollständig -->
@@ -47,12 +41,15 @@
       </transition>
     </div>
 
-
     <!-- Fragenbereich -->
     <div v-else-if="!gameFinished" class="game-card question-section">
       <transition name="fade-question" mode="out-in">
         <component
-          :is="currentQuestion && currentQuestion.type === 'anweisung' ? 'GpsChecker' : 'GameQuestion'"
+          :is="
+            currentQuestion && currentQuestion.type === 'anweisung'
+              ? 'GpsChecker'
+              : 'GameQuestion'
+          "
           v-if="currentQuestion"
           :key="currentQuestionIndex"
           :question="currentQuestion"
@@ -83,10 +80,9 @@
         @done="onTimeBonusDone"
       />
 
-
       <div class="star-status" v-if="currentQuestion?.type !== 'next'">
         <p v-if="gameType === 'Maxi'" :class="{ 'time-bonus-glow': showTimeGlow }">
-          <span>Zeit benötigt:</span> 
+          <span>Zeit benötigt:</span>
           <strong>{{ gameDuration }}</strong>
         </p>
         <p v-else><strong>Gesammelte Sterne:</strong> 🌟 {{ starCount }}</p>
@@ -107,18 +103,19 @@
               <p v-else><strong>Gesammelte Sterne:</strong> 🌟 {{ starCount }}</p>
             </div>
             <div>
-              <p>Hat dir das Spiel gefallen und hast du ein paar Anmerkungen - dann schreib uns!</p>
-              <p><a href="mailto:mail@kiezjagd.de">Team Kiezjagd</a></p><br />
+              <p>
+                Hat dir das Spiel gefallen und hast du ein paar Anmerkungen - dann schreib
+                uns!
+              </p>
+              <p><a href="mailto:mail@kiezjagd.de">Team Kiezjagd</a></p>
+              <br />
             </div>
           </div>
         </div>
         <div class="info-container">
           <div v-if="infohistory" class="info-container">
             <div v-html="infohistory"></div>
-            <SpeechButton
-              v-if="gameType === 'Mini'"
-              :text="infohistory"
-            />
+            <SpeechButton v-if="gameType === 'Mini'" :text="infohistory" />
           </div>
 
           <button @click="goToHome" class="btn btn--primary">
@@ -130,18 +127,24 @@
   </div>
 </template>
 
-<script> 
+<script>
 import StartForm from "@/components/StartForm.vue";
 import GameQuestion from "@/components/GameQuestion.vue";
-import GpsChecker from "@/components/GpsChecker.vue"; 
+import GpsChecker from "@/components/GpsChecker.vue";
 import FeedbackAnimation from "@/components/FeedbackAnimation.vue";
 import { apiService } from "@/services/apiService";
 import TimeBonusAnimation from "@/components/TimeBonusAnimation.vue";
 import SpeechButton from "@/components/SpeechButton.vue";
 
-
 export default {
-  components: { StartForm, GameQuestion, GpsChecker, FeedbackAnimation, TimeBonusAnimation, SpeechButton },
+  components: {
+    StartForm,
+    GameQuestion,
+    GpsChecker,
+    FeedbackAnimation,
+    TimeBonusAnimation,
+    SpeechButton,
+  },
   data() {
     return {
       gameId: null,
@@ -159,7 +162,7 @@ export default {
       gameDuration: "0h 0m 0s",
       showFeedback: false,
       feedbackMessage: "",
-      prehistory: "", 
+      prehistory: "",
       infohistory: "",
       timerInterval: null,
       startTime: null,
@@ -170,9 +173,8 @@ export default {
       attemptCount: 0,
       gameType: "",
       showTimeGlow: false,
-      showStartForm: false, 
+      showStartForm: false,
       correctSound: null,
-
     };
   },
   computed: {
@@ -232,7 +234,7 @@ export default {
         this.gameType = response.ageGroup || "Maxi";
         this.prehistory = response.prehistory || "";
         this.infohistory = response.infohistory || "";
-        
+
         console.log("🔄 Spieldaten geladen:", response);
       } catch (error) {
         console.error("❌ Fehler beim Laden des Spiels:", error);
@@ -264,7 +266,7 @@ export default {
     handleAnswer({ isCorrect }) {
       this.currentAnswerQuestion = this.currentQuestion;
 
-      if (this.currentAnswerQuestion.type === 'next') {
+      if (this.currentAnswerQuestion.type === "next") {
         this.nextQuestion();
         return;
       }
@@ -275,10 +277,10 @@ export default {
         this.feedbackImage = require("@/assets/img/correct.gif");
         this.showFeedback = true;
 
-        this.correctSound = new Audio(require('@/assets/sound/correct.flac'));
+        this.correctSound = new Audio(require("@/assets/sound/correct.flac"));
         this.correctSound.play();
 
-        if (this.gameType === 'Maxi') {
+        if (this.gameType === "Maxi") {
           const bonus = this.getTimeBonus();
 
           if (bonus > 0) {
@@ -291,7 +293,6 @@ export default {
             setTimeout(() => {
               this.showFeedback = false;
             }, 6000);
-
           } else {
             // Kein Bonus → nur GIF anzeigen, dann zur nächsten Frage
             setTimeout(() => {
@@ -299,7 +300,6 @@ export default {
               this.nextQuestion();
             }, 6000);
           }
-
         } else {
           // 🌟 Sternanimation startet nach 1 Sekunde
           setTimeout(() => {
@@ -308,25 +308,23 @@ export default {
             }
           }, 1000);
 
-
           // 🚪 Feedback wird 6 Sekunden angezeigt, dann ausgeblendet
           setTimeout(() => {
             this.showFeedback = false;
           }, 8000);
         }
-
       } else {
-        this.earnedStars = 0; 
+        this.earnedStars = 0;
         this.attemptCount++;
         this.feedbackMessage = "Versuche es nochmal!";
-        this.feedbackImage = require("@/assets/img/false.png");
+        this.feedbackImage = require("@/assets/img/false2.png");
         this.showFeedback = true;
-        console.log('flasche Antwort');
+        console.log("flasche Antwort");
 
         // ❌ Falsche Antwort → Feedback 5 Sekunden sichtbar
         setTimeout(() => {
           this.showFeedback = false;
-        }, 5000);
+        }, 25000);
       }
     },
     getTimeBonus() {
@@ -376,7 +374,7 @@ export default {
     },
     onTimeBonusDone() {
       console.log("🕒 Zeitbonus-Animation beendet.");
-      this.showFeedback = false; 
+      this.showFeedback = false;
       this.nextQuestion();
     },
     startCounting() {
@@ -398,8 +396,8 @@ export default {
           this.countingStarted = false; // 🔄 Zurücksetzen für die nächste Frage
           console.log("🎯 Zählen abgeschlossen.");
           setTimeout(() => {
-              this.nextQuestion(); // ✅ Wechsle zur nächsten Frage nach kurzem Delay
-            }, 500);
+            this.nextQuestion(); // ✅ Wechsle zur nächsten Frage nach kurzem Delay
+          }, 500);
         }
       }, 1000);
     },
@@ -486,7 +484,6 @@ export default {
     closeForm() {
       this.showStartForm = false;
     },
-
   },
   beforeUnmount() {
     clearInterval(this.timerInterval);
@@ -504,7 +501,6 @@ export default {
 .fade-question-leave-to {
   opacity: 0;
 }
-
 
 .game-container {
   display: flex;
@@ -564,7 +560,6 @@ export default {
   text-align: center;
 }
 
-
 .game-finished p {
   margin: 5px 0;
   font-size: 1rem;
@@ -580,7 +575,7 @@ export default {
   font-size: 20px;
   font-weight: bold;
   text-align: center;
-  color: #FAC227;
+  color: #fac227;
   z-index: 10; /* Sicherstellen, dass es unter dem Button bleibt */
   pointer-events: none; /* Verhindert, dass es Klicks blockiert */
   background-color: #355b4c;
@@ -647,7 +642,7 @@ export default {
 }
 
 .form-inner {
-  position: fixed; 
+  position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
@@ -655,7 +650,6 @@ export default {
   padding: 1rem;
   z-index: 1000; /* wichtig: höher als alles darunter */
 }
-
 
 .close-button {
   position: absolute;
@@ -666,7 +660,6 @@ export default {
   border: none;
   cursor: pointer;
 }
-
 
 /* Responsive Anpassung */
 @media (min-width: 768px) {
