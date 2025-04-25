@@ -324,7 +324,7 @@ export default {
         // ❌ Falsche Antwort → Feedback 5 Sekunden sichtbar
         setTimeout(() => {
           this.showFeedback = false;
-        }, 25000);
+        }, 5000);
       }
     },
     getTimeBonus() {

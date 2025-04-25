@@ -131,8 +131,7 @@
 
   .feedback-content img {
     margin-top: 20px;
-    height: auto;
-    width: 100%;
+    max-height: 80vh;
   }
 
   /* Sterne-Container */
