@@ -15,8 +15,8 @@
   <style scoped>
   .error-page {
     text-align: center;
-    margin-top: 50px;
-    width: 50%;
+    width: 70%;
+    margin: 150px auto;
   }
   h1 {
     color: #f44336;

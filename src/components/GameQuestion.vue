@@ -137,12 +137,13 @@ export default {
       }
     },
     updateSalutation() {
-      if (this.players.length > 0) {
+      
+      if (this.players.length > 1) {
         const randomSalutation = this.salutations[Math.floor(Math.random() * this.salutations.length)];
         const randomPlayer = this.players[Math.floor(Math.random() * this.players.length)];
         this.currentSalutation = `${randomSalutation} ${randomPlayer}!`;
       } else {
-        this.currentSalutation = "Hallo!";
+        this.currentSalutation = "";
       }
     },
     toggleOption(index) {

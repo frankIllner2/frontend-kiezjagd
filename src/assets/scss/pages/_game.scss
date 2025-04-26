@@ -94,6 +94,7 @@
       border-radius: 8px;
       padding: 10px;
       margin: 10px;
+      line-height: 1.6;
       h4 {
         text-decoration: underline;
       }
@@ -115,10 +116,14 @@
       p {
         font-size: clamp(1.2rem, 2vw, 2em);
         margin: 0.5em 0;
+        line-height: 1.6;
       }
       .answer-section {
         margin-bottom: 1em;
         font-size: clamp(1.2rem, 2vw, 2em);
+        div {
+          line-height: 1.6;
+        }
       }
   }
 
