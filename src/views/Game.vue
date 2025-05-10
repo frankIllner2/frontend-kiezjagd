@@ -317,7 +317,7 @@ export default {
         this.earnedStars = 0;
         this.attemptCount++;
         this.feedbackMessage = "Versuche es nochmal!";
-        this.feedbackImage = require("@/assets/img/false2.png");
+        this.feedbackImage = require("@/assets/img/false.png");
         this.showFeedback = true;
         console.log("flasche Antwort");
 
