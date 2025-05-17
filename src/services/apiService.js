@@ -173,10 +173,11 @@
         
         // Bild hochladen
         uploadImage(file) {
+           
             if (!file) throw new Error('Keine Bilddatei zum Hochladen ausgewählt.');
             const formData = new FormData();
             formData.append('image', file); // Feldname muss zu `upload.single('image')` passen
-
+     
             return axiosInstance.post('/upload/image', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             })

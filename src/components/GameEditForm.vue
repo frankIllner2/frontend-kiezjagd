@@ -239,8 +239,6 @@ export default {
     async updateGame() {
       try {
         let imageUrl = this.game.gameImage;
-
-
         if (this.uploadedImage) imageUrl = await apiService.uploadImage(this.uploadedImage);
         const gameData = { ...this.game, gameImage: imageUrl };
         await apiService.updateGame({ _id: this.id, ...gameData });

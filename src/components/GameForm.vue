@@ -16,7 +16,7 @@
 
     <div class="form-group">
       <label for="gameImage">Spielbild</label>
-      <input type="file" @change="handleImageUpload" id="gameImage" accept="image/*" required />
+      <input type="file" @change="handleImageUpload" id="gameImage" accept="image/*" />
       <img v-if="previewImage" :src="previewImage" alt="Vorschau" class="image-preview" />
     </div>
 
@@ -137,10 +137,11 @@ export default {
     async saveGame() {
       try {
         let imageUrl = '';
-        if (this.uploadedImage) {
-          imageUrl = await apiService.uploadImage(this.uploadedImage);  // Lade das Bild hoch
+        if (this.uploadedImage instanceof File) {
+          imageUrl = await apiService.uploadImage(this.uploadedImage);
+        } else {
+          console.log("⚠️ Kein Bild zum Hochladen ausgewählt.");
         }
-
         const gameData = { 
           ...this.localGame,
           gameImage: imageUrl  // Verwende die hochgeladene URL
