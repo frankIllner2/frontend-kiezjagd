@@ -22,10 +22,10 @@
         </ul>
         <!-- Social Media (Desktop) -->
         <div class="social-icons">
-          <a href="https://facebook.com" target="_blank">
+          <a href="https://www.facebook.com/profile.php?id=61576565126407" target="_blank">
             <font-awesome-icon :icon="['fab', 'facebook']" class="social-icon facebook" />
           </a>
-          <a href="https://instagram.com" target="_blank">
+          <a href="https://www.instagram.com/kiezjaeger/" target="_blank">
             <font-awesome-icon :icon="['fab', 'instagram']" class="social-icon instagram" />
           </a>
         </div>
@@ -48,6 +48,7 @@
           <li><a href="mailto:support@kiezjagd.de?subject=Wie%20gehts!&body=Hallo%20Kiezjagd-Team,">Schreib uns</a></li>
           <li><a href="/Impressum" target="_blank" rel="noopener">Impressum</a></li>
           <li><a href="/Agb" target="_blank" rel="noopener">AGB</a></li>
+          <li><a href="/Datenschutz" target="_blank" rel="noopener">Datenschutz</a></li>
         </ul>
         <div class="social-icons">
           <a href="https://facebook.com" target="_blank">

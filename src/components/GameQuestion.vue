@@ -24,6 +24,11 @@
       <img :src="getCorrectImageUrl(question.imageUrl)" alt="Frage Bild" />
     </div>
 
+    <!-- Frage mit Sound -->
+    <div v-if="question.audioUrl" class="question-audio">
+      <audio :src="getCorrectImageUrl(question.audioUrl)" controls />
+    </div>
+
     <!-- Freitextantwort -->
     <div v-if="question.type === 'text'" class="text-answer">
       <input v-model="userAnswer" placeholder="Deine Antwort" />

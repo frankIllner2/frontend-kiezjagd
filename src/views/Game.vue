@@ -109,6 +109,16 @@
               </p>
               <p><a href="mailto:mail@kiezjagd.de">Team Kiezjagd</a></p>
               <br />
+              <!-- Social Media (Desktop) -->
+              <div class="social-icons">
+                <p>Oder folge uns auf Insta und FB - für weitere Rätsel und Informationen!</p>
+                <a href="https://www.facebook.com/profile.php?id=61576565126407" target="_blank">
+                  <font-awesome-icon :icon="['fab', 'facebook']" class="social-icon facebook" />
+                </a>
+                <a href="https://www.instagram.com/kiezjaeger/" target="_blank">
+                  <font-awesome-icon :icon="['fab', 'instagram']" class="social-icon instagram" />
+                </a>
+              </div>
             </div>
           </div>
         </div>

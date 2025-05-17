@@ -8,29 +8,27 @@
           <template v-if="question.type === 'anweisung'">Anweisung</template>
           <template v-else-if="question.type === 'next'">
             Weiter
-            <span style="color: red; margin-left: 10px;">Hinweis!</span>
+            <span style="color: red; margin-left: 10px">Hinweis!</span>
           </template>
           <template v-else>Frage</template>
         </label>
-        <textarea 
-          v-model="question.question" 
-          id="question" 
-          rows="2"   
-          required 
+        <textarea
+          v-model="question.question"
+          id="question"
+          rows="2"
+          required
           maxlength="400"
-          />
-          <small>{{ question.question?.length || 0 }}/400 Zeichen</small>
+        />
+        <small>{{ question.question?.length || 0 }}/400 Zeichen</small>
       </div>
 
       <!-- Antwort auf Frage -->
-      <div class="form-group"  
-        v-if="questionIndex > 0 && question.type !== 'next'">
-       
+      <div class="form-group" v-if="questionIndex > 0 && question.type !== 'next'">
         <label for="question">Individuelle Antwort auf die Frage</label>
         <textarea
           v-model="question.answerquestion"
           id="answerQuestion"
-          maxlength="350" 
+          maxlength="350"
           rows="2"
         />
         <small>{{ question.answerquestion?.length || 0 }}/350 Zeichen</small>
@@ -70,10 +68,24 @@
       <div class="form-group">
         <label for="image">Bild hinzufügen</label>
         <input type="file" @change="onFileChange" accept="image/*" />
-        <div v-if="previewImage" class="image-preview">
-          <img :src="previewImage" alt="Vorschau des Bildes" />
-          <button type="button" class="btn btn--delete-image" @click="removeImage(null)">Bild entfernen</button>
-        </div> 
+        <div v-if="previewImage || question.imageUrl" class="image-preview">
+          <img :src="previewImage || question.imageUrl" alt="Vorschau des Bildes" />
+          <button type="button" class="btn btn--delete-image" @click="removeImage(null)">
+            Bild Updaten
+          </button>
+        </div>
+      </div>
+
+      <!-- Sound hinzufügen -->
+      <div class="form-group">
+        <label for="sound">Ton hinzufügen</label>
+        <input type="file" @change="onSoundChange" accept="audio/*" />
+        <div v-if="previewSound || question.audioUrl" class="sound-preview">
+          <audio :src="previewSound || question.audioUrl" controls />
+          <button type="button" class="btn btn--delete-image" @click="removeSound">
+            Ton updaten
+          </button>
+        </div>
       </div>
 
       <!-- Optionen für Mehrfachauswahl -->
@@ -101,7 +113,13 @@
             <input type="file" @change="onImageChange($event, index)" accept="image/*" />
             <div v-if="option.imageUrl" class="image-preview">
               <img :src="option.imageUrl" alt="Bildantwort" />
-              <button type="button" class="btn btn--delete-image" @click="removeImage(index)">Bild entfernen</button>
+              <button
+                type="button"
+                class="btn btn--delete-image"
+                @click="removeImage(index)"
+              >
+                Bild entfernen
+              </button>
             </div>
           </div>
           <div class="edit-question-container">
@@ -146,7 +164,7 @@ export default {
         question: {
           question: "",
           answerquestion: "",
-        }
+        },
       }),
     },
     isEditing: {
@@ -168,10 +186,13 @@ export default {
         options: [],
         answer: "",
         imageUrl: "",
+        audioUrl: "",
         coordinates: { lat: null, lon: null },
       },
       previewImage: null,
       uploadedFile: null,
+      previewSound: null,
+      uploadedSound: null,
     };
   },
   created() {
@@ -200,6 +221,7 @@ export default {
       } else {
         // Entfernt das Hauptbild
         this.previewImage = null;
+        this.uploadedFile = null;
         this.question.imageUrl = "";
       }
     },
@@ -222,6 +244,19 @@ export default {
         this.question.options.splice(index, 1);
       }
     },
+    onSoundChange(event) {
+      const file = event.target.files[0];
+      if (file) {
+        this.uploadedSound = file;
+        this.previewSound = URL.createObjectURL(file);
+      }
+    },
+    removeSound() {
+      this.previewSound = null;
+      this.uploadedSound = null;
+      this.question.audioUrl = "";
+    },
+
     async saveQuestion() {
       if (this.isSaving) {
         console.warn("⛔ Frage wird bereits gespeichert!");
@@ -231,7 +266,9 @@ export default {
 
       try {
         // Validierung für Mehrfachauswahl
-        if (this.question.type === "multiple" && this.question.options.length === 0) {
+        if (
+          this.question.type === "multiple" && (!Array.isArray(this.question.options) || this.question.options.length === 0)
+        ) {
           alert("⚠️ Bitte mindestens eine Option hinzufügen.");
           return;
         }
@@ -252,7 +289,13 @@ export default {
           console.log("📸 Bild erfolgreich hochgeladen:", imageUrl);
         }
 
-        console.log("📝 Frage-ID:", this.question._id);
+        // Sound hochladen (falls vorhanden)
+        if (this.uploadedSound) {
+          const audioUrl = await apiService.uploadAudio(this.uploadedSound);
+          console.log("audio-url", audioUrl);
+          this.question.audioUrl = audioUrl;
+          console.log("🎵 Sound erfolgreich hochgeladen:", audioUrl);
+        }
 
         if (this.question._id) {
           console.log("✏️ Bearbeiten einer bestehenden Frage");
@@ -263,6 +306,7 @@ export default {
               answer: this.question.answer,
               type: this.question.type,
               imageUrl: this.question.imageUrl,
+              audioUrl: this.question.audioUrl,
             });
           } else if (this.question.type === "multiple") {
             await apiService.updateQuestion(this.$route.params.id, this.question._id, {
@@ -271,6 +315,7 @@ export default {
               options: this.question.options,
               type: this.question.type,
               imageUrl: this.question.imageUrl,
+              audioUrl: this.question.audioUrl,
             });
           } else if (this.question.type === "anweisung") {
             await apiService.updateQuestion(this.$route.params.id, this.question._id, {
@@ -288,6 +333,12 @@ export default {
           }
         } else {
           console.log("➕ Neue Frage hinzufügen");
+          if (this.uploadedSound) {
+            const audioUrl = await apiService.uploadAudio(this.uploadedSound);
+            this.question.audioUrl = audioUrl;
+            console.log("🔊 Audio erfolgreich hochgeladen:", audioUrl);
+          }
+
           await apiService.addQuestion(this.$route.params.id, this.question);
         }
 
@@ -310,10 +361,13 @@ export default {
         options: [],
         answer: "",
         imageUrl: "",
+        audioUrl: "",
         coordinates: { lat: null, lon: null },
       };
       this.previewImage = null;
+      this.previewSound = null; 
       this.uploadedFile = null;
+       this.uploadedSound = null; 
     },
 
     onFileChange(event) {
@@ -330,6 +384,7 @@ export default {
       handler(newData) {
         this.question = { ...newData };
         this.previewImage = newData.imageUrl || null;
+         this.previewSound = newData.audioUrl || null;
         console.log("📝 Geladene Frage:", this.question);
       },
     },
@@ -357,12 +412,13 @@ export default {
   align-items: start;
   gap: 5px;
   margin-bottom: 10px;
-  background-color: #E9E2D0;
+  background-color: #e9e2d0;
   padding: 10px;
-    &:nth-child(even){
+  &:nth-child(even) {
     background-color: #f4ebd0;
   }
-  input, select {
+  input,
+  select {
     width: 100%;
     padding: 5px;
   }
@@ -404,6 +460,4 @@ export default {
 .option-item input[type="text"] {
   flex: 1;
 }
-
-
 </style>

@@ -14,6 +14,8 @@ import NotFoundPage from '../views/NotFound.vue';
 import LinkFault from '../views/LinkFault.vue';
 import ImpressumSite from '../views/ImpressumSite.vue';
 import AgbSite from '../views/AgbSite.vue';
+import PrivacypolicySite from '../views/PrivacypolicySite.vue';
+
 
 const routes = [
   {
@@ -105,6 +107,11 @@ const routes = [
     path: '/Agb',
     name: 'Agb',
     component: AgbSite,
+  },
+  {
+    path: '/Datenschutz',
+    name: 'Datenschutz',
+    component: PrivacypolicySite,
   },
   {
     path: '/:pathMatch(.*)*',
