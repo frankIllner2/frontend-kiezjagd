@@ -171,6 +171,8 @@ export default {
       try {
         const response = await apiService.fetchGameById(id, true); //
         this.game = { ...response };
+
+        
         this.uploadedImage = response.gameImage;
         console.log("🖼️ gameImage aus Response:", response.gameImage);
 
@@ -238,8 +240,16 @@ export default {
     },
     async updateGame() {
       try {
+        
         let imageUrl = this.game.gameImage;
-        if (this.uploadedImage) imageUrl = await apiService.uploadImage(this.uploadedImage);
+       
+        if (this.uploadedImage instanceof File) {
+          console.log("📤 Neues Bild wird hochgeladen:", this.uploadedImage.name);
+          imageUrl = await apiService.uploadImage(this.uploadedImage);
+        } else {
+          console.log("Bestehendes Bild wird verwendet:", imageUrl);
+        }
+
         const gameData = { ...this.game, gameImage: imageUrl };
         await apiService.updateGame({ _id: this.id, ...gameData });
     

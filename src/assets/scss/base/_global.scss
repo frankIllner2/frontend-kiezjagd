@@ -32,6 +32,7 @@ b {
 }
 a {
     font-size: clamp(1rem, 1vw, 1em); 
+    color: $primary-text-color;
 }
 .hidden {
     display: none;

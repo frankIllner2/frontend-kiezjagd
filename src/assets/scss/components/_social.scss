@@ -1,0 +1,10 @@
+.social-icons {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    a {
+        font-size: 28px;
+        padding: 10px;
+    }
+}
