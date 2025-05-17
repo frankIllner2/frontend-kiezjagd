@@ -138,10 +138,7 @@ export default {
       console.log('test2');
       try {
         let imageUrl = '';
-        console.log(this.uploadedImage);
-        console.log('-----------------');
-        console.log(this.localGame.gameImage);
-
+    
         if (this.uploadedImage instanceof File) {
           imageUrl = await apiService.uploadImage(this.uploadedImage);
         } else if (typeof this.localGame.gameImage === 'string' && this.localGame.gameImage.startsWith('http')) {
