@@ -112,7 +112,13 @@
     <hr />
     <section class="edit-section">
       <h3>Fragen verwalten</h3>
-      <QuestionList :questions="game.questions" @edit="editQuestion" @delete="deleteQuestion" @add="addQuestion" />
+      <QuestionList 
+        :questions="game.questions" 
+        :gameId="game._id"
+        @edit="editQuestion" 
+        @delete="deleteQuestion" 
+        @add="addQuestion" 
+      />
     </section>
     <div v-if="successMessage" class="success-message">{{ this.successMessage }}</div>
     <section v-if="showQuestionForm" class="edit-section">

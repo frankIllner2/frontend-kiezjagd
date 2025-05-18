@@ -197,7 +197,12 @@
             .then(res => res.data.audioUrl)
             .catch(error => handleApiError(error, 'uploadAudio'));
         },
-
+        updateQuestionOrder(gameId, reordered) {
+            if (!gameId || !Array.isArray(reordered) || reordered.length === 0) {
+                throw new Error('⚠️ Spiel-ID und Sortierliste dürfen nicht leer sein.');
+            }
+            return performRequest('post', '/questions/reorder', { gameId, reordered });
+        },
     // Newsletter
     subscribeToNewsletter(email) {
         if (!email) throw new Error("E-Mail erforderlich");
@@ -209,5 +214,5 @@
         return performRequest("post", "/newsletter/unsubscribe", { email });
     },
 
-    };
-    export default apiService;
+};
+export default apiService;

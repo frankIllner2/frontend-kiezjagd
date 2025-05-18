@@ -4,6 +4,42 @@
     flex-direction: column;
     gap: 10px;
     margin-top: 15px;
+
+    /* Smooth Slide-Effekt für Sortierung */
+    .question-card {
+      border: 1px solid #000;
+      transition: transform 200ms ease, box-shadow 200ms ease;
+    }
+
+    /* Optisches Feedback beim Drag */
+    .vuedraggable-fallback {
+      opacity: 0.9;
+      transform: scale(1.05);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Platzhalter, während ein Element gezogen wird */
+    .vuedraggable-ghost {
+      opacity: 0.8;
+      background-color: #000;
+      border: 2px dashed #000;
+    }
+
+    .question-card.dropped {
+      animation: droppedPulse 0.4s ease;
+    }
+
+    @keyframes droppedPulse {
+      0% {
+        background-color: #000;
+      }
+      100% {
+        background-color: white;
+      }
+    }
+
+
+
   }
   
   .question-item {
@@ -31,5 +67,12 @@
     gap: 5px;
     justify-content: flex-end;
     margin-left: 20px;
+    button {
+      width: 35px;
+      height: 35px;
+      border: none;
+      margin: 5px;
+      cursor: pointer;
+    }
   }
   
