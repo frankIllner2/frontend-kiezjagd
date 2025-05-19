@@ -54,6 +54,13 @@
   .question-content {
     flex: 1;
     text-align: left;
+    .question-image {
+      img {
+        max-width: 100%;
+        height: auto;
+        width: 40%;
+      }
+    }
   }
   
   .question-content p {

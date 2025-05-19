@@ -71,7 +71,6 @@
             maxlength="650" 
             placeholder="Text für die Vorgeschichte des Spiels" 
             rows="4"
-            required
           ></textarea>
           <small>{{ game.prehistory?.length || 0 }}/650 Zeichen</small>
         </div>
@@ -84,7 +83,6 @@
             maxlength="1200" 
             placeholder="Infos zur Geschichte" 
             rows="4"
-            required
           ></textarea>
           <small>{{ game.infohistory?.length || 0}}/1200 Zeichen</small>
         </div>
