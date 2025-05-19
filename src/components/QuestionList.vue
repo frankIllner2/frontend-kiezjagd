@@ -14,12 +14,12 @@
       <template #item="{ element: question, index }">
         <div class="question-card">
           <div class="question-header">
-            <h4>{{ index + 1 }} {{ question.type === "anweisung" ? "Anweisung" : "Frage" }}</h4>
+            <h4>{{ index + 1 }} {{ question.type === "anweisung" ? "Anweisung" : (question.type === "next" ? "Weiter" : "Frage") }}</h4>
           </div>
 
           <div class="question-content">
             <p>
-              <strong>{{ question.type === "anweisung" ? "Anweisung" : "Frage" }}:</strong>
+              <strong>{{ question.type === "anweisung" ? "Anweisung" : (question.type === "next" ? "Weiter" : "Frage") }}:</strong>
               {{ question.question }}
             </p>
 
