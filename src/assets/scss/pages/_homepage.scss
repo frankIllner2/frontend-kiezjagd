@@ -539,15 +539,17 @@
                     border-radius: 20px;
                     padding-bottom: 15px;
                     width: 100%;
+                    .headline-game-name {
+                        text-align: center;
+                    }
                     h2 {
                         font-size: clamp(2.2rem,3vw,3em);
                     }
                     .image-game {
+                        object-fit: cover;
                         width: 100%;
-                        height: auto;
-                        margin-bottom: 10px;
-                        border-radius: 20px 20px 0 0;
-                       
+                        display: block;
+                        min-height: 260px;
                     }
                     .short {
                         position: relative;
