@@ -43,7 +43,7 @@
         activeIndex: null,
         ageGroups: [
           {
-            ageRange: "3-5",
+            ageRange: "4-6",
             name: "Mini",
             image: new URL("@/assets/img/mini.jpg", import.meta.url).href, 
             title: "So geht's",
@@ -52,7 +52,7 @@
             Mit jedem gelösten Rätsel kommst du dem Ziel näher und sammelst wertvolle Sterne, mit denen du dich auf unserer Mitgemacht-Liste eintragen kannst`,
           },
           {
-            ageRange: "5-9",
+            ageRange: "7-9",
             name: "Medi",
             image: new URL("@/assets/img/medi.jpg", import.meta.url).href,
             title: "Schnitzeljagd",
@@ -60,7 +60,7 @@
             Hier kommt die Anleitung für die Medi-Kategorie hin Hier kommt die Anleitung für die Medi-Kategorie hin Hier kommt die Anleitung für die Medi-Kategorie hin`,
           },
           {
-            ageRange: "9-12",
+            ageRange: "10-12",
             name: "Maxi",
             image: new URL("@/assets/img/maxi.jpg", import.meta.url).href,
             title: "So geht's",

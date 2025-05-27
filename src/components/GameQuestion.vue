@@ -8,7 +8,7 @@
       />
     </div>
 
-    <h3>{{ currentIndex + 1 }}. {{ question.type === "anweisung" ? "Anweisung" : (question.type === "next" ? "Weiter" : "Frage") }}</h3>
+    <hr style="border-width: 60%;">
 
     <p v-if="currentSalutation">
       {{ currentSalutation }} <span v-html=" question.question"></span>
