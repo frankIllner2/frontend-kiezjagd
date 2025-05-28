@@ -96,11 +96,11 @@
           <h3>Spiel erfolgreich abgeschlossen!</h3>
           <div class="result-content">
             <div>
-              <p><strong>Team:</strong> {{ teamName }}</p>
+              <p><strong>Team:{{ teamName }}</strong> </p>
               <p v-if="gameType === 'Maxi'">
                 <strong>Zeit benötigt:</strong> {{ gameDuration }}
               </p>
-              <p v-else><strong>Gesammelte Sterne:</strong> 🌟 {{ starCount }}</p>
+              <p v-else><strong>Gesammelte Sterne: 🌟 {{ starCount }}</strong></p>
             </div>
             <div>
               <p>
@@ -111,10 +111,7 @@
               <br />
               <!-- Social Media (Desktop) -->
               <div class="social-icons">
-                <p>Oder folge uns auf Insta und FB - für weitere Rätsel und Informationen!</p>
-                <a href="https://www.facebook.com/profile.php?id=61576565126407" target="_blank">
-                  <font-awesome-icon :icon="['fab', 'facebook']" class="social-icon facebook" />
-                </a>
+                <p>Oder folge uns auf Insta - für weitere Rätsel und Informationen!</p>
                 <a href="https://www.instagram.com/kiezjaeger/" target="_blank">
                   <font-awesome-icon :icon="['fab', 'instagram']" class="social-icon instagram" />
                 </a>

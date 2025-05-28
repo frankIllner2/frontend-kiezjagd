@@ -268,17 +268,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-
-
-/* Fragenverwaltung */
-
-.question-actions button {
-  width: 100px;
-  text-align: center;
-}
-
-
-
-</style>

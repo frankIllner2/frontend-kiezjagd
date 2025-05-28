@@ -1,12 +1,12 @@
 <template>
-    <div class="gps-checker">
-      <h3>{{ question.question }}</h3>
-      <button class="btn btn--primary" @click="getLocation" :disabled="loading">
-        {{ loading ? "Bestimme Standort..." : "Koordinaten senden" }}
-      </button>
-      <p v-if="error" class="error">{{ error }}</p>
-      <p v-if="success" class="success">Standort korrekt! Nächste Frage freigeschaltet.</p>
-    </div>
+  <div class="gps-checker">
+    <h3>{{ question.question }}</h3>
+    <button class="btn btn--primary" @click="getLocation" :disabled="loading">
+      {{ loading ? "Bestimme Standort..." : "Koordinaten senden" }}
+    </button>
+    <p v-if="error" class="error">{{ error }}</p>
+    <p v-if="success" class="success">Standort korrekt! Nächste Frage freigeschaltet.</p>
+  </div>
 </template>
 
 <script>
@@ -54,7 +54,8 @@ export default {
           };
 
           try {
-            const encryptedId = this.$route.params.gameId || localStorage.getItem("currentGameId");
+            const encryptedId =
+              this.$route.params.gameId || localStorage.getItem("currentGameId");
             if (!encryptedId) {
               console.error("⚠️ Keine encryptedId gefunden!");
             } else {
@@ -66,12 +67,11 @@ export default {
               console.log(resultApi);
 
               if (resultApi.success) {
-                console.log('✅ Standort ist korrekt!');
+                console.log("✅ Standort ist korrekt!");
                 this.success = true;
                 this.onSuccess(); // Nächste Frage freischalten
               } else {
-                console.log('❌ Falsche Koordinaten');
-               
+                console.log("❌ Falsche Koordinaten");
               }
             }
           } catch (error) {
@@ -84,7 +84,8 @@ export default {
           let errorMessage = "Standort konnte nicht ermittelt werden.";
           switch (error.code) {
             case error.PERMISSION_DENIED:
-              errorMessage = "⚠️ Standortfreigabe verweigert. Bitte erlaube den Zugriff in den Browsereinstellungen.";
+              errorMessage =
+                "⚠️ Standortfreigabe verweigert. Bitte erlaube den Zugriff in den Browsereinstellungen.";
               break;
             case error.POSITION_UNAVAILABLE:
               errorMessage = "📡 Standortinformationen sind nicht verfügbar.";
@@ -106,27 +107,3 @@ export default {
   },
 };
 </script>
-
-
-<style scoped>
-.gps-checker {
-  text-align: center;
-  margin: 20px;
-}
-
-h3 {
-  margin-bottom: 1em;
-}
-
-button:disabled {
-  background-color: gray;
-}
-.error {
-  color: red;
-  margin-top: 10px;
-}
-.success {
-  color: green;
-  margin-top: 10px;
-}
-</style>

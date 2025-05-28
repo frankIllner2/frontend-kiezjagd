@@ -81,39 +81,3 @@ export default {
   }
 };
 </script>
-
-
-<style scoped>
-.speech-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 1.5rem;
-}
-
-.speech-btn svg {
-  color: #355b4c;
-  margin-left: 5px;
-}
-
-/* 🎯 Wiggle-Animation auf das gerenderte SVG, wenn über .is-speaking */
-:v-deep(.is-speaking > svg) {
-  animation: wiggle 0.6s ease-in-out infinite;
-  transform-origin: center;
-}
-
-.speech-btn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-</style>
-
-<style>
-@keyframes wiggle {
-  0% { transform: rotate(0deg); }
-  25% { transform: rotate(5deg); }
-  50% { transform: rotate(0deg); }
-  75% { transform: rotate(-5deg); }
-  100% { transform: rotate(0deg); }
-}
-</style>

@@ -7,9 +7,9 @@
         Bild entfernen
       </button>
     </div>
-  </template>
+</template>
   
-  <script>
+<script>
     export default {
     props: {
       modelValue: File
@@ -79,12 +79,12 @@
     },
   };
 
-  </script>
+</script>
   
-  <style scoped>
+<style scoped>
   .image-preview {
     max-width: 100%;
     margin-top: 10px;
     border-radius: 8px;
   }
-  </style>  
+</style>  

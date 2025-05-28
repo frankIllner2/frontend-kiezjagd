@@ -95,9 +95,3 @@ export default {
 
 };
 </script>
-
- 
-<style>
-/* Falls spezifische Styles für den Ranking-Slider notwendig sind */
-
-</style>

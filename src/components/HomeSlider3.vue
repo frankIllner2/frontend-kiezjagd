@@ -83,7 +83,6 @@
   
   <style scoped>
 
-
   .short-description {
     display: flex;
     flex-direction: column;
