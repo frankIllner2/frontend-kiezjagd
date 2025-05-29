@@ -554,19 +554,20 @@
                     .short {
                         position: relative;
                         display: flex;
-                        align-items: flex-end;
                         width: 100%;
                         padding: 15px 15px 0 15px;
                         min-height: 7em;
                         height: 100%;
                         b {
+                            display: flex;
+                            flex-direction: column;
+                            justify-content: flex-end;
                             line-height: 1;
                             padding: 0 0 10px 0;
                         }
                         .game-infos {
                             display: flex;
                             flex-direction: column;
-                            align-content: flex-end;
                             align-items: center;
                             width: 40%;
                         }
