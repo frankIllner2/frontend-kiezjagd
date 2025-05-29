@@ -22,7 +22,7 @@
               <strong>{{ question.type === "anweisung" ? "Anweisung" : (question.type === "next" ? "Weiter" : "Frage") }}:</strong>
               {{ question.question }}
             </p>
-            <p v-if="question.answerquestion">Antwort auf die Frage zuvor: {{ question.answerquestion }}</p>
+            <p v-if="question.answerquestion"><b>Antwort auf die Frage zuvor:</b> {{ question.answerquestion }}</p>
             <p v-if="question.type === 'text'"><strong>Antwort:</strong> {{ question.answer }}</p>
 
             <div v-if="question.type === 'multiple'">
