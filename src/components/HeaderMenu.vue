@@ -22,9 +22,6 @@
         </ul>
         <!-- Social Media (Desktop) -->
         <div class="social-icons">
-          <a href="https://www.facebook.com/profile.php?id=61576565126407" target="_blank">
-            <font-awesome-icon :icon="['fab', 'facebook']" class="social-icon facebook" />
-          </a>
           <a href="https://www.instagram.com/kiezjaeger/" target="_blank">
             <font-awesome-icon :icon="['fab', 'instagram']" class="social-icon instagram" />
           </a>
@@ -51,9 +48,6 @@
           <li><a href="/Datenschutz" target="_blank" rel="noopener">Datenschutz</a></li>
         </ul>
         <div class="social-icons">
-          <a href="https://facebook.com" target="_blank">
-            <font-awesome-icon :icon="['fab', 'facebook']" class="social-icon facebook" />
-          </a>
           <a href="https://instagram.com" target="_blank">
             <font-awesome-icon :icon="['fab', 'instagram']" class="social-icon instagram" />
           </a>
