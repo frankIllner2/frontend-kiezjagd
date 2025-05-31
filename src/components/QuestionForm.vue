@@ -17,21 +17,21 @@
           id="question"
           rows="2"
           required
-          maxlength="400"
+          maxlength="500"
         />
-        <small>{{ question.question?.length || 0 }}/400 Zeichen</small>
+        <small>{{ question.question?.length || 0 }}/500 Zeichen</small>
       </div>
 
       <!-- Antwort auf Frage -->
-      <div class="form-group" v-if="questionIndex > 0 && question.type !== 'next'">
-        <label for="question">Individuelle Antwort auf die Frage</label>
+      <div class="form-group" v-if="questionIndex > 0">
+        <label for="answerQuestion">Individuelle Antwort auf die Frage</label>
         <textarea
           v-model="question.answerquestion"
           id="answerQuestion"
-          maxlength="350"
+          maxlength="450"
           rows="2"
         />
-        <small>{{ question.answerquestion?.length || 0 }}/350 Zeichen</small>
+        <small>{{ question.answerquestion?.length || 0 }}/450 Zeichen</small>
       </div>
 
       <!-- Fragetyp -->
@@ -122,6 +122,7 @@
               </button>
             </div>
           </div>
+
           <div class="edit-question-container">
             <label>
               <input type="checkbox" v-model="option.correct" />
@@ -153,29 +154,9 @@ import { apiService } from "@/services/apiService";
 
 export default {
   props: {
-    questionData: {
-      type: Object,
-      default: () => ({
-        type: "text",
-        options: [],
-        answer: "",
-        imageUrl: "",
-        coordinates: { lat: null, lon: null },
-        question: {
-          question: "",
-          answerquestion: "",
-        },
-      }),
-    },
-    isEditing: {
-      type: Boolean,
-      default: false,
-      isSaving: false, // Sperre hinzufügen
-    },
-    questionIndex: {
-      type: Number,
-      default: 0,
-    },
+    questionData: Object,
+    isEditing: Boolean,
+    questionIndex: Number
   },
   data() {
     return {
@@ -188,11 +169,12 @@ export default {
         imageUrl: "",
         audioUrl: "",
         coordinates: { lat: null, lon: null },
+        answerquestion: ""
       },
       previewImage: null,
       uploadedFile: null,
       previewSound: null,
-      uploadedSound: null,
+      uploadedSound: null
     };
   },
   created() {
@@ -214,12 +196,10 @@ export default {
     },
     removeImage(index = null) {
       if (index !== null) {
-        // Entfernt Bild aus den Antwortoptionen
         if (this.question.options && this.question.options[index]) {
           this.question.options[index].imageUrl = null;
         }
       } else {
-        // Entfernt das Hauptbild
         this.previewImage = null;
         this.uploadedFile = null;
         this.question.imageUrl = "";
@@ -233,7 +213,7 @@ export default {
         type: "text",
         text: "",
         imageUrl: "",
-        correct: false,
+        correct: false
       });
     },
     removeOption(index) {
@@ -256,93 +236,31 @@ export default {
       this.uploadedSound = null;
       this.question.audioUrl = "";
     },
-
     async saveQuestion() {
-      if (this.isSaving) {
-        console.warn("⛔ Frage wird bereits gespeichert!");
-        return; // Verhindert mehrfaches Speichern
-      }
+      if (this.isSaving) return;
       this.isSaving = true;
-
       try {
-        // Validierung für Mehrfachauswahl
-        if (
-          this.question.type === "multiple" && (!Array.isArray(this.question.options) || this.question.options.length === 0)
-        ) {
+        if (this.question.type === "multiple" && (!Array.isArray(this.question.options) || this.question.options.length === 0)) {
           alert("⚠️ Bitte mindestens eine Option hinzufügen.");
           return;
         }
-
-        // Validierung für GPS-Anweisungen
-        if (
-          this.question.type === "anweisung" &&
-          (!this.question.coordinates.lat || !this.question.coordinates.lon)
-        ) {
+        if (this.question.type === "anweisung" && (!this.question.coordinates.lat || !this.question.coordinates.lon)) {
           alert("⚠️ GPS-Koordinaten sind erforderlich.");
           return;
         }
-
-        // Bild hochladen (falls vorhanden)
         if (this.uploadedFile) {
           const imageUrl = await apiService.uploadImage(this.uploadedFile);
           this.question.imageUrl = imageUrl;
-          console.log("📸 Bild erfolgreich hochgeladen:", imageUrl);
         }
-
-        // Sound hochladen (falls vorhanden)
         if (this.uploadedSound) {
           const audioUrl = await apiService.uploadAudio(this.uploadedSound);
-          console.log("audio-url", audioUrl);
           this.question.audioUrl = audioUrl;
-          console.log("🎵 Sound erfolgreich hochgeladen:", audioUrl);
         }
-
         if (this.question._id) {
-          console.log("✏️ Bearbeiten einer bestehenden Frage");
-          if (this.question.type === "text") {
-            await apiService.updateQuestion(this.$route.params.id, this.question._id, {
-              question: this.question.question,
-              answerquestion: this.question.answerquestion,
-              answer: this.question.answer,
-              type: this.question.type,
-              imageUrl: this.question.imageUrl,
-              audioUrl: this.question.audioUrl,
-            });
-          } else if (this.question.type === "multiple") {
-            await apiService.updateQuestion(this.$route.params.id, this.question._id, {
-              question: this.question.question,
-              answerquestion: this.question.answerquestion,
-              options: this.question.options,
-              type: this.question.type,
-              imageUrl: this.question.imageUrl,
-              audioUrl: this.question.audioUrl,
-            });
-          } else if (this.question.type === "anweisung") {
-            await apiService.updateQuestion(this.$route.params.id, this.question._id, {
-              question: this.question.question,
-              answerquestion: this.question.answerquestion,
-              type: this.question.type,
-              coordinates: this.question.coordinates,
-            });
-          } else if (this.question.type === "next") {
-            await apiService.updateQuestion(this.$route.params.id, this.question._id, {
-              question: this.question.question,
-              answerquestion: this.question.answerquestion,
-              type: this.question.type,
-            });
-          }
+          await apiService.updateQuestion(this.$route.params.id, this.question._id, this.question);
         } else {
-          console.log("➕ Neue Frage hinzufügen");
-          if (this.uploadedSound) {
-            const audioUrl = await apiService.uploadAudio(this.uploadedSound);
-            this.question.audioUrl = audioUrl;
-            console.log("🔊 Audio erfolgreich hochgeladen:", audioUrl);
-          }
-
           await apiService.addQuestion(this.$route.params.id, this.question);
         }
-
-        // Event feuern
         this.$emit("save", { ...this.question });
         this.$root.showToast("Daten wurden erfolgreich gespeichert!");
         this.resetForm();
@@ -353,7 +271,6 @@ export default {
         this.isSaving = false;
       }
     },
-
     resetForm() {
       this.question = {
         question: "",
@@ -363,20 +280,20 @@ export default {
         imageUrl: "",
         audioUrl: "",
         coordinates: { lat: null, lon: null },
+        answerquestion: ""
       };
       this.previewImage = null;
-      this.previewSound = null; 
+      this.previewSound = null;
       this.uploadedFile = null;
-       this.uploadedSound = null; 
+      this.uploadedSound = null;
     },
-
     onFileChange(event) {
       const file = event.target.files[0];
       if (file) {
         this.uploadedFile = file;
         this.previewImage = URL.createObjectURL(file);
       }
-    },
+    }
   },
   watch: {
     questionData: {
@@ -384,12 +301,9 @@ export default {
       handler(newData) {
         this.question = { ...newData };
         this.previewImage = newData.imageUrl || null;
-         this.previewSound = newData.audioUrl || null;
-        console.log("📝 Geladene Frage:", this.question);
-      },
-    },
-  },
+        this.previewSound = newData.audioUrl || null;
+      }
+    }
+  }
 };
 </script>
-
-

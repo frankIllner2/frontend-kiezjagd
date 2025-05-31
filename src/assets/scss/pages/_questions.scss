@@ -1,4 +1,7 @@
-  .old-question-form {
+ @use "@/assets/scss/abstracts/variables" as *;
+@use "@/assets/scss/abstracts/mixins" as *;
+@use "sass:map";
+ .old-question-form {
     margin: 20px auto;
     width: 100%;
     background: #f9f9f9;
@@ -98,6 +101,9 @@
         font-weight: bold;
         margin-bottom: 10px;
         color: #333;
+      }
+      #edit-question-container {
+        border: 2px solid $primary-text-color;
       }
     }
 
