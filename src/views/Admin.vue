@@ -21,6 +21,7 @@
           <p><strong>Stadt:</strong> {{ game.city }}</p>
           <p><strong>Altersgruppe:</strong> {{ game.ageGroup }}</p>
           <p><strong>Anzahl der Fragen:</strong> {{ game.questions.length }}</p>
+          <p><strong>QR-Code:</strong>/spiel/{{ game.encryptedId }}</p>
 
           <ul class="margin-top-2">
             <li><span class="underline">Top 5 Teams</span></li>

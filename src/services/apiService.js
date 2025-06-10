@@ -47,7 +47,7 @@
             return performRequest('get', '/games/random');
         },
         // Ein Spiel anhand der encryptedId abrufen, wenn Admin dann mit anderen Bedingungen
-        fetchGameById(encryptedId, isAdmin = false) {    // isAdmin als zweiten Parameter hinzufügen
+        fetchGameById(encryptedId, isAdmin = false) {
             if (!encryptedId) throw new Error('⚠️ GameId darf nicht leer sein.');
             const adminParam = isAdmin ? "?admin=true" : ""; // Jetzt wird isAdmin definiert
             return performRequest('get', `/games/${encryptedId}${adminParam}`);

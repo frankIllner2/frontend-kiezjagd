@@ -7,6 +7,7 @@ import GamePage from '../views/Game.vue';
 import AdminPage from '../views/Admin.vue';
 import AdminGameView from '../views/AdminGame.vue';
 import GameEditForm from '../components/GameEditForm.vue';
+import GameLandingPage from '../components/GameLandingPage.vue';
 import AdminLogin from '../views/AdminLogin.vue';
 import SuccessPage from '../views/Success.vue';
 import CancelPage from '../views/CancelSite.vue';
@@ -54,6 +55,12 @@ const routes = [
     path: '/game/:gameId',
     name: 'GameDirect',
     component: GamePage,
+    props: true,
+  },
+  {
+    path: '/spiel/:encryptedId',
+    name: 'GameLandingPage',
+    component: GameLandingPage,
     props: true,
   },
   {
