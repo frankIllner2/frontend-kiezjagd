@@ -21,8 +21,18 @@
           <p><strong>Stadt:</strong> {{ game.city }}</p>
           <p><strong>Altersgruppe:</strong> {{ game.ageGroup }}</p>
           <p><strong>Anzahl der Fragen:</strong> {{ game.questions.length }}</p>
-          <p><strong>QR-Code:</strong>/spiel/{{ game.encryptedId }}</p>
-
+          <p>
+            <strong>Zur LP: </strong>
+            <router-link
+              :to="`/spiel/${game.encryptedId}`"
+              target="_blank"
+              class="button"
+            >
+              zur Landingpage
+            </router-link>
+          </p>
+        
+          
           <ul class="margin-top-2">
             <li><span class="underline">Top 5 Teams</span></li>
             <li v-for="team in game.ranking" :key="team.teamName">
