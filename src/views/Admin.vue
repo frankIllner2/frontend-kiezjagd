@@ -22,7 +22,7 @@
           <p><strong>Altersgruppe:</strong> {{ game.ageGroup }}</p>
           <p><strong>Anzahl der Fragen:</strong> {{ game.questions.length }}</p>
           <p>
-            <strong>Zur LP: </strong>
+            <strong>
             <router-link
               :to="`/spiel/${game.encryptedId}`"
               target="_blank"
@@ -30,6 +30,7 @@
             >
               zur Landingpage
             </router-link>
+            </strong>
           </p>
         
           
