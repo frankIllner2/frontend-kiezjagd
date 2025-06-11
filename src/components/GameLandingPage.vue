@@ -182,6 +182,25 @@ export default {
   padding: 20px;
 }
 
+.game-card {
+    position: relative;
+  padding: 20px;
+  z-index: 1;
+  &:before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: url('../assets/img/icons/girl2.svg');
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: bottom left;
+    opacity: 0.1; /* Transparenz fürs Wasserzeichen */
+    z-index: 0;
+    pointer-events: none; /* Klicks gehen durch */
+  }
+}
+
+
 .game-header h1 {
   font-size: 2.5rem;
   margin-bottom: 10px;
@@ -200,12 +219,11 @@ export default {
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 20px;
   padding: 20px;
-  background-color: #E9E2D0;
 }
 
 .game-teaser {
-  background-color: #ffffff;
-  padding: 15px;
+  background-color: #FAC227;
+  padding: 5px;
   border-radius: 8px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   text-align: center;
@@ -304,7 +322,7 @@ export default {
 
   .game-teaser {
     font-size: 0.9rem;
-    padding: 12px;
+    padding: 2px;
   }
 
   .btn {
