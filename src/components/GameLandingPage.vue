@@ -2,8 +2,12 @@
   <div v-if="loading">Lädt...</div>
   <div v-else-if="error">{{ error }}</div>
   <div v-else class="game-landing-container">
+
     <!-- Game Card -->
     <div class="game-card">
+      <router-link to="/" class="logo-lp">
+        <img src="@/assets/img/logo.svg" alt="Kiezjagd Logo" />
+      </router-link>
       <!-- Game Header -->
       <div class="game-header">
         <div class="image-container">
@@ -198,6 +202,11 @@ export default {
     z-index: 0;
     pointer-events: none; /* Klicks gehen durch */
   }
+  .logo-lp {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
 }
 
 
@@ -218,7 +227,7 @@ export default {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 20px;
-  padding: 20px;
+  padding: 40px;
 }
 
 .game-teaser {
@@ -322,7 +331,7 @@ export default {
 
   .game-teaser {
     font-size: 0.9rem;
-    padding: 2px;
+    padding: 4px;
   }
 
   .btn {
