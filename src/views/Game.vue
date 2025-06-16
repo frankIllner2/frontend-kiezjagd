@@ -93,6 +93,10 @@
     <div v-else class="game-card game-finished">
       <div class="result-container">
         <div class="result">
+          <div v-if="infohistory" class="info-container">
+            <div v-html="infohistory"></div>
+            <SpeechButton v-if="gameType === 'Mini'" :text="infohistory" />
+          </div>
           <h3>Spiel erfolgreich abgeschlossen!</h3>
           <div class="result-content">
             <div>
@@ -127,11 +131,6 @@
           </div>
         </div>
         <div class="info-container">
-          <div v-if="infohistory" class="info-container">
-            <div v-html="infohistory"></div>
-            <SpeechButton v-if="gameType === 'Mini'" :text="infohistory" />
-          </div>
-
           <button @click="goToHome" class="btn btn--primary">
             Zurück zur Startseite
           </button>
@@ -394,8 +393,6 @@ export default {
     startCounting() {
       if (this.countingStarted) return; // 🚀 Blockiert doppeltes Hochzählen
       this.countingStarted = true; // ✅ Markiert als gestartet
-
-      console.log("🔢 Starte Stern-Zähler...");
 
       let currentStars = this.starCount;
       let targetStars = this.starCount + this.earnedStars;
