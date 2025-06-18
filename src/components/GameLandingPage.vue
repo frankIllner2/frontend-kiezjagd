@@ -150,7 +150,6 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 10px;
   position: relative;
 }
 
@@ -182,12 +181,9 @@ export default {
 }
 
 /* Game Details */
-.game-details {
-  padding: 20px;
-}
 
 .game-card {
-    position: relative;
+  position: relative;
   padding: 20px;
   z-index: 1;
   &:before {
@@ -198,7 +194,7 @@ export default {
     background-repeat: no-repeat;
     background-size: contain;
     background-position: bottom left;
-    opacity: 0.1; /* Transparenz fürs Wasserzeichen */
+    opacity: 0.05; /* Transparenz fürs Wasserzeichen */
     z-index: 0;
     pointer-events: none; /* Klicks gehen durch */
   }
@@ -226,8 +222,7 @@ export default {
 .game-teasers {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 20px;
-  padding: 40px;
+  gap: 10px;
 }
 
 .game-teaser {
@@ -327,7 +322,7 @@ export default {
   }
 
   .game-teasers {
-    grid-template-columns: 1fr;
+    grid-template-columns: 50% 50%;
   }
 
   .game-teaser {
