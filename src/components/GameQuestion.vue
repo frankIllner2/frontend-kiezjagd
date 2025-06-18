@@ -116,9 +116,11 @@ export default {
     }
   },
   computed: {
-      fullQuestionText() {
-          return this.currentSalutation ? `${this.currentSalutation} ${this.question.question}` : this.question.question;
-      }
+    fullQuestionText() {
+      return this.currentSalutation
+        ? `${this.currentSalutation} ${this.question.question}`
+        : this.question.question;
+    }
   },
   methods: {
     loadPlayers() {
@@ -126,11 +128,22 @@ export default {
       if (this.isValidJsonArray(savedPlayers)) {
         this.players = JSON.parse(savedPlayers);
         console.log("✅ Spieler geladen:", this.players);
+      } else if (Array.isArray(this.playerNames) && this.playerNames.length > 0) {
+        // einmalige zufällige Rotation speichern
+        const shuffled = this.shuffleArray([...this.playerNames]);
+        this.players = shuffled;
+        localStorage.setItem("playerNames", JSON.stringify(shuffled));
+        console.log("🔀 Spieler zufällig gemischt:", shuffled);
       } else {
-        console.log("🔍 Falsche Daten im localStorage:", savedPlayers);
-        localStorage.removeItem("playerNames");
         this.players = [];
       }
+    },
+    shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
     },
     isValidJsonArray(data) {
       if (!data) return false;
@@ -142,11 +155,12 @@ export default {
       }
     },
     updateSalutation() {
-      
       if (this.players.length > 1) {
-        const randomSalutation = this.salutations[Math.floor(Math.random() * this.salutations.length)];
-        const randomPlayer = this.players[Math.floor(Math.random() * this.players.length)];
-        this.currentSalutation = `${randomSalutation} ${randomPlayer}!`;
+        const playerIndex = this.currentIndex % this.players.length;
+        const playerName = this.players[playerIndex];
+        const salutation = this.salutations[this.currentIndex % this.salutations.length];
+        this.currentSalutation = `${salutation} ${playerName}!`;
+        console.log(`🎯 Frage ${this.currentIndex + 1}: ${this.currentSalutation}`);
       } else {
         this.currentSalutation = "";
       }
@@ -158,12 +172,16 @@ export default {
       let isCorrect = false;
 
       if (this.question.type === "text") {
-        isCorrect = this.userAnswer.trim().toLowerCase() === this.question.answer.toLowerCase();
+        isCorrect =
+          this.userAnswer.trim().toLowerCase() ===
+          this.question.answer.toLowerCase();
       } else if (this.question.type === "multiple") {
-        const correctIndex = this.question.options.findIndex(option => option.correct);
+        const correctIndex = this.question.options.findIndex(
+          (option) => option.correct
+        );
         isCorrect = this.selectedOptions === correctIndex;
       }
-      console.log("submitAnswer", isCorrect);
+
       this.$emit("submitAnswer", { isCorrect });
       this.userAnswer = "";
       this.selectedOptions = -1;
