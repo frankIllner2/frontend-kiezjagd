@@ -142,6 +142,9 @@ export default {
 .game-header {
   position: relative;
   text-align: center;
+  .game-details {
+    padding: 20px 0;
+  }
 }
 
 /* Bild Container für zentriertes Bild */
@@ -235,7 +238,7 @@ export default {
 
 .game-teaser strong {
   display: block;
-  font-weight: bold;
+  font-weight: normal;
   margin-bottom: 5px;
 }
 
