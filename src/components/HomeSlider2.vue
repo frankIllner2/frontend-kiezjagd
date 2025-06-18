@@ -33,7 +33,6 @@
           :key="idx"
         >
           <!-- Nur bei Maxi anzeigen wir das Ranking -->
-          <span v-if="getGameType(item.topResults) === 'Maxi' || result.gameType === 'Medi'">{{ idx + 1 }}.</span>
 
           <strong>{{ result.teamName }}</strong>
 
