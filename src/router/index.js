@@ -8,6 +8,7 @@ import AdminPage from '../views/Admin.vue';
 import AdminGameView from '../views/AdminGame.vue';
 import GameEditForm from '../components/GameEditForm.vue';
 import GameLandingPage from '../components/GameLandingPage.vue';
+import ShopSite from '../components/ShopView.vue';
 import AdminLogin from '../views/AdminLogin.vue';
 import SuccessPage from '../views/Success.vue';
 import CancelPage from '../views/CancelSite.vue';
@@ -121,10 +122,16 @@ const routes = [
     component: PrivacypolicySite,
   },
   {
+    path: '/shop',
+    name: 'Shop',
+    component: ShopSite
+  },
+  {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
     component: NotFoundPage,
   },
+
 ];
 
 const router = createRouter({

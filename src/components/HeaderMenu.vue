@@ -19,6 +19,7 @@
       <nav class="desktop-menu desktop-menu-right">
         <ul>
           <li class="bottom-menu"><a href="mailto:support@kiezjagd.de?subject=Wie%20gehts!&body=Hallo%20Kiezjagd-Team,">Schreib uns</a></li>
+          <li><router-link to="/shop/" class="shop-lp">Shop</router-link></li>
         </ul>
         <!-- Social Media (Desktop) -->
         <div class="social-icons">
@@ -42,6 +43,7 @@
           <li><a href="#" @click.prevent="closeMenu; scrollToSection('what-is-headline')">Was ist Kiezjagd?</a></li>
           <li><a href="#" @click.prevent="closeMenu; scrollToSection('game-preview-section')">Spiele entdecken</a></li>
           <li><a href="#" @click.prevent="closeMenu; scrollToSection('features-section')">Wie geht's?</a></li>
+          <li><router-link to="/shop/" class="shop-lp">Shop</router-link></li>
           <li><a href="mailto:support@kiezjagd.de?subject=Wie%20gehts!&body=Hallo%20Kiezjagd-Team,">Schreib uns</a></li>
           <li><a href="/Impressum" target="_blank" rel="noopener">Impressum</a></li>
           <li><a href="/Agb" target="_blank" rel="noopener">AGB</a></li>
