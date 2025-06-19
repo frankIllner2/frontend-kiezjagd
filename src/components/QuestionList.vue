@@ -41,16 +41,24 @@
                     <img :src="option.imageUrl" alt="Bild" />
                     <span>{{ option.text }}</span>
                   </span>
+                  <span v-else-if="option.type === 'audio'">
+                    <audio :src="option.audioUrl" controls />
+                  </span>
                   <span v-if="option.correct"> ✅</span>
                 </li>
               </ul>
             </div>
+
             <p v-if="question.type === 'anweisung'">
               <strong>Koordinaten:</strong>
               {{ question.coordinates.lat }}, {{ question.coordinates.lon }}
             </p>
             <div v-if="question.imageUrl" class="question-image">
               <img :src="question.imageUrl" alt="Fragenbild" />
+            </div>
+            <div v-if="question.audioUrl" class="question-audio">
+              <strong>Ton:</strong>
+              <audio :src="question.audioUrl" controls />
             </div>
           </div>
 
