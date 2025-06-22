@@ -62,7 +62,7 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .ecwid-shop-wrapper {
-  background-color: #E9E2D0; /* ← Dein Wunschhintergrund */
+  background-color: #E9E2D0;
 
   min-height: 100vh;
   display: flex;
