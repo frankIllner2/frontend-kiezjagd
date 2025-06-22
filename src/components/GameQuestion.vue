@@ -43,20 +43,37 @@
         :class="{ selected: selectedOptions === index }"
         @click="toggleOption(index)"
       >
+        <!-- Text -->
         <span v-if="option.type === 'text'" class="only-text">
           {{ option.text }}
           <SpeechButton v-if="gameType === 'Mini' && option.text" :text="option.text" />
         </span>
+
+        <!-- Bild -->
         <span v-else-if="option.type === 'image'" class="option-image">
           <img :src="getCorrectImageUrl(option.imageUrl)" alt="Option Bild" />
         </span>
+
+        <!-- Text + Bild -->
         <span v-else-if="option.type === 'both'" class="text-image">
           <img :src="getCorrectImageUrl(option.imageUrl)" alt="Option Bild" />
           <strong>{{ option.text }}</strong>
           <SpeechButton v-if="gameType === 'Mini' && option.text" :text="option.text" />
         </span>
+
+        <!-- NEU: Nur Audio -->
+        <span v-else-if="option.type === 'audio'" class="only-audio">
+          <audio :src="option.audioUrl" controls />
+        </span>
+
+        <!-- Optional: Text + Audio -->
+        <span v-else-if="option.type === 'text-audio'" class="text-audio">
+          <strong>{{ option.text }}</strong>
+          <audio :src="option.audioUrl" controls />
+        </span>
       </div>
     </div>
+
       <!-- Standard-Antwort Button -->
       <button
         v-if="!['anweisung', 'next'].includes(question.type)"
