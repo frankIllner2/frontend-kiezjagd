@@ -139,11 +139,11 @@
             return this.performRequest('get', `/order/validate-link/${sessionId}`);
         },
         // Stripe-Checkout-Session erstellen
-        createCheckoutSession(gameId, email) {
+        createCheckoutSession(gameId, email, voucherCode = null) {
             if (!gameId || !email) {
                 throw new Error('⚠️ Spiel-ID und E-Mail sind erforderlich.');
             }
-            return performRequest('post', '/order/create-checkout-session', { gameId, email });
+            return performRequest('post', '/order/create-checkout-session', { gameId, email, voucherCode });
         },
         // Fragen eines Spiels abrufen
         fetchQuestions(encryptedId) {

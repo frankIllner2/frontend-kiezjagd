@@ -96,6 +96,7 @@
           E-Mail-Adresse:
         </p>
         <input type="email" v-model="userEmail" placeholder="E-Mail-Adresse" required />
+        <input type="text" v-model="voucherCode" placeholder="Gutscheincode (optional)" />
         <div class="modal-actions">
           <button class="btn btn--third" @click="closeModal">Abbrechen</button>
           <button class="btn btn--primary" @click="handleCheckout">Kaufen</button>
@@ -202,6 +203,7 @@ export default {
       showInstruction2: false,
       showInstruction3: false,
       showNewsletterForm: false,
+      voucherCode: "",
       features: [
         {
           title: "Um die Ecke",
@@ -272,8 +274,9 @@ export default {
     },
     async handleCheckout() {
       try {
-        const email =
-          this.userEmail || prompt("Bitte geben Sie Ihre E-Mail-Adresse ein:");
+        const email = this.userEmail;
+        const code = this.voucherCode;
+
         if (!email) {
           alert("⚠️ Eine E-Mail-Adresse ist erforderlich!");
           return;
@@ -283,7 +286,11 @@ export default {
           return;
         }
 
-        const { url } = await apiService.createCheckoutSession(this.currentGameId, email);
+        const { url } = await apiService.createCheckoutSession(
+          this.currentGameId,
+          email,
+          code // 🆕 Gutschein mitgeben
+        );
         window.location.href = url;
       } catch (error) {
         console.error("❌ Fehler beim Checkout:", error);

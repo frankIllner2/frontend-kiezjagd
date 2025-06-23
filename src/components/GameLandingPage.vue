@@ -51,6 +51,7 @@
         <h2>Spiel kaufen</h2>
         <p>Um dir den Spiel-Link nach dem Kauf zusenden zu können, benötigen wir deine E-Mail-Adresse:</p>
         <input type="email" v-model="userEmail" placeholder="E-Mail-Adresse" required />
+        <input type="text" v-model="voucherCode" placeholder="Gutscheincode (optional)" />
         <div class="modal-actions">
           <button class="btn btn--third" @click="closeModal">Abbrechen</button>
           <button class="btn btn--primary" @click="handleCheckout">Kaufen</button>
@@ -73,6 +74,7 @@ export default {
       error: null,
       showModal: false, // Modal sichtbar
       userEmail: '', // E-Mail für den Kauf
+      voucherCode: ""
     };
   },
   mounted() {
@@ -97,18 +99,23 @@ export default {
     },
     async handleCheckout() {
       try {
-        const email =
-          this.userEmail || prompt("Bitte geben Sie Ihre E-Mail-Adresse ein:");
+        const email = this.userEmail;
+        const code = this.voucherCode;
+
         if (!email) {
           alert("⚠️ Eine E-Mail-Adresse ist erforderlich!");
           return;
         }
-        if (!this.encryptedId) {
+        if (!this.currentGameId) {
           alert("⚠️ Keine Spiel-ID gefunden!");
           return;
         }
 
-        const { url } = await apiService.createCheckoutSession(this.encryptedId, email);
+        const { url } = await apiService.createCheckoutSession(
+          this.currentGameId,
+          email,
+          code // 🆕 Gutschein mitgeben
+        );
         window.location.href = url;
       } catch (error) {
         console.error("❌ Fehler beim Checkout:", error);
