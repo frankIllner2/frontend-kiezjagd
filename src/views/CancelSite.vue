@@ -2,6 +2,7 @@
     <div class="error-page">
       <h1>Zahlung abgebrochen!</h1>
       <p>Deine Zahlung wurde abgebrochen. Versuche es erneut.</p>
+      <router-link to="/" class="btn btn--primary">Zurück zur Startseite</router-link>
     </div>
 </template>
 
