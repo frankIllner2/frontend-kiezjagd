@@ -1,6 +1,6 @@
 <template>
     <div class="error-page">
-      <h1>❌ Zahlung abgebrochen!</h1>
+      <h1>Zahlung abgebrochen!</h1>
       <p>Deine Zahlung wurde abgebrochen. Versuche es erneut.</p>
     </div>
 </template>
