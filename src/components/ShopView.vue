@@ -33,7 +33,8 @@
 import { onMounted } from 'vue'
 
 onMounted(() => {
-  const storeId = '119751753';
+  const storeId = process.env.VUE_APP_ECWID_STORE_ID;
+
   if (!window.Ecwid) {
     const script = document.createElement('script');
     script.src = `https://app.ecwid.com/script.js?${storeId}&data_platform=code&data_date=2025-06-19`;
@@ -89,7 +90,6 @@ onMounted(() => {
     margin-bottom: 0.5rem;
     }
 }
-
 
 /* Footer */
 .bottom {
