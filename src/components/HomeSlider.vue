@@ -14,7 +14,6 @@
         />
         <div class="headline-game-name">
         <h2>{{ item.name }}</h2>
-        <b>{{ item.isVoucher }}</b>
         </div>
         <div class="short">
           <div class="short-left">
