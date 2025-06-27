@@ -14,6 +14,7 @@
         />
         <div class="headline-game-name">
         <h2>{{ item.name }}</h2>
+        <b>{{ item.isVoucher }}</b>
         </div>
         <div class="short">
           <div class="short-left">
@@ -27,7 +28,7 @@
             <div class="button">
               <button
                 class="btn btn--fourth"
-                @click="$emit('open-modal', item.encryptedId)"
+                @click="$emit('open-modal', item)"
               >
                 Kaufen
               </button>

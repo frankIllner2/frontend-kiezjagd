@@ -94,6 +94,9 @@
     <div class="form-group checkbox-group">
         <input type="checkbox" id="disabled" v-model="localGame.isDisabled" />
         <label for="disabled">Spiel deaktivieren</label>
+
+        <input type="checkbox" id="isVoucher" v-model="localGame.isVoucher" />
+        <label for="isVoucher">Spiel mit Gutschein-Code einlösen</label>
       </div>
 
     <div class="form-actions">

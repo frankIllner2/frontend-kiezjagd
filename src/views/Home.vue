@@ -90,13 +90,14 @@
     <!-- Modal Fenster -->
     <div v-if="showModal" class="modal-overlay">
       <div class="modal">
-        <h2>Spiel kaufen</h2>
+        <h2>Spiel kaufen: {{ currentGame?.name }}</h2>
         <p>
           Um dir den Spiel-Link nach dem Kauf zusenden zu können, benötigen wir deine
           E-Mail-Adresse:
         </p>
+       
         <input type="email" v-model="userEmail" placeholder="E-Mail-Adresse" required />
-        <input type="text" v-model="voucherCode" placeholder="Gutscheincode (optional)" />
+        <input v-if="currentGame?.isVoucher"  type="text" v-model="voucherCode" placeholder="Gutscheincode (optional)" />
         <div class="modal-actions">
           <button class="btn btn--third" @click="closeModal">Abbrechen</button>
           <button class="btn btn--primary" @click="handleCheckout">Kaufen</button>
@@ -119,8 +120,7 @@
             <img :src="feature.image" alt="Feature Icon" />
           </div>
           <div>
-            <b>{{ feature.title }}</b
-            ><br />
+            <b>{{ feature.title }}</b><br />
             <span>{{ feature.text }}</span>
           </div>
         </div>
@@ -204,6 +204,7 @@ export default {
       showInstruction3: false,
       showNewsletterForm: false,
       voucherCode: "",
+      currentGame: null,
       features: [
         {
           title: "Um die Ecke",
@@ -297,14 +298,13 @@ export default {
         alert("❌ Ein Fehler ist beim Checkout aufgetreten.");
       }
     },
-    openModal(gameId) {
-      const selectedGame = this.games.find((game) => game.encryptedId === gameId);
-      console.log(selectedGame);
-      if (!selectedGame || selectedGame.isDisabled) {
+    openModal(game) {
+      if (!game || game.isDisabled) {
         alert("Dieses Spiel ist derzeit nicht verfügbar.");
         return;
       }
-      this.currentGameId = gameId;
+      this.currentGameId = game.encryptedId;
+      this.currentGame = game;
       this.showModal = true;
     },
     closeModal() {

@@ -100,6 +100,10 @@
           <div class="form-group checkbox-group">
             <input type="checkbox" id="disabled" v-model="game.isDisabled" />
             <label for="disabled">Spiel deaktivieren</label>
+
+            <input type="checkbox" id="isVoucher" v-model="game.isVoucher" />
+            <label for="isVoucher">Spiel mit Gutschein-Code einlösen</label>
+
           </div>
 
           <div class="form-actions">
@@ -148,6 +152,7 @@ export default {
         infohistory: "",
         questions: [],
         isDisabled: false,
+        isVoucher: false,
         gameImage: "",
       },
       previewImage: null,
