@@ -108,34 +108,45 @@ export default {
       }
     },
 
-    submitForm() {
-  if (!this.localTeamName.trim() || !this.localEmail.trim()) {
-    console.warn('⚠️ Teamname und E-Mail dürfen nicht leer sein.');
-    return;
-  }
+    async submitForm() {
+      if (!this.localTeamName.trim() || !this.localEmail.trim()) {
+        console.warn('⚠️ Teamname und E-Mail dürfen nicht leer sein.');
+        return;
+      }
 
-  if (this.localTeamExists) {
-    console.warn('⚠️ Teamname ist bereits vergeben. Bitte wähle einen anderen.');
-    return;
-  }
+      if (this.localTeamExists) {
+        console.warn('⚠️ Teamname ist bereits vergeben. Bitte wähle einen anderen.');
+        return;
+      }
 
-  console.log("📢 `localPlayerNames` vor Verarbeitung:", this.localPlayerNames);
+      const playerNamesArray = [...this.localPlayerNames];
 
-  // Vue Proxy in normales Array umwandeln
-  const playerNamesArray = [...this.localPlayerNames];
+      try {
+        // 🧠 NEU: Team speichern im Backend
+        await apiService.saveTeam({
+          name: this.localTeamName,
+          email: this.localEmail,
+          players: playerNamesArray,
+          gameId: this.gameId,
+        });
 
-  if (playerNamesArray.length > 0) {
-    localStorage.setItem('playerNames', JSON.stringify(playerNamesArray));
-    console.log("✅ Spielernamen gespeichert:", localStorage.getItem('playerNames')); // Direkt aus localStorage lesen
-  }
+        console.log('✅ Team wurde erfolgreich gespeichert');
 
-  this.$emit('startGame', {
-    teamName: this.localTeamName,
-    email: this.localEmail,
-    playerCount: this.localPlayerCount,
-    playerNames: playerNamesArray,
-  });
-},
+        // Lokale Speicherung & Spielstart
+        localStorage.setItem('playerNames', JSON.stringify(playerNamesArray));
+
+        this.$emit('startGame', {
+          teamName: this.localTeamName,
+          email: this.localEmail,
+          playerCount: this.localPlayerCount,
+          playerNames: playerNamesArray,
+        });
+
+      } catch (error) {
+        console.error('❌ Fehler beim Speichern des Teams:', error);
+        alert('Beim Speichern des Teams ist ein Fehler aufgetreten.');
+      }
+    },
 
 
     adjustPlayerInputs() {

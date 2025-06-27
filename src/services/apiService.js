@@ -213,6 +213,14 @@
         if (!email) throw new Error("E-Mail erforderlich");
         return performRequest("post", "/newsletter/unsubscribe", { email });
     },
+    // Team speichern
+    saveTeam(team) {
+        if (!team || !team.name || !team.email || !team.gameId || !Array.isArray(team.players)) {
+            throw new Error('⚠️ Teamdaten sind unvollständig.');
+        }
+        return performRequest('post', '/teams', team);
+    },
+
 
 };
 export default apiService;
