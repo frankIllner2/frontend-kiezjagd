@@ -49,7 +49,6 @@ export default {
     },
   },
   async mounted() {
-    // Session-ID aus der URL auslesen
     this.sessionId = this.$route.query.session_id;
 
     if (!this.sessionId) {
@@ -59,17 +58,17 @@ export default {
     }
 
     try {
-      // ✅ Bestellstatus vom Backend abrufen
-      console.log(`🔄 Lade Bestellinformationen für Session-ID: ${this.sessionId}`);
-      const response = await apiService.fetchOrderStatus(this.sessionId);
+      // 📨 Zahlung bestätigen und E-Mail auslösen
+      await apiService.verifyPayment(this.sessionId);
+      console.log('✅ verify-payment erfolgreich');
 
-      // Daten aktualisieren
-     
+      // 🧾 Dann die Bestellinfo laden (optional)
+      const response = await apiService.fetchOrderStatus(this.sessionId);
       this.order = response.order;
       this.gameLink = response.gameLink;
     } catch (err) {
-      console.error('❌ Fehler beim Abrufen der Bestellinformationen:', err);
-      this.error = '❌ Bestellinformationen konnten nicht geladen werden.';
+      console.error('❌ Fehler bei Erfolg oder Verifikation:', err);
+      this.error = '❌ Bestellinformationen konnten nicht geladen oder bestätigt werden.';
     } finally {
       this.isLoading = false;
     }

@@ -220,6 +220,12 @@
         }
         return performRequest('post', '/teams', team);
     },
+    // Zahlung verifizieren (Mailversand auslösen)
+    verifyPayment(sessionId) {
+        if (!sessionId) throw new Error('⚠️ Session-ID ist erforderlich.');
+        return performRequest('post', '/order/verify-payment', { sessionId });
+    },
+
 
 
 };
