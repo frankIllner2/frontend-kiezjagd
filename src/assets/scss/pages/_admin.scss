@@ -135,6 +135,18 @@
         left: 0;
         color: #333; /* Farbe des Symbols */
       }
+      span:not(.underline) {
+        position: absolute;
+        right: 15px;
+      }
+
+      &.disabled-border {
+        border: 2px solid red;
+      }
+
+      &.enabled-border {
+        border: 2px solid green;
+      }
 
     }
 

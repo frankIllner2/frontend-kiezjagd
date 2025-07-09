@@ -16,11 +16,13 @@
     <section class="content">
       <!-- Spieleliste -->
       <div v-if="currentView === 'list'" class="game-list">
-        <div v-for="game in games" :key="game._id" class="game-card">
+        <div v-for="game in games" :key="game._id" class="game-card"
+         :class="{ 'disabled-border': game.isDisabled, 'enabled-border': !game.isDisabled }">
           <h3>{{ game.name }}</h3><span @click="copyGame(game._id)">&#x1F4CB;</span>
           <p><strong>Stadt:</strong> {{ game.city }}</p>
           <p><strong>Altersgruppe:</strong> {{ game.ageGroup }}</p>
           <p><strong>Anzahl der Fragen:</strong> {{ game.questions.length }}</p>
+        
           <p>
             <strong>
             <router-link
