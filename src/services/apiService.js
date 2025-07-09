@@ -6,6 +6,14 @@
         timeout: 15000,
     });
 
+    axiosInstance.interceptors.request.use(config => {
+        const token = localStorage.getItem("token");
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+    });
+
     // ✅ Generische Fehlerbehandlungsfunktion
     function handleApiError(error, methodName) {
         console.error(`❌ Fehler bei ${methodName}:`, error.response?.data || error.message);
@@ -225,6 +233,11 @@
         if (!sessionId) throw new Error('⚠️ Session-ID ist erforderlich.');
         return performRequest('post', '/order/verify-payment', { sessionId });
     },
+    copyGame(gameId) {
+        if (!gameId) throw new Error("⚠️ Spiel-ID darf nicht leer sein.");
+        return performRequest('post', `/games/${gameId}/copy`);
+    }
+
 
 
 

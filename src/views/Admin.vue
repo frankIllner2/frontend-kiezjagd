@@ -17,7 +17,7 @@
       <!-- Spieleliste -->
       <div v-if="currentView === 'list'" class="game-list">
         <div v-for="game in games" :key="game._id" class="game-card">
-          <h3>{{ game.name }}</h3>
+          <h3>{{ game.name }}</h3><span @click="copyGame(game._id)">&#x1F4CB;</span>
           <p><strong>Stadt:</strong> {{ game.city }}</p>
           <p><strong>Altersgruppe:</strong> {{ game.ageGroup }}</p>
           <p><strong>Anzahl der Fragen:</strong> {{ game.questions.length }}</p>
@@ -115,6 +115,16 @@ export default {
       } catch (err) {
         this.$root.showToast("Fehler beim Erstellen des Spiels!!");
         console.error('Fehler beim Erstellen des Spiels:', err);
+      }
+    },
+    async copyGame(gameId) {
+      try {
+        await apiService.copyGame(gameId);
+        this.$root.showToast("Spiel wurde erfolgreich kopiert!");
+        this.fetchGames();
+      } catch (error) {
+        console.error("Fehler beim Kopieren des Spiels:", error);
+        this.$root.showToast("Fehler beim Kopieren des Spiels!");
       }
     },
     editGame(game) {
