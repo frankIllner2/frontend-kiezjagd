@@ -13,6 +13,7 @@
       <!-- Logo (Mitte) -->
       <div class="logo">
         <img src="@/assets/img/logo.svg" alt="Kiezjagd Logo" />
+        <img src="@/assets/img/icons/girl1-green.webp" alt="Bild Mädchen Logo" />
       </div>
 
       <!-- Desktop-Menü (rechts) -->
