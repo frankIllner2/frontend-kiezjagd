@@ -9,9 +9,9 @@
       "permanent": true
     },
     {
-      "source": "/(.*)", 
+      "source": "/(.*)",
       "has": [
-        { "type": "host", "value": "https://kiezjagd.de" } 
+        { "type": "host", "value": "kiezjagd.vercel.app" }
       ],
       "destination": "https://www.kiezjagd.de/$1",
       "permanent": true
