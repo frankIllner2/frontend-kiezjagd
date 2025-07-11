@@ -49,7 +49,7 @@
     <div v-if="showModal" class="modal-overlay">
       <div class="modal">
         <h2>Spiel kaufen</h2>
-        <p>Um dir den Spiel-Link nach dem Kauf zusenden zu können, benötigen wir deine E-Mail-Adresse:</p>
+        <p>Um dir den Spiel-Link nach dem Kauf zusenden zu können, benötigen wir deine E-Mail-Adresse: </p>
         <input type="email" v-model="userEmail" placeholder="E-Mail-Adresse" required />
 
         <input v-if="gameData.isVoucher" type="text" v-model="voucherCode" placeholder="Gutscheincode (optional)" />
