@@ -1,5 +1,8 @@
-import axios from 'axios';
 import { createRouter, createWebHistory } from 'vue-router';
+import axios from 'axios';
+
+// 🔁 Slug-ID-Mapping importieren
+import slugMap from '@/data/slug-map.json';
 
 // ✅ Seiten importieren
 import HomePage from '../views/Home.vue';
@@ -18,15 +21,32 @@ import ImpressumSite from '../views/ImpressumSite.vue';
 import AgbSite from '../views/AgbSite.vue';
 import PrivacypolicySite from '../views/PrivacypolicySite.vue';
 
+// ✅ Dynamisch generierte, statische Slug-Routen für Spiele
+const gameSlugRoutes = slugMap.map(entry => ({
+  path: `/spiel/${entry.slug}`,
+  name: `GameLanding-${entry.slug}`,
+  component: GameLandingPage,
+  props: { encryptedId: entry.id }
+}));
 
 const routes = [
+  ...gameSlugRoutes,
+
+  // Optional: Weiterleitung von alter ID-Route zur Slug-Route
+  {
+    path: '/spiel/:encryptedId',
+    redirect: to => {
+      const match = slugMap.find(entry => entry.id === to.params.encryptedId);
+      return match ? `/spiel/${match.slug}` : '/notfound';
+    }
+  },
+
   {
     path: '/',
     name: 'Home',
     component: HomePage,
   },
   {
-    // Route für Benutzer mit sessionId und gameId
     path: '/game/:sessionId/:gameId',
     name: 'GameWithValidation',
     component: GamePage,
@@ -59,16 +79,10 @@ const routes = [
     props: true,
   },
   {
-    path: '/spiel/:encryptedId',
-    name: 'GameLandingPage',
-    component: GameLandingPage,
-    props: true,
-  },
-  {
     path: '/admin/game/:encryptedId',
     name: 'AdminGame',
-    component: AdminGameView, // Spezielle Admin-Ansicht für das Spiel
-    meta: { requiresAuth: true, isAdmin: true }, // Schutz durch Navigation Guards
+    component: AdminGameView,
+    meta: { requiresAuth: true, isAdmin: true },
     props: true 
   },
   {
@@ -130,8 +144,7 @@ const routes = [
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
     component: NotFoundPage,
-  },
-
+  }
 ];
 
 const router = createRouter({

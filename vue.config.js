@@ -1,16 +1,17 @@
 const path = require('path');
+const PrerenderSPAPlugin = require('prerender-spa-plugin');
+const Renderer = PrerenderSPAPlugin.PuppeteerRenderer;
+const slugMap = require('./src/data/slug-map.json');
 
 module.exports = {
   // ✅ PWA-Konfiguration
   pwa: {
     name: 'Kiezjagd',
     themeColor: '#f7f9fc',
-    // Entferne manifestOptions, da manifest.json als Datei eingebunden wird
-    manifestPath: 'manifest.json', // Pfad zur eigenen manifest.json
+    manifestPath: 'manifest.json',
     workboxOptions: {
       runtimeCaching: [
         {
-          // API-Caching für Produktionsumgebung
           urlPattern: new RegExp(`^${process.env.VUE_APP_API_BASE_URL}/api/`),
           handler: 'NetworkFirst',
           options: {
@@ -18,19 +19,18 @@ module.exports = {
             networkTimeoutSeconds: 10,
             expiration: {
               maxEntries: 50,
-              maxAgeSeconds: 86400, // Cache für 24 Stunden
+              maxAgeSeconds: 86400,
             },
           },
         },
         {
-          // Caching von statischen Ressourcen (Bilder, Fonts, CSS, JS)
           urlPattern: /\.(?:png|jpg|jpeg|svg|gif|css|js|woff2|woff|ttf|eot)$/,
           handler: 'CacheFirst',
           options: {
             cacheName: 'static-resources',
             expiration: {
               maxEntries: 100,
-              maxAgeSeconds: 2592000, // Cache für 30 Tage
+              maxAgeSeconds: 2592000,
             },
           },
         },
@@ -53,13 +53,12 @@ module.exports = {
   // ✅ Entwicklungsserver mit Proxy
   devServer: {
     proxy: {
-      // Proxy für API-Requests
       '/api': {
         target: process.env.VUE_APP_API_BASE_URL || 'http://localhost:5000',
         changeOrigin: true,
         secure: false,
         pathRewrite: {
-          '^/api': '', // Entfernt das `/api` Präfix
+          '^/api': '',
         },
         onProxyReq: (proxyReq, req) => {
           console.log(`[Proxy] ${req.method} ${req.url} -> ${proxyReq.path}`);
@@ -68,12 +67,28 @@ module.exports = {
     },
   },
 
-  // ✅ Webpack-Konfiguration
-  configureWebpack: {
-    resolve: {
+  // ✅ Webpack-Konfiguration mit Prerendering
+  configureWebpack: config => {
+    config.resolve = {
       alias: {
         '@': path.resolve(__dirname, 'src'),
       },
-    },
-  },
+    };
+
+    if (process.env.NODE_ENV === 'production') {
+      config.plugins = config.plugins || [];
+      config.plugins.push(
+        new PrerenderSPAPlugin({
+          staticDir: path.join(__dirname, 'dist'),
+          routes: slugMap.map(entry => `/spiel/${entry.slug}`),
+          renderer: new Renderer({
+            inject: {}, // optional
+            renderAfterDocumentEvent: 'render-event',
+            headless: true,
+            timeout: 20000
+          })
+        })
+      );
+    }
+  }
 };

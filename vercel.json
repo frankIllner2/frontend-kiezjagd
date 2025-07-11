@@ -16,5 +16,11 @@
       "destination": "https://www.kiezjagd.de/$1",
       "permanent": true
     }
+  ],
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
   ]
 }

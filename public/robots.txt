@@ -1,4 +1,9 @@
 User-agent: *
-Disallow: /admin
 Allow: /
+
+Disallow: /admin
+Disallow: /game   # falls Spielstände oder dynamische Sessions darüber laufen
+Disallow: /checkout  # falls Checkout-Links sichtbar wären
+Disallow: /api       # falls API öffentlich zugänglich wäre
+
 Sitemap: https://www.kiezjagd.de/sitemap.xml

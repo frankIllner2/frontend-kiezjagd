@@ -73,8 +73,8 @@ export default {
       gameData: null,
       loading: true,
       error: null,
-      showModal: false, // Modal sichtbar
-      userEmail: '', // E-Mail für den Kauf
+      showModal: false,
+      userEmail: '',
       voucherCode: ""
     };
   },
@@ -85,12 +85,61 @@ export default {
     async loadGame() {
       try {
         this.gameData = await apiService.fetchGameById(this.encryptedId);
+        this.setMetaTags();
+        document.dispatchEvent(new Event('render-event'));
       } catch (error) {
         console.error("Fehler beim Abrufen des Spiels:", error);
         this.error = error.response?.data?.message || 'Fehler beim Laden des Spiels';
       } finally {
         this.loading = false;
       }
+    },
+    setMetaTags() {
+      const title = this.gameData?.name || 'Kiezjagd – Das Outdoor-Abenteuer für Kinder';
+      const description = this.gameData?.description || 'Erlebe spannende Rätsel und Abenteuer mit deiner Familie bei Kiezjagd – draußen, gemeinsam, in Berlin!';
+      const image = this.gameData?.gameImage || 'https://www.kiezjagd.de/default-og-image.jpg';
+      const url = `https://www.kiezjagd.de${this.$route.fullPath}`;
+      const keywords = `Kiezjagd, Kinderspiel, Rätselspiel, Berlin, Outdoor, ${this.gameData?.location || ''}`;
+
+      document.title = title;
+
+      const setMeta = (name, content, attr = 'name') => {
+        let tag = document.querySelector(`meta[${attr}="${name}"]`);
+        if (!tag) {
+          tag = document.createElement('meta');
+          tag.setAttribute(attr, name);
+          document.head.appendChild(tag);
+        }
+        tag.setAttribute('content', content);
+      };
+
+      // Basis
+      setMeta('description', description);
+      setMeta('keywords', keywords);
+
+      // OpenGraph
+      setMeta('og:title', title, 'property');
+      setMeta('og:description', description, 'property');
+      setMeta('og:type', 'website', 'property');
+      setMeta('og:url', url, 'property');
+      setMeta('og:image', image, 'property');
+      setMeta('og:site_name', 'Kiezjagd', 'property');
+
+      // Twitter
+      setMeta('twitter:card', 'summary_large_image');
+      setMeta('twitter:title', title);
+      setMeta('twitter:description', description);
+      setMeta('twitter:image', image);
+      setMeta('twitter:site', '@kiezjagd');
+
+      // Canonical
+      let link = document.querySelector('link[rel="canonical"]');
+      if (!link) {
+        link = document.createElement('link');
+        link.setAttribute('rel', 'canonical');
+        document.head.appendChild(link);
+      }
+      link.setAttribute('href', url);
     },
     openModal() {
       this.showModal = true;
@@ -115,17 +164,18 @@ export default {
         const { url } = await apiService.createCheckoutSession(
           this.currentGameId,
           email,
-          code // 🆕 Gutschein mitgeben
+          code
         );
         window.location.href = url;
       } catch (error) {
         console.error("❌ Fehler beim Checkout:", error);
         alert("❌ Ein Fehler ist beim Checkout aufgetreten.");
       }
-    },
-  },
+    }
+  }
 };
 </script>
+
 
 <style scoped>
 /* Container für die gesamte Seite */
