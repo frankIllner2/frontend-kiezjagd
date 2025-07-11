@@ -295,7 +295,7 @@ export default {
         window.location.href = url;
       } catch (error) {
         console.error("❌ Fehler beim Checkout:", error);
-        alert("❌ Ein Fehler ist beim Checkout aufgetreten.");
+        alert("❌ Ein Fehler ist beim Checkout aufgetreten."); 
       }
     },
     openModal(game) {
