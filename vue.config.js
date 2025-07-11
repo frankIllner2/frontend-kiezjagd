@@ -1,7 +1,15 @@
 const path = require('path');
-const PrerenderSPAPlugin = require('prerender-spa-plugin');
-const Renderer = PrerenderSPAPlugin.PuppeteerRenderer;
-const slugMap = require('./src/data/slug-map.json');
+
+// Nur importieren, wenn nicht auf Vercel!
+const isVercel = process.env.VERCEL === '1';
+const isProd = process.env.NODE_ENV === 'production';
+
+let PrerenderSPAPlugin, Renderer, slugMap;
+if (!isVercel && isProd) {
+  PrerenderSPAPlugin = require('prerender-spa-plugin');
+  Renderer = PrerenderSPAPlugin.PuppeteerRenderer;
+  slugMap = require('./src/data/slug-map.json');
+}
 
 module.exports = {
   // ✅ PWA-Konfiguration
@@ -50,7 +58,6 @@ module.exports = {
     },
   },
 
-  // ✅ Entwicklungsserver mit Proxy
   devServer: {
     proxy: {
       '/api': {
@@ -67,7 +74,6 @@ module.exports = {
     },
   },
 
-  // ✅ Webpack-Konfiguration mit Prerendering
   configureWebpack: config => {
     config.resolve = {
       alias: {
@@ -75,14 +81,14 @@ module.exports = {
       },
     };
 
-    if (process.env.NODE_ENV === 'production') {
+    // 👉 Nur lokal & production: Prerender aktivieren
+    if (!isVercel && isProd) {
       config.plugins = config.plugins || [];
       config.plugins.push(
         new PrerenderSPAPlugin({
           staticDir: path.join(__dirname, 'dist'),
           routes: slugMap.map(entry => `/spiel/${entry.slug}`),
           renderer: new Renderer({
-            inject: {}, // optional
             renderAfterDocumentEvent: 'render-event',
             headless: true,
             timeout: 20000
