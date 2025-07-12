@@ -1,5 +1,9 @@
 <template>
-  <div v-if="loading">Lädt...</div>
+  <div v-if="loading" class="loading-spinner">
+  <img src="@/assets/img/star.png" alt="Lädt..." class="rotating-star" />
+  <span class="loading-text">Kiezjagd wird vorbereitet...</span>
+</div>
+
   <div v-else-if="error">{{ error }}</div>
   <div v-else class="game-landing-container">
 
@@ -178,6 +182,44 @@ export default {
 
 
 <style scoped>
+.loading-spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.rotating-star {
+  width: 80px;
+  height: 80px;
+  animation: rotate 1.5s linear infinite;
+}
+
+.loading-text {
+  margin-top: 15px;
+  font-size: 1.2rem;
+  color: #355b4c;
+  font-weight: bold;
+  animation: pulse 2s infinite;
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 /* Container für die gesamte Seite */
 .game-landing-container {
   max-width: 1200px;
