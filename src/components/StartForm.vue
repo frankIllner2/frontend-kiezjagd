@@ -8,7 +8,7 @@
         id="teamName"
         placeholder="Teamname eingeben"
         @blur="checkTeamName"
-        v-maxlength="30" 
+        maxlength="30" 
         required
       />
       <p v-if="localTeamExists" class="error">
@@ -23,7 +23,7 @@
         id="email"
         placeholder="E-Mail eingeben"
         type="email"
-        v-maxlength="40" 
+        maxlength="40" 
         required
       />
     </div>
@@ -46,7 +46,7 @@
       <div v-for="(player, index) in localPlayerNames" :key="index" class="player-input">
         <input
           v-model="localPlayerNames[index]"
-          v-maxlength="25" 
+          maxlength="25" 
           :placeholder="`Spieler ${index + 1}`"
           required
         />
@@ -107,13 +107,11 @@ export default {
           return;
       }
 
-      await this.checkTeamName();
-
       if (this.localTeamExists) {
         console.warn('⚠️ Teamname ist bereits vergeben. Bitte wähle einen anderen.');
         return;
       }
-
+      await this.checkTeamName();
       const playerNamesArray = [...this.localPlayerNames];
 
       try {
