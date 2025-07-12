@@ -8,6 +8,7 @@
         id="teamName"
         placeholder="Teamname eingeben"
         @blur="checkTeamName"
+        v-maxlength="30" 
         required
       />
       <p v-if="localTeamExists" class="error">
@@ -22,6 +23,7 @@
         id="email"
         placeholder="E-Mail eingeben"
         type="email"
+        v-maxlength="40" 
         required
       />
     </div>
@@ -33,6 +35,7 @@
         id="playerCount"
         type="number"
         min="1"
+        max="8"
         @input="adjustPlayerInputs"
         required
       />
@@ -43,6 +46,7 @@
       <div v-for="(player, index) in localPlayerNames" :key="index" class="player-input">
         <input
           v-model="localPlayerNames[index]"
+          v-maxlength="25" 
           :placeholder="`Spieler ${index + 1}`"
           required
         />
@@ -85,34 +89,25 @@ export default {
     teamExists(newValue) {
       this.localTeamExists = newValue;
     },
-  },
-  methods: {
+    },
+    methods: {
     async checkTeamName() {
-      if (!this.localTeamName.trim()) {
-        this.localTeamExists = false;
-        return;
-      }
-
       try {
         const response = await apiService.checkTeamName(this.localTeamName, this.gameId);
         this.localTeamExists = response.exists || false;
-
-        if (this.localTeamExists) {
-          console.warn('⚠️ Teamname existiert bereits.');
-        } else {
-          console.log('✅ Teamname ist verfügbar.');
-        }
       } catch (error) {
-        console.error('❌ Fehler beim Überprüfen des Teamnamens:', error);
+        console.error('Fehler bei der Teamnamenprüfung:', error);
         this.localTeamExists = false;
       }
     },
 
     async submitForm() {
-      if (!this.localTeamName.trim() || !this.localEmail.trim()) {
-        console.warn('⚠️ Teamname und E-Mail dürfen nicht leer sein.');
-        return;
+      if (!this.localTeamName.trim()) {
+          console.warn('⚠️ Teamname darf nicht leer sein.');
+          return;
       }
+
+      await this.checkTeamName();
 
       if (this.localTeamExists) {
         console.warn('⚠️ Teamname ist bereits vergeben. Bitte wähle einen anderen.');
