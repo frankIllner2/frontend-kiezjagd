@@ -94,6 +94,7 @@ export default {
     async checkTeamName() {
       try {
         const response = await apiService.checkTeamName(this.localTeamName, this.gameId);
+        console.log('exists:' + response.exists);
         this.localTeamExists = response.exists || false;
       } catch (error) {
         console.error('Fehler bei der Teamnamenprüfung:', error);
@@ -102,16 +103,20 @@ export default {
     },
 
     async submitForm() {
+
       if (!this.localTeamName.trim()) {
+          console.log('nicht leer');
           console.warn('⚠️ Teamname darf nicht leer sein.');
           return;
       }
+      await this.checkTeamName();
 
       if (this.localTeamExists) {
+         console.log('ist vorhanden');
         console.warn('⚠️ Teamname ist bereits vergeben. Bitte wähle einen anderen.');
         return;
       }
-      await this.checkTeamName();
+      
       const playerNamesArray = [...this.localPlayerNames];
 
       try {

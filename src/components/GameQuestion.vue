@@ -31,7 +31,7 @@
 
     <!-- Freitextantwort -->
     <div v-if="question.type === 'text'" class="text-answer">
-      <input v-model="userAnswer" placeholder="Deine Antwort" />
+      <input v-model="userAnswer" maxlength="35" name="Antwort" placeholder="Deine Antwort" />
     </div>
 
     <!-- Einzelne Auswahl (vorher Mehrfachauswahl) -->
