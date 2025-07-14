@@ -19,18 +19,18 @@
     margin: 150px auto;
   }
   h1 {
-    color: #f44336;
+    color: #355b4c;
   }
   .btn-primary {
     margin-top: 20px;
-    background-color: #4caf50;
-    color: white;
+    background-color: #355b4c;
+    color: #FAC227;
     padding: 10px 20px;
     border-radius: 5px;
     text-decoration: none;
   }
   a {
-    color: #4caf50;
+    color: #355b4c;
     text-decoration: none;
   }
   </style>
