@@ -11,7 +11,7 @@
 
     <!-- Fehleranzeige -->
     <div v-else-if="error" class="error">
-      ❌ Fehler: {{ error }}
+      Fehler: {{ error }}
     </div>
 
     <!-- Bestellinformationen -->
