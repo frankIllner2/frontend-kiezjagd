@@ -136,16 +136,19 @@
         },
         // Teamname prüfen
         checkTeamName(teamName, gameId) {
+         
             if (!teamName || !gameId) {
                 throw new Error('Teamname und Spiel-ID sind erforderlich.');
             }
             return performRequest('get', `/teams/check?teamName=${encodeURIComponent(teamName)}&gameId=${encodeURIComponent(gameId)}`);
         },
         // prüfen ob Link abgelaufen ist
+        /*
         validateLink(sessionId) {
             if (!sessionId) throw new Error('⚠️ encryptedId ist erforderlich.');
             return this.performRequest('get', `/order/validate-link/${sessionId}`);
         },
+        */
         // Stripe-Checkout-Session erstellen
         createCheckoutSession(gameId, email, voucherCode = null) {
             if (!gameId || !email) {

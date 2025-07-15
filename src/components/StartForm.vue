@@ -26,34 +26,40 @@
         maxlength="40" 
         required
       />
-    </div>
+      <p v-if="emailError" class="error">{{ emailError }}</p>
 
+    </div>
     <div class="form-group">
       <label for="playerCount">Wie viele Spieler seid ihr?</label>
       <input
         v-model.number="localPlayerCount"
         id="playerCount"
         type="number"
-        min="1"
-        max="8"
-        @input="adjustPlayerInputs"
+        :min="1"
+        :max="8"
+        @input="onPlayerCountChange"
         required
       />
     </div>
 
     <div class="form-group">
       <label>Wie heisst du?</label>
-      <div v-for="(player, index) in localPlayerNames" :key="index" class="player-input">
+      <div
+        v-for="(player, index) in localPlayerNames"
+        :key="index"
+        class="player-input"
+      >
         <input
           v-model="localPlayerNames[index]"
-          maxlength="25" 
+          maxlength="25"
           :placeholder="`Spieler ${index + 1}`"
           required
         />
       </div>
     </div>
 
-    <button type="submit" class="btn btn--secondary" :disabled="localTeamExists">Starte dein Spiel</button>
+
+    <button type="submit" class="btn btn--secondary" :disabled="localTeamExists || !!emailError">Starte dein Spiel</button>
   </form>
 </template>
 
@@ -62,10 +68,7 @@ import { apiService } from '@/services/apiService';
 
 export default {
   props: {
-    gameId: {
-      type: String,
-      required: true,
-    },
+    gameId: { type: String, required: true },
     teamName: String,
     email: String,
     playerCount: Number,
@@ -80,6 +83,7 @@ export default {
       localPlayerCount: this.playerCount || 1,
       localPlayerNames: [...(this.playerNames || [])],
       localTeamExists: this.teamExists || false,
+      emailError: '',
     };
   },
   watch: {
@@ -89,12 +93,16 @@ export default {
     teamExists(newValue) {
       this.localTeamExists = newValue;
     },
-    },
-    methods: {
+  },
+  methods: {
     async checkTeamName() {
+     
+      if (!this.localTeamName.trim()) {
+        this.localTeamExists = false;
+        return;
+      }
       try {
         const response = await apiService.checkTeamName(this.localTeamName, this.gameId);
-        console.log('exists:' + response.exists);
         this.localTeamExists = response.exists || false;
       } catch (error) {
         console.error('Fehler bei der Teamnamenprüfung:', error);
@@ -103,24 +111,32 @@ export default {
     },
 
     async submitForm() {
+      this.emailError = '';
 
-      if (!this.localTeamName.trim()) {
-          console.log('nicht leer');
-          console.warn('⚠️ Teamname darf nicht leer sein.');
-          return;
-      }
-      await this.checkTeamName();
-
-      if (this.localTeamExists) {
-         console.log('ist vorhanden');
-        console.warn('⚠️ Teamname ist bereits vergeben. Bitte wähle einen anderen.');
+      // E-Mail prüfen
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
+      if (!emailRegex.test(this.localEmail)) {
+        this.emailError = 'Bitte gib eine gültige E-Mail-Adresse ein.';
         return;
       }
-      
+
+      // Teamname prüfen
+      try {
+        const check = await apiService.checkTeamName(this.localTeamName, this.gameId);
+        this.localTeamExists = check.exists || false;
+      } catch (err) {
+        console.error("❌ Fehler bei Teamnamenprüfung:", err);
+        this.localTeamExists = false; // optional: im Zweifel weitermachen
+      }
+
+      if (this.localTeamExists) {
+        console.warn('⚠️ Teamname ist bereits vergeben.');
+        return;
+      }
+
       const playerNamesArray = [...this.localPlayerNames];
 
       try {
-        // 🧠 NEU: Team speichern im Backend
         await apiService.saveTeam({
           name: this.localTeamName,
           email: this.localEmail,
@@ -128,9 +144,6 @@ export default {
           gameId: this.gameId,
         });
 
-        console.log('✅ Team wurde erfolgreich gespeichert');
-
-        // Lokale Speicherung & Spielstart
         localStorage.setItem('playerNames', JSON.stringify(playerNamesArray));
 
         this.$emit('startGame', {
@@ -139,16 +152,20 @@ export default {
           playerCount: this.localPlayerCount,
           playerNames: playerNamesArray,
         });
-
       } catch (error) {
         console.error('❌ Fehler beim Speichern des Teams:', error);
         alert('Beim Speichern des Teams ist ein Fehler aufgetreten.');
       }
     },
 
-
     adjustPlayerInputs() {
+      // Begrenzung auf maximal 8 Spieler
+      if (this.localPlayerCount > 8) {
+        this.localPlayerCount = 8;
+      }
+
       const currentCount = this.localPlayerNames.length;
+
       if (this.localPlayerCount > currentCount) {
         for (let i = currentCount; i < this.localPlayerCount; i++) {
           this.localPlayerNames.push('');
@@ -162,4 +179,5 @@ export default {
     this.adjustPlayerInputs();
   },
 };
+
 </script>
