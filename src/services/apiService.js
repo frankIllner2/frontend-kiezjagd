@@ -136,11 +136,11 @@
         },
         // Teamname prüfen
         checkTeamName(teamName, gameId) {
-         
+            console.log('Name' + teamName);
             if (!teamName || !gameId) {
                 throw new Error('Teamname und Spiel-ID sind erforderlich.');
             }
-            return performRequest('get', `/teams/check?teamName=${encodeURIComponent(teamName)}&gameId=${encodeURIComponent(gameId)}`);
+            return performRequest('get', `/results/check?teamName=${encodeURIComponent(teamName)}&gameId=${encodeURIComponent(gameId)}`);
         },
         // prüfen ob Link abgelaufen ist
         /*

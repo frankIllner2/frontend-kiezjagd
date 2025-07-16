@@ -248,7 +248,7 @@ export default {
         this.prehistory = response.prehistory || "";
         this.infohistory = response.infohistory || "";
 
-        console.log("🔄 Spieldaten geladen:", response);
+        console.log("Game - Spieldaten geladen:");
       } catch (error) {
         console.error("❌ Fehler beim Laden des Spiels:", error);
       }
