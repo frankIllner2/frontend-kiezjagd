@@ -1,7 +1,10 @@
 @use "@/assets/scss/abstracts/variables" as *;
 @use "@/assets/scss/abstracts/mixins" as *;
 
-/* Header-Bereich */
+/* ===========================
+   HEADER
+   =========================== */
+
 .top-header-menu {
   display: flex;
   position: sticky;
@@ -13,220 +16,148 @@
   z-index: 1000;
   font-family: 'BN Bergen', sans-serif;
 
+  &.is-translucent {
+    background: rgba($background-color-2, 0.7);
+  }
+
   .header-wrapper {
-    display: flex;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
     align-items: center;
     width: 100%;
-    max-width: 1280px; //max Größe
+    max-width: 1280px;
     margin: auto;
-    justify-content: space-between;
+    gap: 16px;
     padding: 10px 20px;
   }
 }
 
 /* Logo */
 .logo {
-  width: 33.33%; /* Ein Drittel der Breite */
   display: flex;
   justify-content: center;
-  height: auto;
-  
-  img {
-    width: 120px;
+  img { width: 140px; }
+  @include respond-to("tablet") {
+    img { width: 240px; }
   }
 }
 
-/* Navigation */
-nav {
-  ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    li {
-      a {
-        text-decoration: none;
-        color: $primary-text-color;
-      }
-    }
-  }
-
-  .bottom-menu {
-    display: flex;
-    justify-content: flex-end;
-    a {
-      color: whitesmoke;
-      padding: 0 5px;
-    }
-  }
-
-  .social-icons {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    .social-icon {
-      font-size: 30px;
-      color: $primary-text-color;
-      transition: color 0.3s ease;
-    }
-    .social-icon:hover {
-      color: $secondary-text-color;
-    }
-  }
-}
-
+/* Desktop-Menü rechts */
 .desktop-menu {
-  display: none; /* Auf Desktop verstecken */
- 
   align-items: center;
   gap: 20px;
 
-  &.desktop-menu-left {
-    justify-content: flex-start; /* Links ausrichten */
-    width: 32%;
-    @include respond-to("tablet") {
-        width: 50.33%;
-    }
-    @include respond-to("desktop") {
-      width: 33.33%;
-  }
-  }
-
-  &.desktop-menu-right {
-    justify-content: flex-end; /* Rechts ausrichten */
-    width: 25%;
-      @include respond-to("tablet") {
-        width: 33.33%;
-    }
-  }
+  &.desktop-menu-right { justify-content: flex-end; }
 
   ul {
+    list-style: none;
+    display: flex;
     gap: 20px;
-    li a {
-      color: $primary-text-color;
-    }
+    margin: 0;
+    padding: 0;
+
+    li a { color: $primary-text-color; text-decoration: none; }
   }
 }
 
-/* Hamburger Button */
+/* ===========================
+   HAMBURGER
+   =========================== */
 .hamburger {
-  display: none;
+  display: flex;
   flex-direction: column;
   gap: 5px;
   background: none;
   border: none;
   cursor: pointer;
-  z-index: 100;
+  z-index: 1002;
 }
-
 .hamburger span {
-  display: block;
   width: 30px;
   height: 3px;
-  background: black;
-  transition: 0.3s;
+  background: $primary-text-color;
 }
-
-.hamburger span.open:nth-child(1) {
-  transform: translateY(8px) rotate(45deg);
-}
-
-.hamburger span.open:nth-child(2) {
+.top-header-menu.is-open .hamburger {
   opacity: 0;
+  pointer-events: none;
 }
 
-.hamburger span.open:nth-child(3) {
-  transform: translateY(-8px) rotate(-45deg);
+/* ===========================
+   BACKDROP (volle Seite)
+   =========================== */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.35);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease-in-out;
+  z-index: 9998;
 }
+/* Sichtbar, wenn Body die Klasse trägt */
+body.menu-open .backdrop {
+  opacity: 1;
+  pointer-events: auto;
+}
+body.menu-open { overflow: hidden; }
 
-/* Mobiles Menü */
+/* ===========================
+   DRAWER
+   =========================== */
 .mobile-menu {
   position: fixed;
-  top: 0;
-  right: -100%;
-  width: 80%;
-  height: 90vh;
+  top: 0; left: 0;
+  width: min(90%, 520px);
+  height: 100vh;
   background: $background-color-2;
-  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
+  box-shadow: 2px 0 10px rgba(0,0,0,.2);
   padding: 20px;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  transition: right 0.3s ease-in-out, opacity 0.3s ease-in-out; /* Übergang für opacity hinzufügen */
-  z-index: 999;
-  overflow-y: auto; /* Wenn nötig, Scrollbar hinzufügen */
+  overflow-y: auto;
+  z-index: 9999;
+
+  transform: translateX(-100%);
   opacity: 0;
+  transition: transform .3s ease-in-out, opacity .25s ease-in-out;
 
   .menu {
     display: flex;
     flex-direction: column;
     gap: 15px;
     padding-top: 20px;
-    li {
+    list-style-type: none;
+
+    li a {
+      font-size: clamp(2rem, 4vw, 2.5em);
+      color: $primary-text-color;
+      text-decoration: none;
+      display: block;
       width: 100%;
-      text-align: left;
-      a {
-        display: block;
-        width: 100%;
-        font-size: clamp(1.4rem, 4vw, 3em);
-      }
     }
   }
-  .social-icons {
-    margin-top: auto;
-  }
 }
+.mobile-menu.menu-open { transform: translateX(0); opacity: 1; }
 
-.mobile-menu.menu-open {
-  right: 0;
-  opacity: 1;
-}
-
-/* Schließen-Button */
+/* Close-X im Drawer */
 .close-btn {
-  font-size: 30px;
-  cursor: pointer;
-  align-self: flex-end;
+  position: absolute;
+  top: 12px; right: 12px;
+  width: 40px; height: 40px;
+  display: grid; place-items: center;
+  background: transparent;
+  border: 0;
   color: $primary-text-color;
+  font-size: 45px;
+  cursor: pointer;
 }
 
-/* Desktop Ansicht */
+/* ===========================
+   VIEWPORTS
+   =========================== */
 @media (min-width: 1024px) {
-  .desktop-menu {
-    display: flex; /* Auf Desktop anzeigen */
-  }
-  .mobile-menu,
-  .hamburger {
-    display: none; /* Auf Desktop verstecken */
-  }
-
-  .top-header-menu .header-wrapper {
-    padding: 10px 0;
-  }
+  .desktop-menu { display: flex; }
 }
-
-/* Mobile Ansicht */
 @media (max-width: 1023px) {
-  .desktop-menu {
-    display: none; /* Auf Mobile verstecken */
-  }
-
-  .hamburger {
-    display: flex; /* Auf Mobile anzeigen */
-  }
-
-  .top-header-menu .header-wrapper {
-    padding: 10px 20px;
-    flex-wrap: nowrap;
-  }
-
-  .top-header-menu .header-wrapper .hamburger {
-    margin-left: auto;
-    position: static;
-  }
-  .top-header-menu {
-    padding: 0 20px;
-  }
+  .desktop-menu .shop-lp { display: none; }
 }

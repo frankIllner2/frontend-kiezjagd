@@ -45,7 +45,7 @@
           <!-- Card 1 -->
           <div class="card">
             <div class="icon">
-              <img src="@/assets/img/icons/junge.png" />
+              <img src="@/assets/img/icons/fritz.png" />
             </div>
             <div class="info">
               <h3>Dein Smartphone als Spielleiter</h3>
@@ -60,7 +60,7 @@
           <!-- Card 2 -->
           <div class="card">
             <div class="icon">
-              <img src="@/assets/img/icons/girls.png" />
+              <img src="@/assets/img/icons/frida.png" />
             </div>
             <div class="info">
               <h3>Dein interaktives Abenteuer</h3>
@@ -136,10 +136,10 @@
     <!-- Call-to-Action -->
     <section class="container community-section">
       <div class="icons-header">
-        <img src="@/assets/img/icons/boyYellowShoes.png" />
-        <img src="@/assets/img/icons/girlYellowShirt.png" />
-        <img src="@/assets/img/icons/girlYellowHair.png" />
-        <img src="@/assets/img/icons/boyYellowShirt.png" />
+        <img src="@/assets/img/icons/fritz.png" />
+        <img src="@/assets/img/icons/susi.png" />
+        <img src="@/assets/img/icons/julia.png" />
+        <img src="@/assets/img/icons/frank.png" />
       </div>
       <h2>Bereit für dein Abenteuer?</h2>
       <div class="container">
@@ -173,10 +173,10 @@ import HeaderMenu from "@/components/HeaderMenu.vue";
 import HomeSlider2 from "@/components/HomeSlider2.vue";
 import HomeSlider3 from "@/components/HomeSlider3.vue";
 import HomeSlider4 from "@/components/HomeSlider4.vue";
-import boyYellowShoes from "@/assets/img/icons/boyYellowShoes.png";
-import girlYellowShirt from "@/assets/img/icons/girlYellowShirt.png";
-import girlYellowHair from "@/assets/img/icons/girlYellowHair.png";
-import boyYellowShirt from "@/assets/img/icons/boyYellowShirt.png";
+import fritz from "@/assets/img/icons/fritz.png";
+import susi from "@/assets/img/icons/susi.png";
+import frida from "@/assets/img/icons/frida.png";
+import frank from "@/assets/img/icons/frank.png";
 import NewsletterSignup from "@/components/NewsletterSignup.vue";
 
 
@@ -209,26 +209,26 @@ export default {
         {
           title: "Um die Ecke",
           text:
-            "Spannende Fragen direkt aus deiner Umgebung für Minis, Medis, Maxis und ganz Groß.",
-          image: boyYellowShoes,
+            "Spannende Fragen direkt aus deiner Umgebung für Minis, Medis, Maxis.",
+          image: fritz,
         },
         {
           title: "Immer griffbereit",
           text:
             "Spiele bequem auf deinem Smartphone oder Tablet.",
-          image: boyYellowShirt,
+          image: frank,
         },
         {
           title: "Gemeinsam spielen",
           text:
             "Teile dein Abenteuer mit Freunden und Familie.",
-          image: girlYellowHair,
+          image: frida,
         },
         {
           title: "Werde KiezMeister",
           text:
             "Lasse dein Spielergebnis strahlen: verewige dich in unserer “Mitgemacht”- Liste!.",
-          image: girlYellowShirt,
+          image: susi,
         },
       ],
     };
