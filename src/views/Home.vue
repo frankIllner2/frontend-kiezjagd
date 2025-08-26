@@ -27,7 +27,6 @@
     </section>
 
     <!-- Headline Info Text -->
-
     <section id="what-is-headline" class="container what-is-headline">
       <div class="headline font-bold">
         <img class="inline-img" src="@/assets/img/icons/game-group.png" alt="Icon-Gril" />
@@ -95,12 +94,20 @@
           Um dir den Spiel-Link nach dem Kauf zusenden zu können, benötigen wir deine
           E-Mail-Adresse:
         </p>
-       
+
         <input type="email" v-model="userEmail" placeholder="E-Mail-Adresse" required />
-        <input v-if="currentGame?.isVoucher"  type="text" v-model="voucherCode" placeholder="Gutscheincode (optional)" />
+        <input v-if="currentGame?.isVoucher" type="text" v-model="voucherCode" placeholder="Gutscheincode (optional)" />
+
+        <!-- Fehlerhinweis -->
+        <p v-if="checkoutError" class="mt-2 p-2" style="background:#FEF2F2;color:#B91C1C;border:1px solid #FECACA;border-radius:6px;">
+          {{ checkoutError }}
+        </p>
+
         <div class="modal-actions">
-          <button class="btn btn--third" @click="closeModal">Abbrechen</button>
-          <button class="btn btn--primary" @click="handleCheckout">Kaufen</button>
+          <button class="btn btn--third" @click="closeModal" :disabled="isCheckingOut">Abbrechen</button>
+          <button class="btn btn--primary" @click="handleCheckout" :disabled="isCheckingOut">
+            {{ isCheckingOut ? 'Wird geprüft…' : 'Kaufen' }}
+          </button>
         </div>
       </div>
     </div>
@@ -162,7 +169,6 @@
       </div>
     </section>
     <NewsletterSignup :visible="showNewsletterForm" @close="showNewsletterForm = false" />
-
   </div>
 </template>
 
@@ -178,7 +184,6 @@ import susi from "@/assets/img/icons/susi.png";
 import frida from "@/assets/img/icons/frida.png";
 import frank from "@/assets/img/icons/frank.png";
 import NewsletterSignup from "@/components/NewsletterSignup.vue";
-
 
 export default {
   name: "HomePage",
@@ -205,6 +210,8 @@ export default {
       showNewsletterForm: false,
       voucherCode: "",
       currentGame: null,
+      isCheckingOut: false,     // 👈 neu
+      checkoutError: "",        // 👈 neu
       features: [
         {
           title: "Um die Ecke",
@@ -274,28 +281,42 @@ export default {
       }
     },
     async handleCheckout() {
+      this.checkoutError = '';
+      this.isCheckingOut = true;
       try {
-        const email = this.userEmail;
-        const code = this.voucherCode;
+        const email = this.userEmail?.trim();
+        const code = this.voucherCode?.trim() || null;
 
         if (!email) {
-          alert("⚠️ Eine E-Mail-Adresse ist erforderlich!");
+          this.checkoutError = "⚠️ Eine E-Mail-Adresse ist erforderlich.";
           return;
         }
         if (!this.currentGameId) {
-          alert("⚠️ Keine Spiel-ID gefunden!");
+          this.checkoutError = "⚠️ Keine Spiel-ID gefunden.";
           return;
         }
 
         const { url } = await apiService.createCheckoutSession(
           this.currentGameId,
           email,
-          code // 🆕 Gutschein mitgeben
+          code
         );
         window.location.href = url;
       } catch (error) {
         console.error("❌ Fehler beim Checkout:", error);
-        alert("❌ Ein Fehler ist beim Checkout aufgetreten."); 
+        const payload = error?.response?.data || {};
+        const code = payload.code;
+        const msg = payload.error || error?.message || "Checkout fehlgeschlagen.";
+
+        if (code === "PROMO_CODE_INVALID") {
+          this.checkoutError = "Dieser Gutscheincode ist abgelaufen oder ungültig.";
+          this.voucherCode = "";
+          try { localStorage.removeItem("kiezjagd_voucher"); } catch {error}
+        } else {
+          this.checkoutError = msg;
+        }
+      } finally {
+        this.isCheckingOut = false;
       }
     },
     openModal(game) {
@@ -306,19 +327,19 @@ export default {
       this.currentGameId = game.encryptedId;
       this.currentGame = game;
       this.showModal = true;
+      this.checkoutError = ""; // Reset Meldung beim Öffnen
     },
     closeModal() {
       this.showModal = false;
       this.userEmail = "";
       this.currentGameId = null;
+      this.checkoutError = "";
+      this.isCheckingOut = false;
     },
     async fetchRandomGameRankings() {
       try {
         // ✅ Zufällige Spiele abrufen
-        console.log("🎲 Zufällige Spiele:");
-
         let randomGameIds = await apiService.getRandomGames();
-        console.log("🎲 Zufällige Spiele:", randomGameIds);
 
         // 🛑 Deaktivierte Spiele herausfiltern
         const allGames = await apiService.fetchGames();
@@ -354,8 +375,6 @@ export default {
             gameName: ranking.gameName,
             topResults: ranking.topResults,
           }));
-
-        console.log("🏆 Top 5 Rankings:", this.randomRankings);
       } catch (error) {
         console.error("❌ Fehler beim Laden zufälliger Rankings:", error);
       }
@@ -365,7 +384,6 @@ export default {
     window.removeEventListener("resize", this.checkScreenSize);
   },
   async mounted() {
-    console.log("Features Data:", this.features);
     this.checkScreenSize();
     window.addEventListener("resize", this.checkScreenSize);
     this.fetchRandomGameRankings();
@@ -373,6 +391,7 @@ export default {
   },
 };
 </script>
+
 <style scoped>
 /* Container */
 /* 🎯 Allgemeine Layout-Stile */
@@ -419,7 +438,6 @@ export default {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
-/* 🏆 Ranking-Section */
 /* 🌟 Ranking Section */
 .ranking-section {
   margin-top: 30px;
@@ -667,8 +685,8 @@ export default {
     width: 85%;
   }
   .modal {
-    width: 90%; /* Verkleinert das Modal für kleinere Geräte */
-    max-width: 90%; /* Sicherstellen, dass es nicht über die Ränder hinausgeht */
+    width: 90%;
+    max-width: 90%;
     padding: 15px;
   }
 
@@ -677,11 +695,11 @@ export default {
   }
 
   .modal-container input[type="email"] {
-    font-size: 0.9rem; /* Kleinere Schrift für Mobilgeräte */
+    font-size: 0.9rem;
   }
 
   .modal-container .btn-primary {
-    font-size: 0.9rem; /* Kleinere Schriftgröße für Buttons */
+    font-size: 0.9rem;
     padding: 8px;
   }
 }
