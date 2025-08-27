@@ -100,18 +100,9 @@
         </a>
       </li>
       <li>
-        <a href="/Agb" target="_blank" rel="noopener" @click="closeMenu">AGB</a>
+        <a href="/Agb" target="_blank" rel="noopener" @click="closeMenu">AGB / Datenschutz</a>
       </li>
-      <li>
-        <a
-          href="/Datenschutz"
-          target="_blank"
-          rel="noopener"
-          @click="closeMenu"
-        >
-          Datenschutz
-        </a>
-      </li>
+   
     </ul>
 
     <!-- Socials -->
