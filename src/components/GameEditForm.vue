@@ -106,6 +106,17 @@
 
           </div>
 
+          <div class="form-group" v-if="game.isVoucher">
+            <label for="voucherName">Gutschein-Name (Admin)</label>
+            <input
+              id="voucherName"
+              v-model="game.voucherName"
+              placeholder="z. B. TEST2025"
+              pattern="[A-Za-z0-9-]+"
+            />
+            
+          </div>
+
           <div class="form-actions">
             <button type="submit" class="btn btn--save">Spiel speichern</button>
           </div>
@@ -131,10 +142,9 @@
     </div>
   </div>
 </template>
-
 <script>
-import QuestionList from "@/components/QuestionList.vue";
-import OptimizedImageUploader from "@/components/OptimizedImageUploader.vue";
+import QuestionList from "@/components/QuestionList.vue"; 
+import OptimizedImageUploader from "@/components/OptimizedImageUploader.vue"; 
 import apiService from "@/services/apiService";
 
 export default {
@@ -153,6 +163,7 @@ export default {
         questions: [],
         isDisabled: false,
         isVoucher: false,
+        voucherName: "",        // 👈 neu
         gameImage: "",
       },
       previewImage: null,
@@ -171,13 +182,14 @@ export default {
     async fetchGame(id) {
       try {
         const response = await apiService.fetchGameById(id, true);
-        this.game = { ...response };
+        // Falls ältere Datensätze noch kein voucherName haben → Default setzen
+        this.game = { voucherName: "", ...response };
         this.uploadedImage = response.gameImage;
-        console.log("🖼️ gameImage aus Response:", response.gameImage);
       } catch (error) {
         console.error("Fehler beim Laden des Spiels:", error);
       }
     },
+
     async deleteQuestion(questionId) {
       await apiService.deleteQuestion(this.id, questionId);
       await this.fetchGame(this.id);
@@ -211,20 +223,24 @@ export default {
         this.game.questions.push(updatedQuestion);
       }
     },
+
     async updateGame() {
       try {
         let imageUrl = this.game.gameImage;
         if (this.uploadedImage instanceof File) {
-          console.log("📤 Neues Bild wird hochgeladen:", this.uploadedImage.name);
           imageUrl = await apiService.uploadImage(this.uploadedImage);
-        } else {
-          console.log("Bestehendes Bild wird verwendet:", imageUrl);
         }
 
-        const gameData = { ...this.game, gameImage: imageUrl };
-        await apiService.updateGame({ _id: this.id, ...gameData });
+        const payload = {
+          ...this.game,
+          gameImage: imageUrl,
+          // Sicherheit: Wenn Gutscheine für dieses Spiel deaktiviert sind,
+          // voucherName serverseitig nicht versehentlich beibehalten.
+          voucherName: this.game.isVoucher ? this.game.voucherName : "",
+        };
+
+        await apiService.updateGame({ _id: this.id, ...payload });
         this.$root.showToast("Daten wurden erfolgreich gespeichert!");
-        console.log("✅ Spiel erfolgreich aktualisiert");
       } catch (error) {
         console.error("❌ Fehler beim Aktualisieren des Spiels:", error);
         this.$root.showToast("Fehler beim Speichern der Daten!", "error");

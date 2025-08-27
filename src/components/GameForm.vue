@@ -97,7 +97,17 @@
 
         <input type="checkbox" id="isVoucher" v-model="localGame.isVoucher" />
         <label for="isVoucher">Spiel mit Gutschein-Code einlösen</label>
-      </div>
+    </div>
+    <div class="form-group" v-if="localGame.isVoucher">
+      <label for="voucherName">Gutschein-Name (Admin)</label>
+      <input
+        id="voucherName"
+        v-model="localGame.voucherName"
+        placeholder="z. B. TEST2025"
+        pattern="[A-Za-z0-9-]+"
+      />
+   
+    </div>
 
     <div class="form-actions">
       <button type="submit" class="btn btn--save">Speichern</button>
@@ -117,15 +127,22 @@ export default {
   emits: ['save', 'update:game'],
   data() {
     return {
-      localGame: { ...this.game }, previewImage: null, uploadedImage: null };
+      localGame: { voucherName: '', 
+      ...this.game }, 
+      previewImage: null, 
+      uploadedImage: null 
+    };
   },
   watch: {
     game: {
       handler(newValue) {
-        this.localGame = { ...newValue };
+        this.localGame = { voucherName: '', ...newValue };
       },
       deep: true,
     },
+    'localGame.isVoucher'(val) {
+      if (!val) this.localGame.voucherName = '';
+    }
   },
   methods: {
     handleImageUpload(event) {
@@ -136,7 +153,6 @@ export default {
       }
     },
     async saveGame() {
-      console.log('test2');
       try {
         let imageUrl = '';
     
@@ -149,7 +165,8 @@ export default {
         }
         const gameData = { 
           ...this.localGame,
-          gameImage: imageUrl  // Verwende die hochgeladene URL
+          gameImage: imageUrl, 
+          voucherName: this.localGame.isVoucher ? this.localGame.voucherName : ''
         };
         
         this.$emit('save', gameData);  // Sende die Daten an Admin.vue
