@@ -13,20 +13,50 @@
           <label for="filter-plz" class="sr-only">PLZ</label>
           <input
             id="filter-plz"
+            ref="plzInput"
             v-model="plzQuery"
             @input="onPlzInput"
+            @focus="onPlzFocus"
+            @blur="onPlzBlur"
+            @keydown="onPlzKeydown"
             type="search"
             class="filters__input"
             placeholder="PLZ (z. B. 10407)"
             inputmode="numeric"
             autocomplete="postal-code"
+            :aria-expanded="showPlzMenu && plzSuggestions.length > 0 ? 'true' : 'false'"
+            aria-haspopup="listbox"
+            aria-controls="plz-listbox"
+            :aria-activedescendant="plzActiveIndex >= 0 ? `plz-opt-${plzActiveIndex}` : null"
           />
           <button
             v-if="plzQuery"
             class="filters__clear"
-            @click="plzQuery = ''"
+            @mousedown.prevent
+            @click="clearPlz"
             aria-label="PLZ löschen"
           >✕</button>
+
+          <!-- 🔽 Autocomplete Dropdown -->
+          <ul
+            v-if="showPlzMenu && plzSuggestions.length"
+            id="plz-listbox"
+            class="filters__autocomplete"
+            role="listbox"
+          >
+            <li
+              v-for="(s, i) in plzSuggestions"
+              :key="s"
+              :id="`plz-opt-${i}`"
+              role="option"
+              :aria-selected="i === plzActiveIndex"
+              :class="['filters__opt', { 'is-active': i === plzActiveIndex }]"
+              @mousedown.prevent="applyPlzSuggestion(s)"
+              @mousemove="plzActiveIndex = i"
+            >
+              {{ s }}
+            </li>
+          </ul>
         </div>
 
         <!-- Altersgruppe -->
@@ -195,9 +225,43 @@ export default {
       activeIndex: null,
       plzQuery: "",
       selectedAge: "Alle",
+      // 👇 Autocomplete State
+      showPlzMenu: false,
+      plzActiveIndex: -1,
     };
   },
   computed: {
+    // alle verfügbaren PLZs (einmalig aus den Games extrahiert)
+    plzCandidates() {
+      const set = new Set();
+      for (const g of this.games || []) {
+        const a = this.extractPlz(String(g.plz ?? ""));
+        const b = this.extractPlz(String(g.startloction ?? ""));
+        const c = this.extractPlz(String(g.endloction ?? ""));
+        const d = this.extractPlz(String(g.city ?? ""));
+        if (a) set.add(a);
+        if (b) set.add(b);
+        if (c) set.add(c);
+        if (d) set.add(d);
+      }
+      // sortiert aufsteigend numerisch (Fallback: string)
+      return Array.from(set).sort((x, y) => {
+        const nx = parseInt(x, 10); const ny = parseInt(y, 10);
+        return isNaN(nx) || isNaN(ny) ? x.localeCompare(y) : nx - ny;
+      });
+    },
+    // Vorschläge ab der 2. Ziffer, Prefix-Match
+    plzSuggestions() {
+      const q = this.normalizePlz(this.plzQuery);
+      if (q.length < 2) return [];
+      const out = [];
+      for (const s of this.plzCandidates) {
+        if (this.normalizePlz(s).startsWith(q)) out.push(s);
+        if (out.length >= 8) break; // max 8 Vorschläge
+      }
+      return out;
+    },
+
     // echtes Filterergebnis (kann 0 sein)
     rawFiltered() {
       let list = this.games || [];
@@ -239,25 +303,60 @@ export default {
     },
   },
   methods: {
-    // --- UI ---
+    // -------- Autocomplete UI --------
     onPlzInput(e) {
-      // nur Ziffern, max 5 Zeichen
       const digits = (e.target.value || "").replace(/\D/g, "").slice(0, 5);
       this.plzQuery = digits;
+      // Dropdown nur ab 2 Ziffern
+      this.showPlzMenu = this.plzQuery.length >= 2 && this.plzSuggestions.length > 0;
+      if (!this.showPlzMenu) this.plzActiveIndex = -1;
     },
-    getGameImagePath(imagePath) {
-      try {
-        return new URL(imagePath, import.meta.url).href;
-      } catch {
-        return imagePath; // falls bereits absolute URL
+    onPlzFocus() {
+      this.showPlzMenu = this.plzQuery.length >= 2 && this.plzSuggestions.length > 0;
+    },
+    onPlzBlur() {
+      // kurz verzögert, damit click auf Option noch greift
+      setTimeout(() => { this.showPlzMenu = false; this.plzActiveIndex = -1; }, 120);
+    },
+    onPlzKeydown(e) {
+      if (!this.showPlzMenu && !(e.key === 'ArrowDown' && this.plzSuggestions.length)) return;
+      if (['ArrowDown', 'ArrowUp', 'Enter', 'Escape'].includes(e.key)) e.preventDefault();
+
+      if (e.key === 'ArrowDown') {
+        this.showPlzMenu = true;
+        const last = this.plzSuggestions.length - 1;
+        this.plzActiveIndex = this.plzActiveIndex < last ? this.plzActiveIndex + 1 : 0;
+      } else if (e.key === 'ArrowUp') {
+        const last = this.plzSuggestions.length - 1;
+        this.plzActiveIndex = this.plzActiveIndex > 0 ? this.plzActiveIndex - 1 : last;
+      } else if (e.key === 'Enter') {
+        if (this.plzActiveIndex >= 0) this.applyPlzSuggestion(this.plzSuggestions[this.plzActiveIndex]);
+        this.showPlzMenu = false;
+      } else if (e.key === 'Escape') {
+        this.showPlzMenu = false;
+        this.plzActiveIndex = -1;
       }
     },
-    toggleLayer(index) {
-      this.activeIndex = this.activeIndex === index ? null : index;
+    applyPlzSuggestion(s) {
+      this.plzQuery = this.normalizePlz(s).slice(0, 5); // übernehmen (nur Ziffern)
+      this.showPlzMenu = false;
+      this.plzActiveIndex = -1;
+      this.$refs.plzInput?.focus();
     },
-    closeLayer() {
-      this.activeIndex = null;
+    clearPlz() {
+      this.plzQuery = "";
+      this.showPlzMenu = false;
+      this.plzActiveIndex = -1;
+      this.$refs.plzInput?.focus();
     },
+
+    // -------- UI / Sonstiges --------
+    getGameImagePath(imagePath) {
+      try { return new URL(imagePath, import.meta.url).href; } catch { return imagePath; }
+    },
+    toggleLayer(index) { this.activeIndex = this.activeIndex === index ? null : index; }
+    ,
+    closeLayer() { this.activeIndex = null; },
     formatAge(age) {
       const a = String(age || "").toLowerCase();
       if (a === "mini") return "Mini";
@@ -266,8 +365,7 @@ export default {
       return age || "";
     },
 
-    // --- PLZ-Helfer ---
-    // Für die Anzeige (Badge): bevorzuge „schöne“ 5-stellige PLZ, wenn vorhanden
+    // -------- PLZ-Helper --------
     getGamePlzDisplay(g) {
       const fromPlz = this.extractPlz(String(g.plz ?? ""));
       if (fromPlz) return fromPlz;
@@ -278,28 +376,21 @@ export default {
         ""
       );
     },
-    // Für das Filtern: normalisiert (nur Ziffern, ohne führende Nullen)
     getGamePlz(g) {
       const fromPlz = this.extractPlz(String(g.plz ?? ""));
       if (fromPlz) return this.normalizePlz(fromPlz);
-
       const fromStart = this.extractPlz(String(g.startloction ?? ""));
       if (fromStart) return this.normalizePlz(fromStart);
-
       const fromEnd = this.extractPlz(String(g.endloction ?? ""));
       if (fromEnd) return this.normalizePlz(fromEnd);
-
       const fromCity = this.extractPlz(String(g.city ?? ""));
       if (fromCity) return this.normalizePlz(fromCity);
-
       return "";
     },
-    // erste 4–5-stellige Ziffernfolge finden (DE i. d. R. 5)
     extractPlz(text = "") {
       const m = String(text).match(/\b\d{4,5}\b/);
       return m ? m[0] : "";
     },
-    // "01067" -> "1067", nur Ziffern
     normalizePlz(val = "") {
       return String(val).replace(/\D/g, "").replace(/^0+/, "");
     },
@@ -314,18 +405,15 @@ export default {
   gap: .5rem 0.75rem;
   align-items: center;
 }
+.slider-below-title { width: 95%; }
 
-.slider-below-title {
-    width: 95%;
-}
-
-/* Mobile: untereinander */
+/* Mobile */
 @media (max-width: 1023.98px) {
   .filters { grid-template-columns: 1fr; }
   .filters__meta { justify-self: end; }
 }
 
-/* Desktop: kompakt rechtsbündig in einer Zeile */
+/* Desktop */
 @media (min-width: 1024px) {
   .filters {
     grid-template-columns: minmax(180px, 260px) auto auto;
@@ -337,7 +425,7 @@ export default {
 
 .filters__input {
   width: 100%;
-  padding: .65rem 2.25rem .65rem .75rem; /* Platz für Clear-Button */
+  padding: .65rem 2.25rem .65rem .75rem;
   border: 1px solid #355b4c;
   border-radius: .75rem;
   font-size: .95rem;
@@ -345,20 +433,18 @@ export default {
   background-color: #355b4c;
 }
 .filters__input::placeholder,
-.filters__input::-webkit-input-placeholder {
-  color: #FAC227;
-  opacity: 1;
+.filters__input::-webkit-input-placeholder { color: #FAC227; opacity: 1; }
+.filters__input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; }
+
+.filters__autocomplete {
+  display: flex;
+  justify-content: flex-start;
 }
-/* natives Browser-X ausblenden */
-.filters__input[type="search"]::-webkit-search-cancel-button {
-  -webkit-appearance: none;
-  appearance: none;
-}
-/* eigenes X */
+
+/* Clear-Button */
 .filters__clear {
   position: absolute;
-  right: .5rem;
-  top: 50%;
+  right: .5rem; top: 50%;
   transform: translateY(-50%);
   width: 1.5rem; height: 1.5rem;
   border-radius: 9999px;
@@ -371,56 +457,49 @@ export default {
 .filters__clear:hover { background: rgba(250, 194, 39, .15); }
 .filters__clear:focus-visible { outline: 2px solid #FAC227; outline-offset: 2px; }
 
-.filters__meta .filters__count {
-  font-size: .85rem;
-  opacity: .75;
-}
-.filters__info {
-  margin-top: .35rem;
-  font-size: .85rem;
-  opacity: .75;
-}
+.filters__meta .filters__count { font-size: .85rem; opacity: .75; }
+.filters__info { margin-top: .35rem; font-size: 1rem; opacity: .75; }
 
-/* ---------- Segmented (Age) ---------- */
-.segmented {
-  display: inline-flex;
-  border: 1px solid #355b4c;
-  border-radius: 999px;
-  overflow: hidden;
-  background: #fff;
-}
-.segmented__btn {
-  padding: .4rem .8rem;
-  font-size: .9rem;
-  line-height: 1;
-  border: none;
-  background: transparent;
+/* ---------- Autocomplete ---------- */
+.filters__autocomplete {
+  position: absolute;
+  left: 0; right: 0;
+  top: calc(100% + 4px);
+  z-index: 30;
+  background: #ffffff;
   color: #355b4c;
-  cursor: pointer;
+  border: 1px solid #355b4c;
+  border-radius: .5rem;
+  box-shadow: 0 8px 20px rgba(0,0,0,.12);
+  max-height: 260px;
+  overflow: auto;
+  padding: .25rem 0;
 }
-.segmented__btn + .segmented__btn { border-left: 1px solid #355b4c22; }
-.segmented__btn.is-active { background: #355b4c; color: #FAC227; }
-.segmented__btn:focus-visible { outline: 2px solid #FAC227; outline-offset: 2px; }
+.filters__opt {
+  padding: .5rem .75rem;
+  cursor: pointer;
+  font-size: .95rem;
+  line-height: 1.2;
+}
+.filters__opt:hover,
+.filters__opt.is-active {
+  background: #355b4c;
+  color: #FAC227;
+}
 
 /* ---------- Slide / Card ---------- */
 .slide-inner { position: relative; }
 
 .short-description {
-  position: relative;       /* für Badge */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  position: relative;
+  display: flex; flex-direction: column; align-items: center;
   background-color: #fac227;
-  border-radius: 20px;
-  width: 100%;
+  border-radius: 20px; width: 100%;
   padding-bottom: 15px;
 }
 .image-game {
-  max-height: 318px;
-  margin-bottom: 10px;
-  border-radius: 20px 20px 0 0;
-  width: 100%;
-  object-fit: cover;
+  max-height: 318px; margin-bottom: 10px;
+  border-radius: 20px 20px 0 0; width: 100%; object-fit: cover;
 }
 .short .game-infos img { transition: transform 0.5s ease-in-out; }
 .short .game-infos img:hover { transform: rotate(360deg); }
@@ -428,23 +507,13 @@ export default {
 
 /* Badge */
 .card-badge {
-  position: absolute;
-  top: 10px; right: 10px;
-  z-index: 6;
-  background: #355b4c;
-  color: #FAC227;
-  border: 1px solid #355b4c;
-  border-radius: 9999px;
-  padding: .25rem .6rem;
-  box-shadow: 0 2px 6px rgba(0,0,0,.15);
+  position: absolute; top: 10px; right: 10px;
+  z-index: 6; background: #355b4c; color: #FAC227;
+  border: 1px solid #355b4c; border-radius: 9999px;
+  padding: .25rem .6rem; box-shadow: 0 2px 6px rgba(0,0,0,.15);
   pointer-events: none;
 }
-.card-badge__text {
-  font-size: .85rem;
-  font-weight: 600;
-  letter-spacing: .2px;
-  white-space: nowrap;
-}
+.card-badge__text { font-size: .85rem; font-weight: 600; letter-spacing: .2px; white-space: nowrap; }
 @media (max-width: 380px) {
   .card-badge { padding: .2rem .5rem; }
   .card-badge__text { font-size: .8rem; }
@@ -452,36 +521,65 @@ export default {
 
 /* ---------- Long description ---------- */
 .long-description {
-  position: absolute;
-  bottom: -100%;
-  left: 0; width: 100%;
-  padding: 20px;
-  background-color: #e9e2d0; color: #355b4c;
-  border: 1px solid #355b4c;
-  z-index: 5;
-  transition: bottom 0.2s ease-in-out;
-  height: 100%;
+  position: absolute; bottom: -100%; left: 0; width: 100%;
+  padding: 20px; background-color: #e9e2d0; color: #355b4c;
+  border: 1px solid #355b4c; z-index: 5;
+  transition: bottom 0.2s ease-in-out; height: 100%;
   border-radius: 20px;
 }
 .long-description-active { bottom: 0px; }
-.long-description-content {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  height: inherit;
-}
-.long-description .top-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
+.long-description-content { display: flex; flex-direction: column; justify-content: space-between; height: inherit; }
+.long-description .top-content { display: flex; justify-content: space-between; align-items: center; }
 .long-description .close-btn { font-size: 30px; cursor: pointer; }
 .long-description .game-information { display: flex; justify-content: stretch; }
-.long-description .game-infos {
-  display: flex; flex-direction: column; width: 100%; padding: 0 30px;
-}
-.long-description .game-infos p {
-  display: flex; justify-content: space-between; margin: 2px 0;
-}
+.long-description .game-infos { display: flex; flex-direction: column; width: 100%; padding: 0 30px; }
+.long-description .game-infos p { display: flex; justify-content: space-between; margin: 2px 0; }
 .long-description .button { display: flex; justify-content: flex-end; }
+
+/* Stärker gezielt: nur innerhalb des Age-Felds */
+.filters__age .segmented {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid #355b4c;
+  border-radius: 9999px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.filters__age .segmented__btn {
+  -webkit-appearance: none;
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: .45rem .9rem;
+  font-size: .9rem;
+  line-height: 1;
+  color: #355b4c;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+
+  /* gegen globale .btn-Regeln absichern */
+  text-transform: none;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.filters__age .segmented__btn + .segmented__btn {
+  border-left: 1px solid rgba(53, 91, 76, 0.13);
+}
+
+.filters__age .segmented__btn.is-active {
+  background: #355b4c;
+  color: #FAC227;
+}
+
+.filters__age .segmented__btn:focus-visible {
+  outline: 2px solid #FAC227;
+  outline-offset: 2px;
+}
+
+
 </style>
