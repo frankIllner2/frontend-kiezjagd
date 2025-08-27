@@ -188,6 +188,8 @@ export default {
       showTimeGlow: false,
       showStartForm: false,
       correctSound: null,
+      correctSounds: [],
+      lastCorrectSoundIndex: null,
     };
   },
   computed: {
@@ -236,6 +238,16 @@ export default {
     }
 
     await this.loadGameData(this.gameId);
+
+    // ✅ Korrekt-Sounds vorladen
+    this.correctSounds = ["correct.flac", "juhu.mp3", "yeah.mp3"].map((file) => {
+      const a = new Audio(require(`@/assets/sound/${file}`));
+      a.preload = "auto";
+      a.volume = 1.0; // ggf. 0.8
+      return a;
+    });
+
+
   },
   name: "GamePage",
   methods: {
@@ -290,8 +302,7 @@ export default {
         this.feedbackImage = require("@/assets/img/correct.gif");
         this.showFeedback = true;
 
-        this.correctSound = new Audio(require("@/assets/sound/correct.flac"));
-        this.correctSound.play();
+        this.playRandomCorrectSound();
 
         if (this.gameType === "Maxi") {
           const bonus = this.getTimeBonus();
@@ -338,6 +349,34 @@ export default {
         setTimeout(() => {
           this.showFeedback = false;
         }, 5000);
+      }
+    },
+    playRandomCorrectSound() {
+      if (!this.correctSounds || this.correctSounds.length === 0) return;
+
+      // Nicht denselben Clip zweimal hintereinander
+      let idx;
+      do {
+        idx = Math.floor(Math.random() * this.correctSounds.length);
+      } while (this.correctSounds.length > 1 && idx === this.lastCorrectSoundIndex);
+
+      // Alle stoppen/zurücksetzen, falls etwas noch spielt
+      this.correctSounds.forEach(a => {
+        try { a.pause(); a.currentTime = 0; } catch (_) {
+          // ignore
+        }
+      });
+
+      const clip = this.correctSounds[idx];
+      this.lastCorrectSoundIndex = idx;
+
+      // iOS/Safari: play() kann ein Promise sein
+      const p = clip.play();
+      if (p && typeof p.catch === "function") {
+        p.catch(() => {
+          // Falls Autoplay blockiert: ignorieren oder leise fallbacken
+          // (hier kein extra Handling nötig, da durch User-Interaktion ausgelöst)
+        });
       }
     },
     getTimeBonus() {
@@ -498,6 +537,11 @@ export default {
   },
   beforeUnmount() {
     clearInterval(this.timerInterval);
+    if (this.correctSounds && this.correctSounds.length) {
+      this.correctSounds.forEach(a => { try { a.pause(); } catch(_) {
+        // ignore
+      } });
+    }
   },
 };
 </script>
