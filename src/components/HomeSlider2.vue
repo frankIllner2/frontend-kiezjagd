@@ -254,8 +254,8 @@ export default {
 /* Desktop kompakter */
 @media (min-width: 1024px) {
   .filterbar {
-    grid-template-columns: auto;
-    justify-content: end;
+    justify-content: flex-end;
+    display: flex;
   }
   .filterbar__field { width: 320px; }
 }

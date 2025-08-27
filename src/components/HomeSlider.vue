@@ -21,7 +21,7 @@
             @keydown="onPlzKeydown"
             type="search"
             class="filters__input"
-            placeholder="PLZ (z. B. 10407)"
+            placeholder="Suche deine PLZ "
             inputmode="numeric"
             autocomplete="postal-code"
             :aria-expanded="showPlzMenu && plzSuggestions.length > 0 ? 'true' : 'false'"
@@ -457,7 +457,7 @@ export default {
 .filters__clear:hover { background: rgba(250, 194, 39, .15); }
 .filters__clear:focus-visible { outline: 2px solid #FAC227; outline-offset: 2px; }
 
-.filters__meta .filters__count { font-size: .85rem; opacity: .75; }
+.filters__meta .filters__count { font-size: .85rem; opacity: .75; color: #355b4c; }
 .filters__info { margin-top: .35rem; font-size: 1rem; opacity: .75; }
 
 /* ---------- Autocomplete ---------- */
@@ -541,7 +541,7 @@ export default {
   display: inline-flex;
   align-items: stretch;
   border: 1px solid #355b4c;
-  border-radius: 9999px;
+  border-radius: 12px;
   overflow: hidden;
   background: #fff;
 }
@@ -550,8 +550,8 @@ export default {
   -webkit-appearance: none;
   appearance: none;
   border: 0;
-  background: transparent;
-  padding: .45rem .9rem;
+  background: #E9E2D0;
+  padding: .75rem .9rem;
   font-size: .9rem;
   line-height: 1;
   color: #355b4c;
