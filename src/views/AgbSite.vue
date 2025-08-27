@@ -133,7 +133,7 @@
 
       <h3 id="ds-1">1. Verantwortliche</h3>
       <p>
-        Frank Illner &amp; Pasteurstraße&nbsp;4, 10407 Berlin – E-Mail:
+        Frank Illner &amp; Julia Schmidt, Pasteurstraße&nbsp;4, 10407 Berlin – E-Mail:
         <a href="mailto:mail@kiezjagd.de">mail@kiezjagd.de</a>
       </p>
 
@@ -241,93 +241,3 @@ export default {
   name: "LegalSite",
 };
 </script>
-
-<style scoped lang="scss">
-/* ============ Kiezjagd – Legal Pages ============ */
-$fg: #355b4c;
-$muted: #666;
-$line: #e8e8e8;
-$accent: #355b4c;
-$bg: #fff;
-$max: 920px;
-
-*, *::before, *::after { box-sizing: border-box; }
-:root { color-scheme: light; }
-
-.legal-wrap {
-  max-width: $max;
-  margin-inline: auto;
-  padding: 32px 20px;
-  color: $fg;
-  background: $bg;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, "Helvetica Neue", Arial, sans-serif;
-  line-height: 1.65;
-}
-
-.legal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 24px;
-
-  .brand { font-weight: 700; letter-spacing: .2px; }
-  .meta { font-size: .9rem; color: $muted; }
-}
-
-h1 {
-  font-size: clamp(1.5rem, 1.1rem + 1.2vw, 1.9rem);
-  margin: 0 0 8px;
-  line-height: 1.25;
-}
-h2 {
-  font-size: clamp(1.2rem, 1.05rem + .5vw, 1.4rem);
-  margin: 20px 0 8px;
-  line-height: 1.3;
-}
-h3 {
-  font-size: 1.05rem;
-  margin: 16px 0 6px;
-  line-height: 1.25;
-}
-
-p { margin: 0 0 12px; }
-ul, ol { margin: 0 0 12px; padding-left: 1.25rem; }
-
-strong {
-  font-size: clamp(1rem, 1.3vw, 1em);
-}
-
-a { color: $accent; text-decoration: underline; text-underline-offset: .15em; }
-
-.toc {
-  border: 1px solid $line;
-  border-radius: 12px;
-  padding: 16px;
-  margin: 8px 0 24px;
-
-  h2 { margin: 0 0 8px; font-size: 1.05rem; }
-  ul { margin: 0; padding: 0 0 0 1.25rem; }
-  li { margin: 6px 0; }
-}
-
-.section { padding-block: 12px; border-top: 1px solid $line; }
-.notice {
-  background: #fafafa;
-  border: 1px solid $line;
-  border-radius: 12px;
-  padding: 12px 14px;
-  margin: 12px 0;
-}
-
-/* Anchor offset if you use a sticky header elsewhere */
-:target { scroll-margin-top: 80px; }
-
-/* Print */
-@media print {
-  a { color: inherit; text-decoration: none; }
-  .toc { page-break-after: avoid; }
-  h2 { page-break-after: avoid; }
-  .section { page-break-inside: avoid; }
-}
-</style>

@@ -11,7 +11,7 @@
       <h1>Impressum</h1>
 
       <h3>Angaben gemäß § 5 DDG</h3>
-      <p><strong>Frank Illner</strong></p>
+      <p><strong>Frank Illner und Julia Schmidt</strong></p>
       <p>
         Pasteurstraße 4<br />
         10407 Berlin
@@ -62,64 +62,3 @@ export default {
 };
 </script>
 
-<style scoped lang="scss">
-/* ============ Kiezjagd – Legal Pages (Impressum) ============ */
-$fg: #355b4c;
-$muted: #666;
-$line: #e8e8e8;
-$accent: #355b4c;
-$bg: #fff;
-$max: 920px;
-
-.legal-wrap {
-  max-width: $max;
-  margin-inline: auto;
-  padding: 32px 20px;
-  color: $fg;
-  background: $bg;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, "Helvetica Neue", Arial, sans-serif;
-  line-height: 1.65;
-}
-
-.legal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 24px;
-
-  .brand { font-weight: 700; letter-spacing: .2px; }
-  .meta { font-size: .9rem; color: $muted; }
-}
-
-h1 {
-  font-size: clamp(1.5rem, 1.1rem + 1.2vw, 1.9rem);
-  margin: 0 0 8px;
-  line-height: 1.25;
-}
-h3 {
-  font-size: 1.05rem;
-  margin: 20px 0 6px;
-  line-height: 1.3;
-}
-
-strong {
-  font-size: clamp(1rem, 1.3vw, 1em);
-}
-
-p { margin: 0 0 12px; }
-
-a {
-  color: $accent;
-  text-decoration: underline;
-  text-underline-offset: .15em;
-}
-
-.section { padding-block: 12px; border-top: 1px solid $line; }
-
-/* Print */
-@media print {
-  a { color: inherit; text-decoration: none; }
-  .section { page-break-inside: avoid; }
-}
-</style>
