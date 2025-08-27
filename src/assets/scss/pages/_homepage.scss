@@ -631,12 +631,12 @@
         display: flex;
         flex-direction: row;
         justify-content: space-between;
-        .left {
-            a {
+        .left, .right {
+            a, span {
             color: $secondary-text-color;
-            font-size: clamp(1rem, 1vw, 1em);
+            font-size: clamp(0.8rem, 1vw, 0.8em);
             text-decoration: none;
-            padding: 0 6px 0 0;
+            padding: 0 10px 0 0;
             }
         }
     }

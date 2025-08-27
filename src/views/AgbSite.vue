@@ -10,7 +10,7 @@
     <nav class="toc" aria-labelledby="toc-heading">
       <h2 id="toc-heading">Inhalt</h2>
       <ul>
-        <li><a href="#agb">AGB / Nutzungsbedingungen</a></li>
+        <li><a href="#agb">AGB/Nutzungsbedingungen</a></li>
         <li><a href="#privacy">Datenschutzerklärung</a></li>
       </ul>
     </nav>

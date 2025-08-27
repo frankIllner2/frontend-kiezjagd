@@ -159,7 +159,7 @@
       <div class="bottom-menu">
         <div class="left">
           <a href="/Impressum" target="_blank" rel="noopener">Impressum</a>
-          <a href="/Agb" target="_blank" rel="noopener">AGB / Datenschutz</a>
+          <a href="/Agb" target="_blank" rel="noopener">AGB/Datenschutz</a>
          
         </div>
 
