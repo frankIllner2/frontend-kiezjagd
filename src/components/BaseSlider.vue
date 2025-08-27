@@ -129,7 +129,7 @@ export default {
       const slideItems = this.$refs.slides.children;
       for (let slide of slideItems) {
         slide.style.width = `${slideWidth}px`;
-        slide.style.marginRight = `${this.gap}px`;
+       
       }
 
       this.correctIndex();
@@ -174,8 +174,10 @@ export default {
   }
 }
 @media (min-width: 768px) { 
-  .slider-below-title {
-    margin: 0;
+  #ranking-slider {
+    .slider-below-title {
+      margin: auto;
+    }
   }
 }
 </style>

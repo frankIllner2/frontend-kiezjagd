@@ -1,13 +1,13 @@
 <template>
   <div class="ranking-wrapper">
     <BaseSlider
-      v-if="filteredRankings.length > 0"
+      v-if="rankings.length > 0"
       title="Mitgemacht"
       :items="filteredRankings"
       sliderId="ranking-slider"
       containerClass="container ranking-section"
     >
-      <!-- 🎯 Filter sitzt jetzt direkt unter dem H2 im Slider -->
+      <!-- 🎯 Filter sitzt direkt unter dem H2 im Slider -->
       <template #below-title>
         <div class="filterbar">
           <div class="filterbar__field">
@@ -25,10 +25,14 @@
               aria-label="Filter zurücksetzen"
             ></button>
           </div>
-          <span class="filterbar__count">{{ filteredRankings.length }} / {{ rankings.length }}</span>
+          <span class="filterbar__count">{{ matchCount }} / {{ rankings.length }}</span>
         </div>
-      </template>
 
+        <!-- Hinweis, wenn keine Treffer → es werden alle gezeigt -->
+        <p v-if="searchQuery && matchCount === 0" class="filterbar__info">
+          Keine Treffer – zeige alle Spiele.
+        </p>
+      </template>
 
       <!-- Cards -->
       <template #default="{ item }">
@@ -72,12 +76,6 @@
         </ul>
       </template>
     </BaseSlider>
-
-    <!-- Keine Treffer -->
-    <div v-else class="container ranking-empty">
-      <p>Keine Ergebnisse für „{{ searchQuery }}“ gefunden.</p>
-      <button class="btn btn--secondary" @click="searchQuery = ''">Filter löschen</button>
-    </div>
   </div>
 </template>
 
@@ -93,13 +91,25 @@ export default {
     return { searchQuery: "" };
   },
   computed: {
-    filteredRankings() {
+    // echtes Filterergebnis (kann 0 sein)
+    rawFiltered() {
       if (!this.searchQuery) return this.rankings;
       const q = this.normalize(this.searchQuery);
       return this.rankings.filter(item =>
         Array.isArray(item.topResults) &&
         item.topResults.some(r => this.normalize(r.teamName || "").includes(q))
       );
+    },
+    // Fallback auf ALLE, wenn 0 Treffer
+    filteredRankings() {
+      if (this.searchQuery && this.rawFiltered.length === 0) {
+        return this.rankings;
+      }
+      return this.rawFiltered;
+    },
+    // Zähler zeigt die echte Trefferzahl (0..N)
+    matchCount() {
+      return this.searchQuery ? this.rawFiltered.length : this.rankings.length;
     },
   },
   methods: {
@@ -138,7 +148,6 @@ export default {
       let currOrig = 0;
       const parts = [];
 
-      // eslint-konform: keine konstante Bedingung
       while (pos < hay.length) {
         const idx = hay.indexOf(needle, pos);
         if (idx === -1) break;
@@ -192,7 +201,7 @@ export default {
 /* Grundlayout: Mobile-First */
 .filterbar {
   display: grid;
-  grid-template-columns: 1fr auto; /* Input+Clear in Spalte 1, Count in Spalte 2 */
+  grid-template-columns: 1fr auto; /* Input+Clear | Count */
   gap: .5rem;
   align-items: center;
 }
@@ -201,16 +210,26 @@ export default {
   display: grid;
   grid-template-columns: 1fr auto; /* Input | Clear */
   gap: .5rem;
-  width: 100%; /* Mobile: volle Breite */
+  width: 100%;
 }
 
 .filterbar__input {
   width: 100%;
   padding: .65rem .75rem;
-  border: 1px solid #e3e6eb;
+  border: 1px solid #355b4c;
   border-radius: .75rem;
   font-size: .95rem;
+  color: #FAC227;
+  background-color: #355b4c;
 }
+
+.filterbar__input::placeholder,
+.filterbar__input::-webkit-input-placeholder {
+  color: #FAC227;
+  opacity: 1;
+}
+
+.filterbar__input:focus::placeholder { color: #FAC227; }
 
 .filterbar__clear {
   border: none;
@@ -226,30 +245,45 @@ export default {
   opacity: .7;
 }
 
-/* Desktop: kompakteres Feld rechtsbündig */
+.filterbar__info {
+  margin-top: .35rem;
+  font-size: .85rem;
+  opacity: .75;
+}
+
+/* Desktop kompakter */
 @media (min-width: 1024px) {
   .filterbar {
-    grid-template-columns: auto;   /* alles in eine Zeile */
-    justify-content: end;          /* Block nach rechts */
+    grid-template-columns: auto;
+    justify-content: end;
   }
-  .filterbar__field {
-    width: 320px;                  /* kompakte Breite */
-  }
+  .filterbar__field { width: 320px; }
 }
 
-/* Optional: Tablet-Stufe (768–1023px) mit leicht größerem Feld */
+/* Tablet */
 @media (min-width: 768px) and (max-width: 1023.98px) {
-  .filterbar__field {
-    width: 420px;
-    max-width: 100%;
-  }
+  .filterbar__field { width: 420px; max-width: 100%; }
 }
 
-/* Markierung (falls noch nicht vorhanden) */
+/* Markierung */
 :deep(mark) {
   background: #fff6a6;
   padding: 0 .1em;
   border-radius: .2em;
 }
+.filterbar__input::placeholder {
+  color: #FAC227;   /* deine Farbe */
+  opacity: 1;       /* Safari/Firefox setzen sonst oft < 1 */
+}
 
+/* Optional: WebKit-Fallback (ältere Safari/Chrome) */
+.filterbar__input::-webkit-input-placeholder {
+  color: #FAC227;
+  opacity: 1;
+}
+
+/* Auf Focus etwas heller/ausgrauen */
+.filterbar__input:focus::placeholder {
+  color: #FAC227;
+}
 </style>

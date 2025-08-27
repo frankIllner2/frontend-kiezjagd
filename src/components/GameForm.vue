@@ -8,10 +8,33 @@
         <input v-model="localGame.name" id="name" placeholder="Spielname eingeben" required />
       </div>
 
-      <div class="form-group">
-        <label for="city">Stadt/PLZ</label>
-        <input v-model="localGame.city" id="city" placeholder="Stadt/PLZ eingeben" required />
-      </div>
+      <div class="form-group form-group--city-plz">
+          <div class="two-col">
+            <div class="col col-plz">
+              <label for="plz">PLZ</label>
+              <input
+                id="plz"
+                v-model="localGame.plz"
+                placeholder="z. B. 10407"
+                inputmode="numeric"
+                maxlength="5"
+                autocomplete="postal-code"
+                required
+              />
+            </div>
+
+            <div class="col col-city">
+              <label for="city">Stadt</label>
+              <input
+                id="city"
+                v-model="localGame.city"
+                placeholder="z. B. Berlin"
+                autocomplete="address-level2"
+                required
+              />
+            </div>
+          </div>
+        </div>
     </div>
 
     <div class="form-group">
@@ -82,6 +105,18 @@
     </div>
 
     <div class="form-group">
+      <label for="mailtext">Individueller E-Mail Text</label>
+      <textarea 
+        v-model="localGame.mailtext" 
+        id="mailtextEmail" 
+        maxlength="1200" 
+        placeholder="Email Text zum Spie" 
+        rows="4"
+      ></textarea>
+      <small>{{ localGame.mailtext?.length || 0}}/1200 Zeichen</small>
+    </div>
+
+    <div class="form-group">
       <label for="ageGroup">Altersgruppe</label>
       <select v-model="localGame.ageGroup" id="ageGroup" required>
         <option value="">Altersgruppe auswählen</option>
@@ -104,7 +139,7 @@
         id="voucherName"
         v-model="localGame.voucherName"
         placeholder="z. B. TEST2025"
-        pattern="[A-Za-z0-9-]+"
+        
       />
    
     </div>
@@ -177,3 +212,25 @@ export default {
   },
 };
 </script>
+
+<style lang="sass" scoped>
+/* City + PLZ nebeneinander, mobil untereinander */
+.form-group--city-plz .two-col {
+  display: grid;
+  grid-template-columns: minmax(90px, 140px) 1fr; /* PLZ schmal, Stadt flexibel */
+  gap: 12px;
+  align-items: end;
+}
+
+.form-group--city-plz .col input {
+  width: 100%;
+}
+
+@media (max-width: 640px) {
+  .form-group--city-plz .two-col {
+    grid-template-columns: 1fr; /* mobil: untereinander */
+  }
+}
+
+
+</style>

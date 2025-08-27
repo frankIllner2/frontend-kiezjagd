@@ -299,40 +299,42 @@ export default {
       if (isCorrect) {
         this.earnedStars = this.calculateStars();
         this.feedbackMessage = this.currentAnswerQuestion.answerquestion;
-        this.feedbackImage = require("@/assets/img/correct.gif");
+
+        // ✅ Random Correct-GIF
+        const correctGifs = [
+          require("@/assets/img/fritz-correct.gif"),
+          require("@/assets/img/frida-correct.gif")
+        ];
+        this.feedbackImage =
+          correctGifs[Math.floor(Math.random() * correctGifs.length)];
+
         this.showFeedback = true;
 
         this.playRandomCorrectSound();
 
         if (this.gameType === "Maxi") {
           const bonus = this.getTimeBonus();
-
           if (bonus > 0) {
-            // ⭐ Startzeitbonus-Animation nach 1 Sekunde
             setTimeout(() => {
               this.$refs.timeBonusAnimation.startTimeBonusAnimation(bonus);
             }, 1000);
 
-            // 🚪 Feedback nach 6 Sekunden ausblenden (Animation läuft vorher los)
             setTimeout(() => {
               this.showFeedback = false;
             }, 6000);
           } else {
-            // Kein Bonus → nur GIF anzeigen, dann zur nächsten Frage
             setTimeout(() => {
               this.showFeedback = false;
               this.nextQuestion();
             }, 6000);
           }
         } else {
-          // 🌟 Sternanimation startet nach 1 Sekunde
           setTimeout(() => {
             if (this.earnedStars > 0) {
               this.$refs.feedbackAnimation.start(this.earnedStars);
             }
           }, 1000);
 
-          // 🚪 Feedback wird 6 Sekunden angezeigt, dann ausgeblendet
           setTimeout(() => {
             this.showFeedback = false;
           }, 8000);
@@ -343,9 +345,7 @@ export default {
         this.feedbackMessage = "Versuche es nochmal!";
         this.feedbackImage = require("@/assets/img/false.png");
         this.showFeedback = true;
-        console.log("flasche Antwort");
 
-        // ❌ Falsche Antwort → Feedback 5 Sekunden sichtbar
         setTimeout(() => {
           this.showFeedback = false;
         }, 5000);
