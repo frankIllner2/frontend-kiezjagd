@@ -102,23 +102,27 @@
       <li>
         <a href="/Agb" target="_blank" rel="noopener" @click="closeMenu">AGB/Datenschutz</a>
       </li>
+      <li>
+      
+        <div class="social-icons">
+          <a
+            href="https://www.instagram.com/kiezjaeger/"
+            target="_blank"
+            rel="noopener"
+            aria-label="Instagram (öffnet in neuem Tab)"
+          >
+            <font-awesome-icon
+              :icon="['fab', 'instagram']"
+              class="social-icon instagram"
+            />
+          </a>
+        </div>
+      </li>
    
     </ul>
 
-    <!-- Socials -->
-    <div class="social-icons">
-      <a
-        href="https://www.instagram.com/kiezjaeger/"
-        target="_blank"
-        rel="noopener"
-        aria-label="Instagram (öffnet in neuem Tab)"
-      >
-        <font-awesome-icon
-          :icon="['fab', 'instagram']"
-          class="social-icon instagram"
-        />
-      </a>
-    </div>
+
+
   </nav>
 </template>
 
