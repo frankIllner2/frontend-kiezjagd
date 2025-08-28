@@ -498,10 +498,11 @@
                     padding-bottom: 15px;
                     width: 100%;
                     .headline-game-name {
+                        height: 4em;
                         text-align: center;
                     }
                     h2 {
-                        font-size: clamp(2.2rem,3vw,3em);
+                        font-size: clamp(2rem,3vw,2.2em);
                     }
                     .image-game {
                         object-fit: cover;
