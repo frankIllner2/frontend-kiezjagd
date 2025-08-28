@@ -66,6 +66,8 @@
         ref="feedbackAnimation"
         :showFeedback="showFeedback"
         :feedbackImage="feedbackImage"
+        :feedbackMessage="feedbackMessage"
+        :feedbackMessage2="feedbackMessage2"
         :earnedStars="earnedStars"
         :gameType="gameType"
         @startCounting="startCounting"
@@ -175,6 +177,7 @@ export default {
       gameDuration: "0h 0m 0s",
       showFeedback: false,
       feedbackMessage: "",
+      feedbackMessage2: "",
       prehistory: "",
       infohistory: "",
       timerInterval: null,
@@ -298,7 +301,8 @@ export default {
 
       if (isCorrect) {
         this.earnedStars = this.calculateStars();
-        this.feedbackMessage = this.currentAnswerQuestion.answerquestion;
+        this.feedbackMessage = '';
+        this.feedbackMessage2 = '';
 
         // ✅ Random Correct-GIF
         const correctGifs = [
@@ -342,8 +346,18 @@ export default {
       } else {
         this.earnedStars = 0;
         this.attemptCount++;
-        this.feedbackMessage = "Versuche es nochmal!";
-        this.feedbackImage = require("@/assets/img/false.png");
+        this.feedbackMessage = "Du bist auf der richtigen Spur!";
+        this.feedbackMessage2 = "Versuch es noch einmal!";
+
+        // ❌ Random False-Bild
+        const falseImages = [
+          require("@/assets/img/frida-false.png"),
+          require("@/assets/img/fritz-false.png"),
+          require("@/assets/img/lupe-false.png")
+        ];
+        this.feedbackImage =
+          falseImages[Math.floor(Math.random() * falseImages.length)];
+
         this.showFeedback = true;
 
         setTimeout(() => {

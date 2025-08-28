@@ -113,7 +113,11 @@
         placeholder="Email Text zum Spie" 
         rows="4"
       ></textarea>
-      <small>{{ localGame.mailtext?.length || 0}}/1200 Zeichen</small>
+      <small>{{ localGame.mailtext?.length || 0}}/1200 Zeichen</small><br />
+      <div class="form-group checkbox-group">
+        <input type="checkbox" id="withCertificate" v-model="localGame.withCertificate" />
+        <label for="withCertificate">Mit Urkunde im Anhang</label>
+      </div>
     </div>
 
     <div class="form-group">

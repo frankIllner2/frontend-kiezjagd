@@ -1,7 +1,13 @@
 <template>
   <div v-if="showFeedback" class="feedback-overlay">
     <div class="feedback-content">
+      <strong v-if="feedbackMessage">
+        {{ feedbackMessage.toUpperCase() }}
+      </strong>
       <img v-if="feedbackImage" :src="feedbackImage" alt="Antwort Feedback" />
+       <strong v-if="feedbackMessage2">
+        {{ feedbackMessage2.toUpperCase() }}
+      </strong>
     </div>
 
     <!-- Sterne-Animation innerhalb des Feedbacks -->
@@ -24,6 +30,7 @@
     props: {
       showFeedback: Boolean,
       feedbackMessage: String,
+      feedbackMessage2: String,
       feedbackImage: String,
       earnedStars: Number,
       gameType: String,
