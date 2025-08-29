@@ -92,11 +92,6 @@
             >Maxi</button>
           </div>
         </div>
-
-        <!-- Trefferzähler -->
-        <div class="filters__meta">
-          <span class="filters__count">{{ matchCount }} / {{ games.length }}</span>
-        </div>
       </div>
 
       <!-- Hinweis bei 0 Treffern (es werden alle gezeigt) -->

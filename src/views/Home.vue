@@ -99,7 +99,7 @@
         <input v-if="currentGame?.isVoucher" type="text" v-model="voucherCode" placeholder="Gutscheincode (optional)" />
 
         <!-- Fehlerhinweis -->
-        <p v-if="checkoutError" class="mt-2 p-2" style="background:#FEF2F2;color:#B91C1C;border:1px solid #FECACA;border-radius:6px;">
+        <p v-if="checkoutError" class="mt-2 p-2">
           {{ checkoutError }}
         </p>
 
@@ -288,11 +288,16 @@ export default {
         const code = this.voucherCode?.trim() || null;
 
         if (!email) {
-          this.checkoutError = "⚠️ Eine E-Mail-Adresse ist erforderlich.";
+          this.checkoutError = "Eine E-Mail-Adresse ist erforderlich.";
+          return;
+        }
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+          this.checkoutError = "Bitte gib eine gültige E-Mail-Adresse ein.";
           return;
         }
         if (!this.currentGameId) {
-          this.checkoutError = "⚠️ Keine Spiel-ID gefunden.";
+          this.checkoutError = "Keine Spiel-ID gefunden.";
           return;
         }
 
@@ -311,7 +316,11 @@ export default {
         if (code === "PROMO_CODE_INVALID") {
           this.checkoutError = "Dieser Gutscheincode ist abgelaufen oder ungültig.";
           this.voucherCode = "";
-          try { localStorage.removeItem("kiezjagd_voucher"); } catch {error}
+          try {
+            localStorage.removeItem("kiezjagd_voucher");
+          } catch (e) {
+            console.warn("Voucher konnte nicht entfernt werden:", e);
+          }
         } else {
           this.checkoutError = msg;
         }
@@ -391,316 +400,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-/* Container */
-/* 🎯 Allgemeine Layout-Stile */
-
-/* 📱 Mobile Optimierung */
-@media (max-width: 768px) {
-  .cards-container {
-    grid-template-columns: 1fr;
-  }
-}
-
-.home-container .age-group {
-  position: relative;
-}
-.home-container .age-group .card .content {
-  cursor: pointer;
-}
-
-/* 🟢 Vorteile als Cards */
-.features-section {
-  text-align: center;
-  margin: 60px 0;
-  padding: 40px 20px;
-  border-radius: 8px;
-}
-
-.features-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
-}
-
-.feature-card {
-  background: #ffffff;
-  padding: 20px;
-  border-radius: 8px;
-  text-align: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.feature-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-}
-
-/* 🌟 Ranking Section */
-.ranking-section {
-  margin-top: 30px;
-  text-align: center;
-}
-
-.ranking-section h2 {
-  font-size: 1.8rem;
-  margin-bottom: 20px;
-}
-
-/* 🌟 Container für die Cards */
-.rankings-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
-  margin-top: 20px;
-}
-
-/* 🌟 Einzelne Ranking-Card */
-.ranking-card {
-  background: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  padding: 15px;
-  text-align: left;
-  transition: transform 0.2s ease-in-out;
-}
-
-.ranking-card:hover {
-  transform: scale(1.02);
-}
-
-.ranking-card h3 {
-  font-size: 1.2rem;
-  margin-bottom: 10px;
-  color: #333;
-  text-align: center;
-}
-
-/* 🌟 Ranking-Liste */
-.ranking-card ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.ranking-card li {
-  display: flex;
-  justify-content: flex-start;
-  margin: 5px 0;
-  font-size: 0.9rem;
-  padding: 5px;
-  border-bottom: 1px solid #f0f0f0;
-}
-.ranking-card li strong {
-  padding: 0 20px 0 0;
-}
-
-.ranking-card li:last-child {
-  border-bottom: none;
-}
-
-/* 🌟 Responsiveness */
-@media (max-width: 768px) {
-  .rankings-container {
-    grid-template-columns: 1fr;
-  }
-
-  .ranking-card {
-    padding: 10px;
-  }
-}
-
-/* 🎲 Spielvorschau */
-.game-preview-section {
-  margin: 60px 0;
-  padding: 40px 20px;
-  border-radius: 8px;
-  text-align: center;
-}
-
-.game-preview-section h2 {
-  font-size: 1.8rem;
-  margin-bottom: 20px;
-}
-
-.game-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
-  margin-top: 20px;
-}
-
-.game-card {
-  display: flex;
-  flex-wrap: wrap;
-  align-content: space-between;
-  justify-content: space-around;
-  background: #ffffff;
-  padding: 20px;
-  border-radius: 2px;
-  text-align: center;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.game-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-}
-
-/* 🌐 Social Media */
-.social-media-section {
-  text-align: center;
-  margin-top: 60px;
-  padding: 10px 20px;
-  background-color: #323c45;
-}
-
-.social-media-section h2 {
-  font-size: 1.8rem;
-  margin-bottom: 15px;
-  color: #7b1fa2;
-}
-
-.social-icons {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-}
-
-.social-icon {
-  font-size: 2rem;
-  color: $primary-text-color;
-  transition: color 0.3s ease;
-}
-
-.social-icon:hover {
-  color: $secondary-text-color;
-}
-
-/* 🦶 Footer */
-.footer {
-  background-color: #424242;
-  color: #fff;
-  text-align: center;
-  padding: 15px 0;
-  margin-top: 40px;
-  font-size: 0.9rem;
-}
-
-.footer a {
-  color: #fbc02d;
-  text-decoration: none;
-}
-
-.footer a:hover {
-  text-decoration: underline;
-}
-
-/* 📱 Mobile Optimierung */
-@media (max-width: 768px) {
-  .game-cards,
-  .features-grid {
-    grid-template-columns: 1fr;
-  }
-  .hero-overlay {
-    width: 100%;
-  }
-
-  .intro-section p {
-    font-size: 1rem;
-  }
-}
-
-/* Modal Layer */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.modal {
-  background: #ffffff;
-  border-radius: 8px;
-  width: 400px;
-  padding: 20px;
-  text-align: center;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.modal h2 {
-  margin-bottom: 10px;
-  font-size: 1.5rem;
-}
-
-.modal p {
-  margin-bottom: 15px;
-  font-size: 1rem;
-}
-
-.modal input {
-  padding: 10px;
-  margin-bottom: 15px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 1rem;
-}
-
-.modal-actions {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.modal-actions button {
-  flex: 1;
-  padding: 10px 15px;
-  border: none;
-  border-radius: 5px;
-  font-size: 1rem;
-  cursor: pointer;
-}
-
-.bottom-menu {
-  display: flex;
-  justify-content: flex-end;
-}
-.bottom-menu span {
-  color: #fbc02d;
-  padding: 0 5px;
-}
-/* Mobile Optimierungen */
-@media (max-width: 768px) {
-  /* 📲 Call-to-Action */
-  .cta-section {
-    width: 85%;
-  }
-  .modal {
-    width: 90%;
-    max-width: 90%;
-    padding: 15px;
-  }
-
-  .modal-container h3 {
-    font-size: 1.3rem;
-  }
-
-  .modal-container input[type="email"] {
-    font-size: 0.9rem;
-  }
-
-  .modal-container .btn-primary {
-    font-size: 0.9rem;
-    padding: 8px;
-  }
-}
-</style>

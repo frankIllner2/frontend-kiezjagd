@@ -25,7 +25,7 @@
               aria-label="Filter zurücksetzen"
             ></button>
           </div>
-          <span class="filterbar__count">{{ matchCount }} / {{ rankings.length }}</span>
+          
         </div>
 
         <!-- Hinweis, wenn keine Treffer → es werden alle gezeigt -->
@@ -202,14 +202,12 @@ export default {
 .filterbar {
   display: grid;
   grid-template-columns: 1fr auto; /* Input+Clear | Count */
-  gap: .5rem;
   align-items: center;
 }
 
 .filterbar__field {
   display: grid;
   grid-template-columns: 1fr auto; /* Input | Clear */
-  gap: .5rem;
   width: 100%;
 }
 

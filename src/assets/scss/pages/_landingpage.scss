@@ -1,0 +1,272 @@
+@use "@/assets/scss/abstracts/variables" as *;
+.game-landing-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: $background-color-1;
+    h1, p, strong, button {
+        text-transform: uppercase;
+    }
+    .loading-spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 60vh;
+    animation: fadeIn 0.5s ease-in-out;
+    }
+
+    .rotating-star {
+    width: 80px;
+    height: 80px;
+    animation: rotate 1.5s linear infinite;
+    }
+
+    .loading-text {
+    margin-top: 15px;
+    font-size: 1.2rem;
+    color:  $background-color-1;
+    font-weight: bold;
+    animation: pulse 2s infinite;
+    }
+
+    @keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+    }
+
+    @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+    }
+
+    @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+    }
+
+ 
+    /* Game Card (Container) */
+    .game-card {
+    background-color: $background-color-2;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+    display: flex;
+    flex-direction: column;
+        .logo-lp {
+            img {
+                width: 100%;
+                max-width: 250px;
+            }
+
+        }
+    }
+
+    /* Header mit Titel und Bild */
+    .game-header {
+    position: relative;
+    text-align: center;
+    .game-details {
+        padding: 20px 0;
+    }
+    }
+
+    /* Bild Container für zentriertes Bild */
+    .image-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    }
+
+    .image-container .wrapper {
+        position: relative;
+    }
+
+
+    .game-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 12px;
+    object-fit: cover;
+    max-height: 500px;
+    }
+
+    /* Badge oben rechts */
+    .badge {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    background-color: $background-color-3;
+    color: $primary-text-color;
+    padding: 5px 10px;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 1rem;
+    }
+
+    /* Game Details */
+
+    .game-card {
+    position: relative;
+    padding: 20px;
+    z-index: 1;
+    &:before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background-image: url('@/assets/img/icons/susi-background.svg');
+        background-repeat: no-repeat;
+        background-size: contain;
+        background-position: bottom left;
+        opacity: 0.1; /* Transparenz fürs Wasserzeichen */
+        z-index: 0;
+        pointer-events: none; /* Klicks gehen durch */
+    }
+    .logo-lp {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    }
+
+
+    .game-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    color: $primary-text-color;
+    }
+
+    .game-header .game-age {
+    font-size: 1.2rem;
+    color: $primary-text-color;
+    font-weight: bold;
+    }
+
+    /* Teaser Infos wie Preis, Dauer, Ort */
+    .game-teasers {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+    }
+
+    .game-teaser {
+    background-color: $background-color-3;
+    padding: 5px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    }
+
+    .game-teaser strong {
+    display: block;
+    font-weight: normal;
+    margin-bottom: 5px;
+    }
+
+    /* Button Container */
+    .btn-container {
+    padding: 20px;
+    text-align: center;
+    }
+
+ 
+      .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+
+  .modal {
+    background: $background-color-2;
+    border-radius: 8px;
+    width: 400px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+
+    h2 {
+      margin-bottom: 10px;
+      font-size: 1.5rem;
+      color: $primary-text-color;
+    }
+
+    p {
+      margin-bottom: 15px;
+      font-size: 1rem;
+      color: $primary-text-color;
+    }
+
+    input {
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid $background-color-1;
+      border-radius: 5px;
+      font-size: 1rem;
+      background-color: $background-color-1;
+      color: $secondary-text-color;
+      &::placeholder {
+        color: $secondary-text-color;
+      }
+    }
+  }
+
+  .modal-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+
+    button {
+      flex: 1;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+  }
+
+  .bottom-menu {
+    display: flex;
+    justify-content: flex-end;
+
+    span {
+      color: #fbc02d;
+      padding: 0 5px;
+    }
+  }
+
+    /* Responsive Styles */
+    @media (max-width: 768px) {
+    .game-header h1 {
+        font-size: 2rem;
+    }
+
+    .game-teasers {
+        grid-template-columns: 50% 50%;
+    }
+
+    .game-teaser {
+        font-size: 0.9rem;
+        padding: 4px;
+    }
+
+    .btn {
+        padding: 15px;
+        font-size: 1.2rem;
+    }
+
+    .game-image {
+        max-width: 100%;
+    }
+    }
+}
