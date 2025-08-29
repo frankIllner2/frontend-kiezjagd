@@ -10,7 +10,7 @@
   position: sticky;
   top: 0;
   width: 100%;
-  background: $background-color-2;
+  background: rgba($background-color-2, 0.65);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   z-index: 1000;
