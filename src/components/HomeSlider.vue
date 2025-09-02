@@ -7,10 +7,12 @@
   >
     <!-- 🎯 Filter direkt unter dem H2 -->
     <template #below-title>
-      <div class="filters">
+      <div class="filters" role="region" aria-labelledby="filters-legend">
+        <h3 id="filters-legend" class="sr-only">Spiele filtern</h3>
+
         <!-- PLZ -->
         <div class="filters__field filters__plz">
-          <label for="filter-plz" class="sr-only">PLZ</label>
+          <label for="filter-plz"></label>
           <input
             id="filter-plz"
             ref="plzInput"
@@ -21,9 +23,10 @@
             @keydown="onPlzKeydown"
             type="search"
             class="filters__input"
-            placeholder="Suche deine PLZ "
+            placeholder="Suche nach PLZ"
             inputmode="numeric"
             autocomplete="postal-code"
+            role="combobox"
             :aria-expanded="showPlzMenu && plzSuggestions.length > 0 ? 'true' : 'false'"
             aria-haspopup="listbox"
             aria-controls="plz-listbox"
@@ -34,7 +37,8 @@
             class="filters__clear"
             @mousedown.prevent
             @click="clearPlz"
-            aria-label="PLZ löschen"
+            aria-label="PLZ Eingabe löschen"
+            type="button"
           >✕</button>
 
           <!-- 🔽 Autocomplete Dropdown -->
@@ -43,13 +47,14 @@
             id="plz-listbox"
             class="filters__autocomplete"
             role="listbox"
+            :aria-label="`Vorschläge für PLZ ${plzQuery}`"
           >
             <li
               v-for="(s, i) in plzSuggestions"
               :key="s"
               :id="`plz-opt-${i}`"
               role="option"
-              :aria-selected="i === plzActiveIndex"
+              :aria-selected="i === plzActiveIndex ? 'true' : 'false'"
               :class="['filters__opt', { 'is-active': i === plzActiveIndex }]"
               @mousedown.prevent="applyPlzSuggestion(s)"
               @mousemove="plzActiveIndex = i"
@@ -59,43 +64,44 @@
           </ul>
         </div>
 
-        <!-- Altersgruppe -->
-        <div class="filters__field filters__age">
-          <div class="segmented" role="tablist" aria-label="Altersgruppe filtern">
-            <button
-              type="button"
-              class="segmented__btn"
-              :class="{ 'is-active': selectedAge === 'Alle' }"
-              @click="selectedAge = 'Alle'"
-              :aria-pressed="selectedAge === 'Alle'"
-            >Alle</button>
-            <button
-              type="button"
-              class="segmented__btn"
-              :class="{ 'is-active': selectedAge === 'Mini' }"
-              @click="selectedAge = 'Mini'"
-              :aria-pressed="selectedAge === 'Mini'"
-            >Mini</button>
-            <button
-              type="button"
-              class="segmented__btn"
-              :class="{ 'is-active': selectedAge === 'Medi' }"
-              @click="selectedAge = 'Medi'"
-              :aria-pressed="selectedAge === 'Medi'"
-            >Medi</button>
-            <button
-              type="button"
-              class="segmented__btn"
-              :class="{ 'is-active': selectedAge === 'Maxi' }"
-              @click="selectedAge = 'Maxi'"
-              :aria-pressed="selectedAge === 'Maxi'"
-            >Maxi</button>
+        <!-- Altersgruppe: als echte Radios in Fieldset -->
+        <fieldset class="filters__field filters__age">
+          <legend class="sr-only">Altersgruppe filtern</legend>
+          <div class="segmented" role="radiogroup" aria-label="Altersgruppe">
+            <label class="segmented__label">
+              <input
+                class="segmented__radio"
+                type="radio"
+                name="age"
+                value="Alle"
+                :checked="selectedAge === 'Alle'"
+                @change="selectedAge = 'Alle'"
+              />
+              <span class="segmented__btn" :class="{ 'is-active': selectedAge === 'Alle' }">Alle</span>
+            </label>
+            <label class="segmented__label">
+              <input class="segmented__radio" type="radio" name="age" value="Mini" :checked="selectedAge === 'Mini'" @change="selectedAge = 'Mini'" />
+              <span class="segmented__btn" :class="{ 'is-active': selectedAge === 'Mini' }">Mini</span>
+            </label>
+            <label class="segmented__label">
+              <input class="segmented__radio" type="radio" name="age" value="Medi" :checked="selectedAge === 'Medi'" @change="selectedAge = 'Medi'" />
+              <span class="segmented__btn" :class="{ 'is-active': selectedAge === 'Medi' }">Medi</span>
+            </label>
+            <label class="segmented__label">
+              <input class="segmented__radio" type="radio" name="age" value="Maxi" :checked="selectedAge === 'Maxi'" @change="selectedAge = 'Maxi'" />
+              <span class="segmented__btn" :class="{ 'is-active': selectedAge === 'Maxi' }">Maxi</span>
+            </label>
           </div>
-        </div>
+        </fieldset>
+
+        <!-- Live-Status für Trefferanzahl -->
+        <p class="filters__meta" role="status" aria-live="polite">
+          <span class="filters__count">{{ matchText }}</span>
+        </p>
       </div>
 
       <!-- Hinweis bei 0 Treffern (es werden alle gezeigt) -->
-      <p v-if="(plzQuery || selectedAge !== 'Alle') && matchCount === 0" class="filters__info">
+      <p v-if="(plzQuery || selectedAge !== 'Alle') && rawFiltered.length === 0" class="filters__info" role="status" aria-live="polite">
         Keine Treffer – zeige alle Spiele.
       </p>
     </template>
@@ -103,7 +109,7 @@
     <!-- Cards / jeder Slide hat EINEN Root-Wrapper -->
     <template #default="{ item, index }">
       <div class="slide-inner">
-        <div class="short-description">
+        <article class="short-description" :aria-labelledby="`game-title-${index}`">
           <img
             :src="getGameImagePath(item.gameImage)"
             :alt="item.name"
@@ -121,20 +127,33 @@
           </div>
 
           <div class="headline-game-name">
-            <h2>{{ item.name }}</h2>
+            <h3 :id="`game-title-${index}`">{{ item.name }}</h3>
           </div>
+
           <div class="short">
             <div class="short-left">
               <b>{{ item.startloction }}</b>
             </div>
-            <div class="game-infos" @click="toggleLayer(index)">
-              <b>{{ item.ageGroup }}</b>
-              <img src="@/assets/img/icons/open-plus.png" alt="open" class="open-layer" />
+
+            <!-- Toggle Long-Description als Button -->
+            <div class="game-infos">
+              <b>{{ formatAge(item.ageGroup) }}</b>
+              <button
+                class="open-layer-btn"
+                type="button"
+                :aria-expanded="activeIndex === index ? 'true' : 'false'"
+                :aria-controls="`desc-${index}`"
+                @click="toggleLayer(index)"
+              >
+                <img src="@/assets/img/icons/open-plus.png" alt="Details anzeigen" class="open-layer" />
+              </button>
             </div>
+
             <div class="short-right">
               <div class="button">
                 <button
                   class="btn btn--fourth"
+                  type="button"
                   @click="$emit('open-modal', item)"
                 >
                   Kaufen
@@ -142,31 +161,33 @@
               </div>
             </div>
           </div>
-        </div>
+        </article>
 
         <!-- Long-description -->
-        <div
+        <section
           class="long-description"
           :class="{ 'long-description-active': activeIndex === index }"
+          :id="`desc-${index}`"
+          role="region"
+          :aria-labelledby="`desc-title-${index}`"
+          @keydown.esc.prevent="closeLayer()"
         >
           <div class="long-description-content">
             <div class="top-content">
               <div class="top-info">
-                <b>{{ item.name }}</b>
+                <b :id="`desc-title-${index}`">{{ item.name }}</b>
               </div>
-              <div class="close-btn" @click="closeLayer">
-                <font-awesome-icon
-                  icon="minus-circle"
-                  class="close-icon-2"
-                  aria-label="Schließen"
-                />
+              <div class="close-btn">
+                <button type="button" class="icon-only" @click="closeLayer" aria-label="Details schließen">
+                  <font-awesome-icon icon="minus-circle" class="close-icon-2" />
+                </button>
               </div>
             </div>
             <div class="game-information">
               <div class="game-infos">
                 <p>
                   <span>Schwierigkeit:</span>
-                  <span>{{ item.ageGroup }}</span>
+                  <span>{{ formatAge(item.ageGroup) }}</span>
                 </p>
                 <p>
                   <span>Start:</span>
@@ -194,13 +215,14 @@
             <div class="button">
               <button
                 class="btn btn--primary"
-                @click="$emit('open-modal', item.encryptedId)"
+                type="button"
+                @click="$emit('open-modal', item)"
               >
                 Kaufen
               </button>
             </div>
           </div>
-        </div>
+        </section>
       </div>
     </template>
   </BaseSlider>
@@ -226,6 +248,10 @@ export default {
     };
   },
   computed: {
+    matchText() {
+      const n = (this.plzQuery || this.selectedAge !== 'Alle') ? this.rawFiltered.length : this.games.length
+      return n === 1 ? '1 Spiel gefunden' : `${n} Spiele gefunden`
+    },
     // alle verfügbaren PLZs (einmalig aus den Games extrahiert)
     plzCandidates() {
       const set = new Set();
@@ -288,14 +314,6 @@ export default {
       }
       return this.rawFiltered;
     },
-
-    // Anzeige der echten Trefferzahl
-    matchCount() {
-      if (this.plzQuery || this.selectedAge !== "Alle") {
-        return this.rawFiltered.length;
-      }
-      return this.games.length;
-    },
   },
   methods: {
     // -------- Autocomplete UI --------
@@ -315,15 +333,18 @@ export default {
     },
     onPlzKeydown(e) {
       if (!this.showPlzMenu && !(e.key === 'ArrowDown' && this.plzSuggestions.length)) return;
-      if (['ArrowDown', 'ArrowUp', 'Enter', 'Escape'].includes(e.key)) e.preventDefault();
+      if (['ArrowDown', 'ArrowUp', 'Enter', 'Escape', 'Home', 'End'].includes(e.key)) e.preventDefault();
 
+      const last = this.plzSuggestions.length - 1
       if (e.key === 'ArrowDown') {
         this.showPlzMenu = true;
-        const last = this.plzSuggestions.length - 1;
         this.plzActiveIndex = this.plzActiveIndex < last ? this.plzActiveIndex + 1 : 0;
       } else if (e.key === 'ArrowUp') {
-        const last = this.plzSuggestions.length - 1;
         this.plzActiveIndex = this.plzActiveIndex > 0 ? this.plzActiveIndex - 1 : last;
+      } else if (e.key === 'Home') {
+        this.plzActiveIndex = 0
+      } else if (e.key === 'End') {
+        this.plzActiveIndex = last
       } else if (e.key === 'Enter') {
         if (this.plzActiveIndex >= 0) this.applyPlzSuggestion(this.plzSuggestions[this.plzActiveIndex]);
         this.showPlzMenu = false;
@@ -349,8 +370,9 @@ export default {
     getGameImagePath(imagePath) {
       try { return new URL(imagePath, import.meta.url).href; } catch { return imagePath; }
     },
-    toggleLayer(index) { this.activeIndex = this.activeIndex === index ? null : index; }
-    ,
+    toggleLayer(index) {
+      this.activeIndex = this.activeIndex === index ? null : index;
+    },
     closeLayer() { this.activeIndex = null; },
     formatAge(age) {
       const a = String(age || "").toLowerCase();
@@ -394,10 +416,23 @@ export default {
 </script>
 
 <style scoped>
+/* ---------- A11y Utilities ---------- */
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
 /* ---------- Filterbar ---------- */
 .filters {
   display: grid;
-  gap: .5rem 0.75rem;
+  gap: .5rem .75rem;
   align-items: center;
 }
 .slider-below-title { width: 95%; }
@@ -416,7 +451,7 @@ export default {
   }
 }
 
-.filters__field { position: relative; }
+.filters__field { position: relative; border: none; }
 
 .filters__input {
   width: 100%;
@@ -430,19 +465,6 @@ export default {
 .filters__input::placeholder,
 .filters__input::-webkit-input-placeholder { color: #FAC227; opacity: 1; }
 .filters__input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; }
-
-.filters__autocomplete {
-  display: flex;
-  justify-content: flex-start;
-}
-
-.filters__autocomplete {
-  display: left;
-  flex-direction: column;
-  ul {
-    list-style-type: none;
-  }
-}
 
 /* Clear-Button */
 .filters__clear {
@@ -490,6 +512,37 @@ export default {
   color: #FAC227;
 }
 
+/* ---------- Segmented (Radios) ---------- */
+.filters__age fieldset { border: 0; padding: 0; margin: 0; }
+.segmented {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid #355b4c;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+}
+.segmented__label { position: relative; display: inline-flex; }
+.segmented__radio { position: absolute; inset: 0; opacity: 0; pointer-events: none; }
+.segmented__btn {
+  background: #E9E2D0;
+  padding: .75rem .9rem;
+  font-size: .9rem;
+  line-height: 1;
+  color: #355b4c;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  text-transform: none;
+  box-shadow: none;
+  border-radius: 0;
+}
+.segmented__label + .segmented__label .segmented__btn { border-left: 1px solid rgba(53, 91, 76, 0.13); }
+.segmented__btn.is-active { background: #355b4c; color: #FAC227; }
+.segmented__label:focus-within .segmented__btn { outline: 2px solid #FAC227; outline-offset: 2px; }
+
 /* ---------- Slide / Card ---------- */
 .slide-inner { position: relative; }
 
@@ -507,6 +560,9 @@ export default {
 .short .game-infos img { transition: transform 0.5s ease-in-out; }
 .short .game-infos img:hover { transform: rotate(360deg); }
 .short .short-right .open-layer { width: 50px; height: auto; margin-right: 10px; }
+
+.open-layer-btn { background: transparent; border: 0; padding: 0 .25rem; cursor: pointer; }
+.open-layer-btn:focus-visible { outline: 2px solid #355b4c; outline-offset: 2px; }
 
 /* Badge */
 .card-badge {
@@ -533,56 +589,11 @@ export default {
 .long-description-active { bottom: 0px; }
 .long-description-content { display: flex; flex-direction: column; justify-content: space-between; height: inherit; }
 .long-description .top-content { display: flex; justify-content: space-between; align-items: center; }
-.long-description .close-btn { font-size: 30px; cursor: pointer; }
+.long-description .close-btn .icon-only { font-size: 30px; cursor: pointer; background: transparent; border: 0; }
+.long-description .close-btn .icon-only svg { color: #355b4c; }
 .long-description .game-information { display: flex; justify-content: stretch; }
 .long-description .game-infos { display: flex; flex-direction: column; width: 100%; padding: 0 30px; }
 .long-description .game-infos p { display: flex; justify-content: space-between; margin: 2px 0; }
 .long-description .button { display: flex; justify-content: flex-end; }
-
-/* Stärker gezielt: nur innerhalb des Age-Felds */
-.filters__age .segmented {
-  display: inline-flex;
-  align-items: stretch;
-  border: 1px solid #355b4c;
-  border-radius: 12px;
-  overflow: hidden;
-  background: #fff;
-}
-
-.filters__age .segmented__btn {
-  -webkit-appearance: none;
-  appearance: none;
-  border: 0;
-  background: #E9E2D0;
-  padding: .75rem .9rem;
-  font-size: .9rem;
-  line-height: 1;
-  color: #355b4c;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  white-space: nowrap;
-
-  /* gegen globale .btn-Regeln absichern */
-  text-transform: none;
-  box-shadow: none;
-  border-radius: 0;
-}
-
-.filters__age .segmented__btn + .segmented__btn {
-  border-left: 1px solid rgba(53, 91, 76, 0.13);
-}
-
-.filters__age .segmented__btn.is-active {
-  background: #355b4c;
-  color: #FAC227;
-}
-
-.filters__age .segmented__btn:focus-visible {
-  outline: 2px solid #FAC227;
-  outline-offset: 2px;
-}
-
 
 </style>
