@@ -436,6 +436,14 @@ export default {
   justify-content: flex-start;
 }
 
+.filters__autocomplete {
+  display: left;
+  flex-direction: column;
+  ul {
+    list-style-type: none;
+  }
+}
+
 /* Clear-Button */
 .filters__clear {
   position: absolute;
