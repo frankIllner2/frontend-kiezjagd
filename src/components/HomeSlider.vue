@@ -502,7 +502,7 @@ export default {
 
 /* Badge */
 .card-badge {
-  position: absolute; top: 10px; right: 10px;
+  position: absolute; top: 1px; left: 1px;
   z-index: 6; background: #355b4c; color: #FAC227;
   border: 1px solid #355b4c; border-radius: 9999px;
   padding: .25rem .6rem; box-shadow: 0 2px 6px rgba(0,0,0,.15);
@@ -517,7 +517,7 @@ export default {
 /* ---------- Long description ---------- */
 .long-description {
   position: absolute; bottom: -100%; left: 0; width: 100%;
-  padding: 20px; background-color: #e9e2d0; color: #355b4c;
+  padding: 30px 20px 20px; background-color: #e9e2d0; color: #355b4c;
   border: 1px solid #355b4c; z-index: 5;
   transition: bottom 0.2s ease-in-out; height: 100%;
   border-radius: 20px;

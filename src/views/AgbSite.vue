@@ -191,9 +191,30 @@
 
       <h3 id="ds-7">7. Cookies &amp; lokale Speicherung</h3>
       <p>
-        Wir verwenden ausschließlich <em>unbedingt erforderliche</em> Speichertechnologien
-        (z.&nbsp;B. Session-Speicherung von Spielständen). Es findet kein
-        Tracking zu Marketing-/Analysezwecken statt.
+        Unsere Website verwendet ausschließlich technisch notwendige Cookies und vergleichbare 
+        Speichertechnologien. Diese sind erforderlich, um die grundlegenden Funktionen unserer 
+        WebApp bereitzustellen. Dazu zählen insbesondere:
+      </p>
+      <ul>
+        <li><strong>Sitzungsverwaltung:</strong> Damit deine Spielstände, dein Warenkorb oder 
+        deine Anmeldung während einer Sitzung erhalten bleiben.</li>
+        <li><strong>Sicherheitsfunktionen:</strong> Zum Schutz unserer Website und deiner Daten 
+        (z.&nbsp;B. gegen Missbrauch).</li>
+      </ul>
+      <p>
+        Diese Cookies sind unverzichtbar für den Betrieb unserer Dienste und können nicht 
+        deaktiviert werden. Sie enthalten keine personenbezogenen Daten, die Rückschlüsse auf 
+        deine Identität zulassen.
+      </p>
+      <p>
+        Wir setzen <strong>keine Analyse-, Tracking- oder Marketing-Cookies</strong> ein. Ebenso 
+        nutzen wir keine Cookies von Drittanbietern (z.&nbsp;B. Google, Facebook, Instagram, YouTube).
+      </p>
+      <p>
+        <em>Rechtsgrundlage:</em> Die Speicherung und Nutzung dieser technisch notwendigen 
+        Cookies erfolgt auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO in Verbindung mit § 25 
+        Abs. 2 Nr. 2 TTDSG. Unser berechtigtes Interesse liegt in der Bereitstellung einer 
+        funktionsfähigen und sicheren Website.
       </p>
 
       <h3 id="ds-8">8. Formulareingaben</h3>
