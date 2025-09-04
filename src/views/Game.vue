@@ -243,7 +243,7 @@ export default {
     await this.loadGameData(this.gameId);
 
     // ✅ Korrekt-Sounds vorladen
-    this.correctSounds = ["correct.flac", "juhu.mp3", "yeah.mp3"].map((file) => {
+    this.correctSounds = ["sound-julia-1.mp3", "correct.flac", "sound-julia-2.mp3", "sound-julia-3.mp3"].map((file) => {
       const a = new Audio(require(`@/assets/sound/${file}`));
       a.preload = "auto";
       a.volume = 1.0; // ggf. 0.8

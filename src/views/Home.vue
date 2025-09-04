@@ -541,7 +541,7 @@ export default {
   padding: 1rem;
   outline: none;
 }
-.form-row { margin-bottom: 0.75rem; }
+.form-row { margin-bottom: 0.75rem; justify-content: space-between; }
 .form-row label { display:flex; margin-bottom: 0.25rem; align-items: center; color: #355b4c;}
 .form-row input[aria-invalid='true'] { border-color: #b00020; }
 .error-text { color: #b00020; }
