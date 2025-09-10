@@ -1,4 +1,5 @@
 <template>
+  <!-- in der Datei data/slug-map.js kommen die Seiten rein -->
   <div v-if="loading" class="loading-spinner">
     <img src="@/assets/img/star.png" alt="Lädt..." class="rotating-star" />
     <span class="loading-text">Kiezjagd wird vorbereitet...</span>
