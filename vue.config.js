@@ -4,23 +4,20 @@ const path = require('path');
 const doPrerender =
   process.env.VUE_APP_PRERENDER === '1' && process.env.NODE_ENV === 'production';
 
-const isVercel = process.env.VERCEL === '1';
-
-let PrerenderSPAPlugin, PuppeteerRenderer, JSDOMRenderer, slugMap;
+let PrerenderSPAPlugin, JSDOMRenderer, slugMap;
 if (doPrerender) {
   PrerenderSPAPlugin = require('prerender-spa-plugin');
-  // Renderer nur „lazy“ laden, damit lokale/CI-Unterschiede sauber sind
-  try { PuppeteerRenderer = PrerenderSPAPlugin.PuppeteerRenderer; } catch (_) {}
-  try { JSDOMRenderer = require('@prerenderer/renderer-jsdom'); } catch (_) {}
+  // wichtig: Default-Export nehmen
+  ({ default: JSDOMRenderer } = require('@prerenderer/renderer-jsdom'));
   try {
-    slugMap = require('./src/data/slug-map.json');
+    slugMap = require('./src/data/slug-map.json'); // oder .js
   } catch (e) {
     slugMap = [];
   }
 }
 
 module.exports = {
-  // ✅ PWA-Konfiguration
+  // ✅ PWA-Konfiguration bleibt wie gehabt
   pwa: {
     name: 'Kiezjagd',
     themeColor: '#E9E2D0',
@@ -138,33 +135,17 @@ module.exports = {
       const staticRoutes = ['/', '/agb', '/impressum', '/datenschutz'];
       const gameRoutes = (slugMap || []).map(e => `/spiel/${e.slug}`);
 
-      const routes = [...staticRoutes, ...gameRoutes];
-
-      const renderer = isVercel && JSDOMRenderer
-        ? new JSDOMRenderer({
-            renderAfterDocumentEvent: 'render-event'
-          })
-        : new PuppeteerRenderer({
-            headless: 'new',
-            args: [
-              '--no-sandbox',
-              '--disable-setuid-sandbox',
-              '--disable-gpu',
-              '--disable-dev-shm-usage',
-              '--single-process',
-              '--no-zygote'
-            ],
-            renderAfterDocumentEvent: 'render-event',
-            maxConcurrentRoutes: 1,
-            timeout: 90000
-          });
-
       config.plugins = config.plugins || [];
       config.plugins.push(
         new PrerenderSPAPlugin({
           staticDir: path.join(__dirname, 'dist'),
-          routes,
-          renderer
+          routes: [...staticRoutes, ...gameRoutes],
+          renderer: new JSDOMRenderer({
+            // wir warten wie bisher auf dein "render-event"
+            renderAfterDocumentEvent: 'render-event',
+            // Fallback: wenn du willst, zusätzlich eine fixe Wartezeit:
+            // renderAfterTime: 2000
+          })
         })
       );
     }

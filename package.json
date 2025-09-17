@@ -23,7 +23,7 @@
     "vue-meta": "^3.0.0-alpha.2",
     "vue-router": "^4.5.0",
     "vuedraggable": "^4.1.0",
-    "puppeteer": "24.10.2"
+    "@prerenderer/renderer-jsdom": "^1.1.7"
   },
   "devDependencies": {
     "@babel/core": "^7.26.0",
@@ -33,7 +33,6 @@
     "@vue/cli-plugin-eslint": "~5.0.0",
     "@vue/cli-plugin-pwa": "~5.0.0",
     "@vue/cli-service": "~5.0.0",
-    "@prerenderer/renderer-jsdom": "^1.1.7",
     "babel-eslint": "^10.1.0",
     "css-loader": "^7.1.2",
     "eslint": "^7.32.0",
