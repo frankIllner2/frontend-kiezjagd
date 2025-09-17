@@ -4,10 +4,14 @@ const path = require('path');
 const doPrerender =
   process.env.VUE_APP_PRERENDER === '1' && process.env.NODE_ENV === 'production';
 
-let PrerenderSPAPlugin, Renderer, slugMap;
+const isVercel = process.env.VERCEL === '1';
+
+let PrerenderSPAPlugin, PuppeteerRenderer, JSDOMRenderer, slugMap;
 if (doPrerender) {
   PrerenderSPAPlugin = require('prerender-spa-plugin');
-  Renderer = PrerenderSPAPlugin.PuppeteerRenderer;
+  // Renderer nur „lazy“ laden, damit lokale/CI-Unterschiede sauber sind
+  try { PuppeteerRenderer = PrerenderSPAPlugin.PuppeteerRenderer; } catch (_) {}
+  try { JSDOMRenderer = require('@prerenderer/renderer-jsdom'); } catch (_) {}
   try {
     slugMap = require('./src/data/slug-map.json');
   } catch (e) {
@@ -16,7 +20,7 @@ if (doPrerender) {
 }
 
 module.exports = {
-  // ✅ PWA
+  // ✅ PWA-Konfiguration
   pwa: {
     name: 'Kiezjagd',
     themeColor: '#E9E2D0',
@@ -128,23 +132,20 @@ module.exports = {
   },
 
   configureWebpack: (config) => {
-    config.resolve = {
-      alias: { '@': path.resolve(__dirname, 'src') }
-    };
+    config.resolve = { alias: { '@': path.resolve(__dirname, 'src') } };
 
-    // 👉 Prerender aktivieren
     if (doPrerender) {
       const staticRoutes = ['/', '/agb', '/impressum', '/datenschutz'];
-      const gameRoutes = (slugMap || []).map((e) => `/spiel/${e.slug}`);
+      const gameRoutes = (slugMap || []).map(e => `/spiel/${e.slug}`);
 
-      config.plugins = config.plugins || [];
-      config.plugins.push(
-        new PrerenderSPAPlugin({
-          staticDir: path.join(__dirname, 'dist'),
-          routes: [...staticRoutes, ...gameRoutes],
-          renderer: new Renderer({
-            // ⚙️ Kompatibel mit älterem Puppeteer
-            headless: true, // <— wichtig: boolean, nicht 'new'
+      const routes = [...staticRoutes, ...gameRoutes];
+
+      const renderer = isVercel && JSDOMRenderer
+        ? new JSDOMRenderer({
+            renderAfterDocumentEvent: 'render-event'
+          })
+        : new PuppeteerRenderer({
+            headless: 'new',
             args: [
               '--no-sandbox',
               '--disable-setuid-sandbox',
@@ -156,7 +157,14 @@ module.exports = {
             renderAfterDocumentEvent: 'render-event',
             maxConcurrentRoutes: 1,
             timeout: 90000
-          })
+          });
+
+      config.plugins = config.plugins || [];
+      config.plugins.push(
+        new PrerenderSPAPlugin({
+          staticDir: path.join(__dirname, 'dist'),
+          routes,
+          renderer
         })
       );
     }

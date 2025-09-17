@@ -18,12 +18,12 @@
     "animate.css": "^4.1.1",
     "axios": "^1.7.9",
     "core-js": "^3.8.3",
-    "puppeteer": "24.10.2",
     "register-service-worker": "^1.7.2",
     "vue": "^3.2.13",
     "vue-meta": "^3.0.0-alpha.2",
     "vue-router": "^4.5.0",
-    "vuedraggable": "^4.1.0"
+    "vuedraggable": "^4.1.0",
+    "puppeteer": "24.10.2"
   },
   "devDependencies": {
     "@babel/core": "^7.26.0",
@@ -33,6 +33,7 @@
     "@vue/cli-plugin-eslint": "~5.0.0",
     "@vue/cli-plugin-pwa": "~5.0.0",
     "@vue/cli-service": "~5.0.0",
+    "@prerenderer/renderer-jsdom": "^1.1.7",
     "babel-eslint": "^10.1.0",
     "css-loader": "^7.1.2",
     "eslint": "^7.32.0",
@@ -45,19 +46,6 @@
     "vue-loader": "^17.4.2",
     "webpack": "^5.97.1",
     "webpack-cli": "^6.0.1"
-  },
-  "overrides": {
-    "@prerenderer/renderer-puppeteer": {
-      "puppeteer": "24.10.2"
-    },
-    "puppeteer": "24.10.2"
-  }, 
-  "eslintConfig": {
-    "root": true,
-    "env": { "node": true },
-    "extends": ["plugin:vue/vue3-essential", "eslint:recommended"],
-    "parserOptions": { "parser": "@babel/eslint-parser" },
-    "rules": {}
   },
   "browserslist": ["> 1%", "last 2 versions", "not dead", "not ie 11"]
 }
