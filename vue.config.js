@@ -1,21 +1,20 @@
 /* eslint-disable */
 const path = require('path');
 
+// Prerender nur im Production-Build und wenn Flag gesetzt ist
 const doPrerender =
   process.env.VUE_APP_PRERENDER === '1' && process.env.NODE_ENV === 'production';
 
-let PrerenderSPAPlugin, JSDOMRenderer, slugMap;
+let PrerendererWebpackPlugin, JSDOMRenderer, slugMap;
 if (doPrerender) {
-  PrerenderSPAPlugin = require('prerender-spa-plugin');
-
-  // ✅ Defensiver Import: funktioniert mit ESM & CJS
+  PrerendererWebpackPlugin = require('@prerenderer/webpack-plugin');
+  // Defensiver Import für CJS/ESM
   try {
     const jsdomModule = require('@prerenderer/renderer-jsdom');
     JSDOMRenderer = jsdomModule.default || jsdomModule;
   } catch (e) {
     JSDOMRenderer = null;
   }
-
   try {
     slugMap = require('./src/data/slug-map.json'); // oder .js
   } catch (e) {
@@ -140,18 +139,21 @@ module.exports = {
 
     if (doPrerender) {
       const staticRoutes = ['/', '/agb', '/impressum', '/datenschutz'];
-      const gameRoutes = (slugMap || []).map(e => `/spiel/${e.slug}`);
+      const gameRoutes = (slugMap || []).map((e) => `/spiel/${e.slug}`);
       const routes = [...staticRoutes, ...gameRoutes];
 
       config.plugins = config.plugins || [];
       config.plugins.push(
-        new PrerenderSPAPlugin({
+        new PrerendererWebpackPlugin({
           staticDir: path.join(__dirname, 'dist'),
           routes,
-          renderer: new JSDOMRenderer({
-            renderAfterDocumentEvent: 'render-event'
-            // optional: renderAfterTime: 2000
-          })
+          renderer: JSDOMRenderer
+            ? new JSDOMRenderer({
+                // wir warten wie bisher auf dein "render-event"
+                renderAfterDocumentEvent: 'render-event',
+                // falls nötig zusätzlich: renderAfterTime: 2000
+              })
+            : undefined
         })
       );
     }
