@@ -1,14 +1,13 @@
 /* eslint-disable */
 const path = require('path');
 
-// Prerender nur im Production-Build und wenn Flag gesetzt ist
 const doPrerender =
   process.env.VUE_APP_PRERENDER === '1' && process.env.NODE_ENV === 'production';
 
 let PrerendererWebpackPlugin, JSDOMRenderer, slugMap;
 if (doPrerender) {
   PrerendererWebpackPlugin = require('@prerenderer/webpack-plugin');
-  // Defensiver Import für CJS/ESM
+  // CJS/ESM-kompatibler Import
   try {
     const jsdomModule = require('@prerenderer/renderer-jsdom');
     JSDOMRenderer = jsdomModule.default || jsdomModule;
@@ -16,14 +15,13 @@ if (doPrerender) {
     JSDOMRenderer = null;
   }
   try {
-    slugMap = require('./src/data/slug-map.json'); // oder .js
+    slugMap = require('./src/data/slug-map.json');
   } catch (e) {
     slugMap = [];
   }
 }
 
 module.exports = {
-  // ✅ PWA-Konfiguration
   pwa: {
     name: 'Kiezjagd',
     themeColor: '#E9E2D0',
@@ -139,7 +137,7 @@ module.exports = {
 
     if (doPrerender) {
       const staticRoutes = ['/', '/agb', '/impressum', '/datenschutz'];
-      const gameRoutes = (slugMap || []).map((e) => `/spiel/${e.slug}`);
+      const gameRoutes = (slugMap || []).map(e => `/spiel/${e.slug}`);
       const routes = [...staticRoutes, ...gameRoutes];
 
       config.plugins = config.plugins || [];
@@ -149,9 +147,7 @@ module.exports = {
           routes,
           renderer: JSDOMRenderer
             ? new JSDOMRenderer({
-                // wir warten wie bisher auf dein "render-event"
-                renderAfterDocumentEvent: 'render-event',
-                // falls nötig zusätzlich: renderAfterTime: 2000
+                renderAfterDocumentEvent: 'render-event'
               })
             : undefined
         })
