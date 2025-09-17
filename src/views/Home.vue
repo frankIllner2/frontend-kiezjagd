@@ -316,45 +316,11 @@ export default {
     },
   },
   methods: {
-    // --- SEO/Head Helpers ---
-    setMeta(name, content) {
-      let tag = document.querySelector(`meta[name="${name}"]`);
-      if (!tag) { tag = document.createElement('meta'); tag.setAttribute('name', name); document.head.appendChild(tag); }
-      tag.setAttribute('content', content);
-    },
-    setOG(prop, content) {
-      let tag = document.querySelector(`meta[property="${prop}"]`);
-      if (!tag) { tag = document.createElement('meta'); tag.setAttribute('property', prop); document.head.appendChild(tag); }
-      tag.setAttribute('content', content);
-    },
+    // --- nur diese Head-Hilfe behalten wir ---
     ensureCanonical(href) {
       let link = document.querySelector('link[rel="canonical"]');
       if (!link) { link = document.createElement('link'); link.setAttribute('rel', 'canonical'); document.head.appendChild(link); }
       link.setAttribute('href', href);
-    },
-    injectOrgJsonLd() {
-      const blocks = [
-        {
-          "@context":"https://schema.org",
-          "@type":"Organization",
-          "name":"Kiezjagd",
-          "url":"https://www.kiezjagd.de/",
-          "logo":"https://www.kiezjagd.de/logo.png",
-          "sameAs":[ "https://www.instagram.com/kiezjagd" ]
-        },
-        {
-          "@context":"https://schema.org",
-          "@type":"WebSite",
-          "url":"https://www.kiezjagd.de/",
-          "name":"Kiezjagd"
-        }
-      ];
-      blocks.forEach(obj => {
-        const s = document.createElement('script');
-        s.type = 'application/ld+json';
-        s.text = JSON.stringify(obj);
-        document.head.appendChild(s);
-      });
     },
 
     // --- UI/Business ---
@@ -537,32 +503,15 @@ export default {
       window.addEventListener("resize", this.checkScreenSize, { passive: true });
     }
 
-    // SEO-Meta vor render-event setzen
-    document.title = 'Kiezjagd – Das Rätselspiel in deinem Kiez';
-
-    this.setMeta('description', 'Kiezjagd: Schnitzeljagd mit Rätseln für Familien & Kinder in Berlin. Entdeckt euren Kiez neu – einfach im Browser starten.');
-
-    this.setOG('og:type', 'website');
-    this.setOG('og:title', 'Kiezjagd – Das Rätselspiel in deinem Kiez');
-    this.setOG('og:description', 'Schnitzeljagd mit Rätseln für Familien & Kinder in Berlin. Entdeckt euren Kiez neu – direkt im Browser starten.');
-    this.setOG('og:url', 'https://www.kiezjagd.de/');
-    this.setOG('og:image', 'https://www.kiezjagd.de/og/kiezjagd-1200x630.jpg');
-
-    this.setMeta('twitter:card', 'summary_large_image');
-    this.setMeta('twitter:title', 'Kiezjagd – Das Rätselspiel in deinem Kiez');
-    this.setMeta('twitter:description', 'Schnitzeljagd mit Rätseln für Familien & Kinder in Berlin. Entdeckt euren Kiez neu – direkt im Browser starten.');
-    this.setMeta('twitter:image', 'https://www.kiezjagd.de/og/kiezjagd-1200x630.jpg');
-
+    // Nur Canonical sicherstellen (Title/Meta/OG/Twitter kommen aus index.html)
     this.ensureCanonical('https://www.kiezjagd.de/');
-    this.injectOrgJsonLd(); // ohne SearchAction, da keine Suche
 
-
-    // 🔔 Prerender-Trigger: direkt nach dem initial sichtbaren DOM
+    // 🔔 Prerender-Trigger (unschädlich, auch wenn Prerender aus ist)
     this.$nextTick(() => {
       document.dispatchEvent(new Event('render-event'));
     });
 
-    // Dynamische Daten (beeinflussen das Prerender nicht)
+    // Dynamische Daten
     this.fetchRandomGameRankings();
     await this.fetchGames();
   },

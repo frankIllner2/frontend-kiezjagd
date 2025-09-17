@@ -10,18 +10,20 @@
     <link rel="canonical" href="https://www.kiezjagd.de/" />
 
     <!-- Beschreibung: natürlich & konsistent -->
-    <meta name="description" content="Kiezjagd: Die Schnitzeljagd mit Rätseln für Familien & Kinder in Berlin. Entdeckt euren Kiez neu – einfach im Browser starten." />
-    <!-- keywords ist veraltet, daher entfernt -->
+    <meta
+      name="description"
+      content="Kiezjagd: Die Schnitzeljagd mit Rätseln für Familien & Kinder in Berlin. Entdeckt euren Kiez neu – einfach im Browser starten."
+    />
     <meta name="robots" content="index, follow" />
 
     <!-- Theme / App -->
     <meta name="theme-color" content="#E9E2D0" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Kiezjagd" />
 
-    <!-- Manifest (Dateiname passt zur Verlinkung) -->
+    <!-- Manifest -->
     <link rel="manifest" href="/manifest.webmanifest" />
 
     <!-- Favicon -->
@@ -39,43 +41,41 @@
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Kiezjagd – Das Rätselspiel in deinem Kiez" />
-    <meta property="og:description" content="Die Schnitzeljagd mit Rätseln für Familien & Kinder in Berlin. Entdeckt euren Kiez neu – direkt im Browser starten." />
+    <meta
+      property="og:description"
+      content="Die Schnitzeljagd mit Rätseln für Familien & Kinder in Berlin. Entdeckt euren Kiez neu – direkt im Browser starten."
+    />
     <meta property="og:url" content="https://www.kiezjagd.de/" />
-    <!-- Wichtig: echtes 1200×630 JPG/PNG im public/og/ -->
     <meta property="og:image" content="https://www.kiezjagd.de/og/kiezjagd-1200x630.jpg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:locale" content="de_DE" />
 
-
-
     <!-- Structured Data (JSON-LD) -->
     <script type="application/ld+json">
-    {
-      "@context":"https://schema.org",
-      "@type":"Organization",
-      "name":"Kiezjagd",
-      "url":"https://www.kiezjagd.de/",
-      "logo":"https://www.kiezjagd.de/logo.png",
-      "sameAs":[
-        "https://www.instagram.com/Kiezjagd"
-      ]
-    }
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Kiezjagd",
+        "url": "https://www.kiezjagd.de/",
+        "logo": "https://www.kiezjagd.de/icons/icon-512x512.png",
+        "sameAs": ["https://www.instagram.com/Kiezjagd"]
+      }
     </script>
     <script type="application/ld+json">
-    {
-      "@context":"https://schema.org",
-      "@type":"WebSite",
-      "url":"https://www.kiezjagd.de/",
-      "name":"Kiezjagd"
-    }
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "url": "https://www.kiezjagd.de/",
+        "name": "Kiezjagd"
+      }
     </script>
   </head>
 
   <body>
     <noscript>
       <strong>Es tut uns leid, aber diese Website funktioniert nur mit aktiviertem JavaScript. Bitte aktiviere JavaScript, um fortzufahren.</strong>
-      <!-- Minimaler Fallback-Content, damit Crawler & Nutzer etwas sehen -->
+      <!-- Minimaler Fallback-Content -->
       <section>
         <h1>Kiezjagd – Interaktive Abenteuer in Berlin</h1>
         <p>Erkundet euren Kiez mit kindgerechten Rätseln – direkt im Browser startklar.</p>
@@ -89,6 +89,6 @@
     </noscript>
 
     <div id="app"></div>
-    <!-- built files will be auto injected -->
+    
   </body>
 </html>
