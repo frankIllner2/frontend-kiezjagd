@@ -35,7 +35,7 @@
         </ul>
         <div class="social-icons">
           <a
-            href="https://www.instagram.com/kiezjaeger/"
+            href="https://www.instagram.com/kiezjagd/"
             target="_blank"
             rel="noopener"
             aria-label="Instagram (öffnet in neuem Tab)"
@@ -51,12 +51,7 @@
   </header>
 
   <!-- BACKDROP nur wenn offen; nicht fokussierbar/sichtbar für SR -->
-  <div
-    v-if="isMenuOpen"
-    class="backdrop"
-    aria-hidden="true"
-    @click="closeMenu"
-  />
+  <div v-if="isMenuOpen" class="backdrop" aria-hidden="true" @click="closeMenu" />
 
   <!-- DRAWER: als Dialog-artiges Aside mit Focus-Trap -->
   <aside
@@ -98,9 +93,7 @@
           </a>
         </li>
         <li>
-          <a href="#" @click.prevent="handleNav('features-section')">
-            Wie geht's?
-          </a>
+          <a href="#" @click.prevent="handleNav('features-section')"> Wie geht's? </a>
         </li>
         <!-- <li><router-link to="/shop/" class="shop-lp">Shop</router-link></li> -->
         <li>
@@ -112,12 +105,14 @@
           </a>
         </li>
         <li>
-          <a href="/Impressum" target="_blank" rel="noopener" @click="closeMenu">
+          <a href="/impressum" target="_blank" rel="noopener" @click="closeMenu">
             Impressum
           </a>
         </li>
         <li>
-          <a href="/Agb" target="_blank" rel="noopener" @click="closeMenu">AGB/Datenschutz</a>
+          <a href="/agb" target="_blank" rel="noopener" @click="closeMenu"
+            >AGB/Datenschutz</a
+          >
         </li>
         <li>
           <div class="social-icons">
@@ -158,22 +153,22 @@ const ANIM_MS = 300;
 
 const lockScroll = (lock) => {
   if (lock) {
-    document.documentElement.style.overflow = 'hidden';
+    document.documentElement.style.overflow = "hidden";
   } else {
-    document.documentElement.style.overflow = '';
+    document.documentElement.style.overflow = "";
   }
 };
 
 const setInertOnMain = (inert) => {
   // Modern: native inert – Fallback: aria-hidden
-  const main = document.querySelector('main');
+  const main = document.querySelector("main");
   if (!main) return;
   if (inert) {
-    main.setAttribute('inert', '');
-    main.setAttribute('aria-hidden', 'true');
+    main.setAttribute("inert", "");
+    main.setAttribute("aria-hidden", "true");
   } else {
-    main.removeAttribute('inert');
-    main.removeAttribute('aria-hidden');
+    main.removeAttribute("inert");
+    main.removeAttribute("aria-hidden");
   }
 };
 
@@ -189,7 +184,7 @@ const openMenu = async () => {
   await nextTick();
   // Fokus ins Menü setzen: auf Close-Button, dann erstes Link
   if (closeBtn.value) closeBtn.value.focus();
-  const firstLink = drawerEl.value?.querySelector('.menu a');
+  const firstLink = drawerEl.value?.querySelector(".menu a");
   if (firstLink) firstLink.focus();
 };
 
@@ -199,7 +194,9 @@ const closeMenu = async () => {
   lockScroll(false);
   setInertOnMain(false);
   await nextTick();
-  setTimeout(() => { hamburgerBtn.value?.focus?.(); }, ANIM_MS);
+  setTimeout(() => {
+    hamburgerBtn.value?.focus?.();
+  }, ANIM_MS);
 };
 
 const handleNav = (id) => {
@@ -207,8 +204,8 @@ const handleNav = (id) => {
   setTimeout(() => {
     const el = document.getElementById(id);
     if (el) {
-      el.setAttribute('tabindex', '-1');
-      el.scrollIntoView({ behavior: 'smooth' });
+      el.setAttribute("tabindex", "-1");
+      el.scrollIntoView({ behavior: "smooth" });
       el.focus({ preventScroll: true });
     }
   }, ANIM_MS + 20);
@@ -234,9 +231,9 @@ const trapFocus = (e) => {
 };
 
 const onKeydown = (e) => {
-  if (e.key === 'Escape') closeMenu();
+  if (e.key === "Escape") closeMenu();
 };
 
-onMounted(() => window.addEventListener('keydown', onKeydown));
-onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
+onMounted(() => window.addEventListener("keydown", onKeydown));
+onBeforeUnmount(() => window.removeEventListener("keydown", onKeydown));
 </script>

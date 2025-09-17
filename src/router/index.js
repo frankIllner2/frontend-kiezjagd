@@ -121,17 +121,17 @@ const routes = [
     component: LinkFault,
   },
   {
-    path: '/Impressum',
+    path: '/impressum',
     name: 'Impressum',
     component: ImpressumSite,
   },
   {
-    path: '/Agb',
+    path: '/agb',
     name: 'Agb',
     component: AgbSite,
   },
   {
-    path: '/Datenschutz',
+    path: '/datenschutz',
     name: 'Datenschutz',
     component: PrivacypolicySite,
   },

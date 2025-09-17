@@ -10,7 +10,9 @@
       <section class="container top-header" role="region" aria-labelledby="hero-heading">
         <div>
           <div class="headline-container">
-            <h1 id="hero-heading">Interaktive Abenteuer für deinen Kiez</h1>
+            <!-- H1 mit Brand im Text -->
+            <h1 id="hero-heading">Kiezjagd – Interaktive Abenteuer für deinen Kiez</h1>
+
             <div class="buttons">
               <button
                 @click="scrollToSection('game-preview-section')"
@@ -62,7 +64,7 @@
                 <h3>Dein Smartphone als Spielleiter</h3>
                 <p>
                   Mit deinem Smartphone begibst du dich auf eine Reise voller Überraschungen und Spaß.
-                  Während du online knifflige Rätsel löst, versteckte Hinweise findest und 
+                  Während du online knifflige Rätsel löst, versteckte Hinweise findest und
                   spannende Herausforderungen meisterst, entdeckst du vertraute Orte aus völlig neuen Perspektiven.
                 </p>
               </div>
@@ -76,13 +78,14 @@
               <div class="info">
                 <h3>Dein interaktives Abenteuer</h3>
                 <p>
-                  Kiezjagd ist mehr als nur ein Spiel – es ist ein interaktives Abenteuer, 
-                  das dich direkt in deinem Viertel herausfordert! Egal ob du allein, mit Freunden oder 
+                  Kiezjagd ist mehr als nur ein Spiel – es ist ein interaktives Abenteuer,
+                  das dich direkt in deinem Viertel herausfordert! Egal ob du allein, mit Freunden oder
                   deiner Familie unterwegs bist, jede Frage führt dich zu interessanten Plätzen, die du vielleicht noch nie bemerkt hast.
                 </p>
               </div>
             </article>
           </div>
+
           <div class="button">
             <button
               @click="scrollToSection('game-preview-section')"
@@ -95,8 +98,11 @@
         </div>
       </section>
 
-      <!-- Beliebte Spiele -->
-      <HomeSlider :games="games" @open-modal="openModal" />
+      <!-- Beliebte Spiele (Slider) -->
+      <section id="game-preview-section" class="container" aria-labelledby="game-preview-heading">
+        <h2 id="game-preview-heading" class="sr-only">Spielvorschau</h2>
+        <HomeSlider :games="games" @open-modal="openModal" />
+      </section>
 
       <!-- Modal Fenster -->
       <div v-if="showModal" class="modal-overlay" @keydown.esc="closeModal">
@@ -116,7 +122,7 @@
 
           <form @submit.prevent="handleCheckout" novalidate>
             <div class="form-row">
-              <label :for="emailId">E‑Mail<span aria-hidden="true"></span></label>
+              <label :for="emailId">E-Mail<span aria-hidden="true"></span></label>
               <input
                 :id="emailId"
                 type="email"
@@ -129,7 +135,7 @@
                 :aria-describedby="emailHelpId + ' ' + (checkoutError ? errorId : '')"
                 ref="emailInput"
               />
-              <p class="form-hint sr-only" :id="emailHelpId">Gib eine gültige E‑Mail‑Adresse ein, um den Link zu erhalten.</p>
+              <p class="form-hint sr-only" :id="emailHelpId">Gib eine gültige E-Mail-Adresse ein, um den Link zu erhalten.</p>
             </div>
 
             <div class="form-row" v-if="currentGame?.isVoucher">
@@ -214,8 +220,8 @@
         </div>
         <div class="bottom-menu">
           <div class="left">
-            <a href="/Impressum" target="_blank" rel="noopener">Impressum</a>
-            <a href="/Agb" target="_blank" rel="noopener">AGB/Datenschutz</a>
+            <a href="/impressum" target="_blank" rel="noopener">Impressum</a>
+            <a href="/agb" target="_blank" rel="noopener">AGB/Datenschutz</a>
           </div>
 
           <div class="right">
@@ -310,6 +316,48 @@ export default {
     },
   },
   methods: {
+    // --- SEO/Head Helpers ---
+    setMeta(name, content) {
+      let tag = document.querySelector(`meta[name="${name}"]`);
+      if (!tag) { tag = document.createElement('meta'); tag.setAttribute('name', name); document.head.appendChild(tag); }
+      tag.setAttribute('content', content);
+    },
+    setOG(prop, content) {
+      let tag = document.querySelector(`meta[property="${prop}"]`);
+      if (!tag) { tag = document.createElement('meta'); tag.setAttribute('property', prop); document.head.appendChild(tag); }
+      tag.setAttribute('content', content);
+    },
+    ensureCanonical(href) {
+      let link = document.querySelector('link[rel="canonical"]');
+      if (!link) { link = document.createElement('link'); link.setAttribute('rel', 'canonical'); document.head.appendChild(link); }
+      link.setAttribute('href', href);
+    },
+    injectOrgJsonLd() {
+      const blocks = [
+        {
+          "@context":"https://schema.org",
+          "@type":"Organization",
+          "name":"Kiezjagd",
+          "url":"https://www.kiezjagd.de/",
+          "logo":"https://www.kiezjagd.de/logo.png",
+          "sameAs":[ "https://www.instagram.com/kiezjagd" ]
+        },
+        {
+          "@context":"https://schema.org",
+          "@type":"WebSite",
+          "url":"https://www.kiezjagd.de/",
+          "name":"Kiezjagd"
+        }
+      ];
+      blocks.forEach(obj => {
+        const s = document.createElement('script');
+        s.type = 'application/ld+json';
+        s.text = JSON.stringify(obj);
+        document.head.appendChild(s);
+      });
+    },
+
+    // --- UI/Business ---
     checkScreenSize() {
       if (typeof window !== 'undefined') {
         this.isMobile = window.innerWidth <= 600;
@@ -424,7 +472,7 @@ export default {
         // 🛑 Deaktivierte Spiele herausfiltern
         const allGames = await apiService.fetchGames();
         const activeGameIds = allGames
-          .filter((game) => !game.isDisabled) // 🛑 Nur aktive Spiele
+          .filter((game) => !game.isDisabled)
           .map((game) => game.encryptedId);
 
         // Entferne zufällige Spiele, die deaktiviert sind
@@ -488,6 +536,33 @@ export default {
     if (typeof window !== 'undefined') {
       window.addEventListener("resize", this.checkScreenSize, { passive: true });
     }
+
+    // SEO-Meta vor render-event setzen
+    document.title = 'Kiezjagd – Das Rätselspiel in deinem Kiez';
+
+    this.setMeta('description', 'Kiezjagd: Schnitzeljagd mit Rätseln für Familien & Kinder in Berlin. Entdeckt euren Kiez neu – einfach im Browser starten.');
+
+    this.setOG('og:type', 'website');
+    this.setOG('og:title', 'Kiezjagd – Das Rätselspiel in deinem Kiez');
+    this.setOG('og:description', 'Schnitzeljagd mit Rätseln für Familien & Kinder in Berlin. Entdeckt euren Kiez neu – direkt im Browser starten.');
+    this.setOG('og:url', 'https://www.kiezjagd.de/');
+    this.setOG('og:image', 'https://www.kiezjagd.de/og/kiezjagd-1200x630.jpg');
+
+    this.setMeta('twitter:card', 'summary_large_image');
+    this.setMeta('twitter:title', 'Kiezjagd – Das Rätselspiel in deinem Kiez');
+    this.setMeta('twitter:description', 'Schnitzeljagd mit Rätseln für Familien & Kinder in Berlin. Entdeckt euren Kiez neu – direkt im Browser starten.');
+    this.setMeta('twitter:image', 'https://www.kiezjagd.de/og/kiezjagd-1200x630.jpg');
+
+    this.ensureCanonical('https://www.kiezjagd.de/');
+    this.injectOrgJsonLd(); // ohne SearchAction, da keine Suche
+
+
+    // 🔔 Prerender-Trigger: direkt nach dem initial sichtbaren DOM
+    this.$nextTick(() => {
+      document.dispatchEvent(new Event('render-event'));
+    });
+
+    // Dynamische Daten (beeinflussen das Prerender nicht)
     this.fetchRandomGameRankings();
     await this.fetchGames();
   },
@@ -523,6 +598,13 @@ export default {
   clip: rect(0, 0, 0, 0) !important;
   white-space: nowrap !important;
   border: 0 !important;
+}
+
+.popular-list {
+  padding-left: 1.2rem;
+}
+.popular-list li {
+  margin: .4rem 0;
 }
 
 .modal-overlay {

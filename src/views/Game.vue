@@ -122,7 +122,7 @@
               <!-- Social Media (Desktop) -->
               <div class="social-icons">
                 <p>Oder folge uns auf Insta - für weitere Rätsel und Informationen!</p>
-                <a href="https://www.instagram.com/kiezjaeger/" target="_blank">
+                <a href="https://www.instagram.com/kiezjagd/" target="_blank">
                   <font-awesome-icon
                     :icon="['fab', 'instagram']"
                     class="social-icon instagram"

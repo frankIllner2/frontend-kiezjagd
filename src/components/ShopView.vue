@@ -17,8 +17,8 @@
     <!-- 📄 Footer -->
     <footer class="bottom">
       <div class="left">
-        <a href="/Impressum" target="_blank" rel="noopener">Impressum</a>
-        <a href="/Agb" target="_blank" rel="noopener">AGB/Datenschutz</a>
+        <a href="/impressum" target="_blank" rel="noopener">Impressum</a>
+        <a href="/agb" target="_blank" rel="noopener">AGB/Datenschutz</a>
       </div>
 
       <div class="right">

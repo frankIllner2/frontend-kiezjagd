@@ -5,14 +5,24 @@
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+
     <title>Kiezjagd – Das Rätselspiel in deinem Kiez</title>
     <link rel="canonical" href="https://www.kiezjagd.de/" />
-    <meta name="description" content="Das beste Rätselspiel im Kiez. Erlebe spannende Abenteuer in deiner Nachbarschaft – mit Freunden oder der Familie!" />
-    <meta name="keywords" content="Rätselspiel, Abenteuer, Kiez, Puzzle, Kinder, Familie, Detektivspiel, Schnitzeljagd" />
-    <meta name="robots" content="index, follow" />
-    <meta name="theme-color" content="#E9E2D0" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
+    <!-- Beschreibung: natürlich & konsistent -->
+    <meta name="description" content="Kiezjagd: Die Schnitzeljagd mit Rätseln für Familien & Kinder in Berlin. Entdeckt euren Kiez neu – einfach im Browser starten." />
+    <!-- keywords ist veraltet, daher entfernt -->
+    <meta name="robots" content="index, follow" />
+
+    <!-- Theme / App -->
+    <meta name="theme-color" content="#E9E2D0" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Kiezjagd" />
+
+    <!-- Manifest (Dateiname passt zur Verlinkung) -->
+    <link rel="manifest" href="/manifest.webmanifest" />
 
     <!-- Favicon -->
     <link rel="icon" href="/favicon.ico" type="image/x-icon" />
@@ -20,37 +30,64 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32x32.png" />
     <link rel="icon" type="image/png" sizes="48x48" href="/icons/icon-48x48.png" />
 
-    <!-- Apple / iOS -->
+    <!-- Apple / iOS Icons -->
     <link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120x120.png" />
     <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png" />
     <link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167x167.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180x180.png" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="Kiezjagd" />
 
-    <!-- Android / PWA -->
-    <meta name="theme-color" content="#4CAF50" />
-    <link rel="manifest" href="/manifest.webmanifest" />
-
-    <!-- Open Graph / Facebook -->
+    <!-- Open Graph -->
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="Kiezjagd – Das beste Rätselspiel im Kiez" />
-    <meta property="og:description" content="Entdecke spannende Rätsel in deinem Kiez und werde zum Meisterdetektiv!" />
-    <meta property="og:image" content="https://www.kiezjagd.de/logo.svg" />
+    <meta property="og:title" content="Kiezjagd – Das Rätselspiel in deinem Kiez" />
+    <meta property="og:description" content="Die Schnitzeljagd mit Rätseln für Familien & Kinder in Berlin. Entdeckt euren Kiez neu – direkt im Browser starten." />
     <meta property="og:url" content="https://www.kiezjagd.de/" />
+    <!-- Wichtig: echtes 1200×630 JPG/PNG im public/og/ -->
+    <meta property="og:image" content="https://www.kiezjagd.de/og/kiezjagd-1200x630.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="de_DE" />
 
-    <!-- Twitter Cards -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Kiezjagd – Das beste Rätselspiel im Kiez" />
-    <meta name="twitter:description" content="Entdecke spannende Rätsel in deinem Kiez und werde zum Meisterdetektiv!" />
-    <meta name="twitter:image" content="https://www.kiezjagd.de/logo.svg" />
+
+
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context":"https://schema.org",
+      "@type":"Organization",
+      "name":"Kiezjagd",
+      "url":"https://www.kiezjagd.de/",
+      "logo":"https://www.kiezjagd.de/logo.png",
+      "sameAs":[
+        "https://www.instagram.com/Kiezjagd"
+      ]
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context":"https://schema.org",
+      "@type":"WebSite",
+      "url":"https://www.kiezjagd.de/",
+      "name":"Kiezjagd"
+    }
+    </script>
   </head>
 
   <body>
     <noscript>
-      <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
+      <strong>Es tut uns leid, aber diese Website funktioniert nur mit aktiviertem JavaScript. Bitte aktiviere JavaScript, um fortzufahren.</strong>
+      <!-- Minimaler Fallback-Content, damit Crawler & Nutzer etwas sehen -->
+      <section>
+        <h1>Kiezjagd – Interaktive Abenteuer in Berlin</h1>
+        <p>Erkundet euren Kiez mit kindgerechten Rätseln – direkt im Browser startklar.</p>
+        <ul>
+          <li><a href="/spiel/maerchen-codex">Kiezjagd „Märchen-Codex“</a></li>
+          <li><a href="/spiel/das-geheime-tor">Kiezjagd „Das geheime Tor“</a></li>
+          <li><a href="/spiel/bunten-kugeln">Kiezjagd „Bunte Kugeln“</a></li>
+          <li><a href="/spiel/feen-ausbildung">Kiezjagd „Feen-Ausbildung“</a></li>
+        </ul>
+      </section>
     </noscript>
+
     <div id="app"></div>
     <!-- built files will be auto injected -->
   </body>
