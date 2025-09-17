@@ -51,7 +51,7 @@
       "puppeteer": "24.10.2"
     },
     "puppeteer": "24.10.2"
-  },
+  }, 
   "eslintConfig": {
     "root": true,
     "env": { "node": true },
