@@ -5,10 +5,16 @@ const path = require('path');
 const doPrerender =
   process.env.VUE_APP_PRERENDER === '1' && process.env.NODE_ENV === 'production';
 
-let PrerenderSPAPlugin, Renderer, slugMap;
+// ⬇️ Puppeteer optional laden (erst wenn wirklich prerendert wird)
+let PrerenderSPAPlugin, Renderer, slugMap, puppeteer;
 if (doPrerender) {
   PrerenderSPAPlugin = require('prerender-spa-plugin');
   Renderer = PrerenderSPAPlugin.PuppeteerRenderer;
+  try {
+    puppeteer = require('puppeteer');
+  } catch (e) {
+    puppeteer = null;
+  }
   try {
     slugMap = require('./src/data/slug-map.json'); // oder .js, je nach deinem Setup
   } catch (e) {
@@ -153,7 +159,6 @@ module.exports = {
     // 👉 Prerender aktivieren
     if (doPrerender) {
       const staticRoutes = ['/', '/agb', '/impressum', '/datenschutz'];
-
       const gameRoutes = (slugMap || []).map((e) => `/spiel/${e.slug}`);
 
       config.plugins = config.plugins || [];
@@ -162,11 +167,26 @@ module.exports = {
           staticDir: path.join(__dirname, 'dist'),
           routes: [...staticRoutes, ...gameRoutes],
           renderer: new Renderer({
-            headless: true,
+            // Stabiler Headless-Start in CI (Vercel)
+            headless: 'new',
+            args: [
+              '--no-sandbox',
+              '--disable-setuid-sandbox',
+              '--disable-gpu',
+              '--disable-dev-shm-usage',
+              '--single-process',
+              '--no-zygote'
+            ],
+            // Verwende den von Puppeteer geladenen Chromium
+            executablePath:
+              puppeteer && puppeteer.executablePath ? puppeteer.executablePath() : undefined,
+
+            // Dein bisheriges Setup
             renderAfterDocumentEvent: 'render-event',
-            maxConcurrentRoutes: 4,
-            timeout: 30000,
-             args: ['--no-sandbox', '--disable-setuid-sandbox']
+
+            // CI-freundliche Limits
+            maxConcurrentRoutes: 2,
+            timeout: 60000
           })
         })
       );
