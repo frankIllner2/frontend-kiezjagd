@@ -2,15 +2,12 @@
   "name": "frontend-kiezjagd",
   "version": "0.1.0",
   "private": true,
-  "engines": {
-    "node": "20.x"
-  },
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
   },
-"dependencies": {
+  "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.7.2",
     "@fortawesome/free-brands-svg-icons": "^6.7.2",
     "@fortawesome/free-solid-svg-icons": "^6.7.2",
@@ -34,19 +31,32 @@
     "@vue/cli-plugin-eslint": "~5.0.0",
     "@vue/cli-plugin-pwa": "~5.0.0",
     "@vue/cli-service": "~5.0.0",
-    "@prerenderer/webpack-plugin": "5.3.10",
-    "@prerenderer/renderer-jsdom": "1.1.9",
     "babel-eslint": "^10.1.0",
     "css-loader": "^7.1.2",
     "eslint": "^7.32.0",
     "eslint-plugin-vue": "^8.0.3",
     "mini-css-extract-plugin": "^2.9.2",
+    "prerender-spa-plugin": "^3.4.0",
     "sass": "^1.83.4",
     "sass-loader": "^16.0.4",
     "style-loader": "^4.0.0",
     "vue-loader": "^17.4.2",
     "webpack": "^5.97.1",
     "webpack-cli": "^6.0.1"
+  },
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "node": true
+    },
+    "extends": [
+      "plugin:vue/vue3-essential",
+      "eslint:recommended"
+    ],
+    "parserOptions": {
+      "parser": "@babel/eslint-parser"
+    },
+    "rules": {}
   },
   "browserslist": [
     "> 1%",
