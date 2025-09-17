@@ -7,8 +7,15 @@ const doPrerender =
 let PrerenderSPAPlugin, JSDOMRenderer, slugMap;
 if (doPrerender) {
   PrerenderSPAPlugin = require('prerender-spa-plugin');
-  // wichtig: Default-Export nehmen
-  ({ default: JSDOMRenderer } = require('@prerenderer/renderer-jsdom'));
+
+  // ✅ Defensiver Import: funktioniert mit ESM & CJS
+  try {
+    const jsdomModule = require('@prerenderer/renderer-jsdom');
+    JSDOMRenderer = jsdomModule.default || jsdomModule;
+  } catch (e) {
+    JSDOMRenderer = null;
+  }
+
   try {
     slugMap = require('./src/data/slug-map.json'); // oder .js
   } catch (e) {
@@ -17,7 +24,7 @@ if (doPrerender) {
 }
 
 module.exports = {
-  // ✅ PWA-Konfiguration bleibt wie gehabt
+  // ✅ PWA-Konfiguration
   pwa: {
     name: 'Kiezjagd',
     themeColor: '#E9E2D0',
@@ -134,17 +141,16 @@ module.exports = {
     if (doPrerender) {
       const staticRoutes = ['/', '/agb', '/impressum', '/datenschutz'];
       const gameRoutes = (slugMap || []).map(e => `/spiel/${e.slug}`);
+      const routes = [...staticRoutes, ...gameRoutes];
 
       config.plugins = config.plugins || [];
       config.plugins.push(
         new PrerenderSPAPlugin({
           staticDir: path.join(__dirname, 'dist'),
-          routes: [...staticRoutes, ...gameRoutes],
+          routes,
           renderer: new JSDOMRenderer({
-            // wir warten wie bisher auf dein "render-event"
-            renderAfterDocumentEvent: 'render-event',
-            // Fallback: wenn du willst, zusätzlich eine fixe Wartezeit:
-            // renderAfterTime: 2000
+            renderAfterDocumentEvent: 'render-event'
+            // optional: renderAfterTime: 2000
           })
         })
       );

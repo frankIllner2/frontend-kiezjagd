@@ -2,7 +2,9 @@
   "name": "frontend-kiezjagd",
   "version": "0.1.0",
   "private": true,
-  "engines": { "node": "20.x" },
+  "engines": {
+    "node": "20.x"
+  },
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
@@ -22,13 +24,13 @@
     "vue": "^3.2.13",
     "vue-meta": "^3.0.0-alpha.2",
     "vue-router": "^4.5.0",
-    "vuedraggable": "^4.1.0",
-    "@prerenderer/renderer-jsdom": "^1.1.7"
+    "vuedraggable": "^4.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.26.0",
     "@babel/eslint-parser": "^7.12.16",
     "@babel/preset-env": "^7.26.0",
+    "@prerenderer/renderer-jsdom": "^1.1.9",
     "@vue/cli-plugin-babel": "~5.0.0",
     "@vue/cli-plugin-eslint": "~5.0.0",
     "@vue/cli-plugin-pwa": "~5.0.0",
@@ -46,5 +48,10 @@
     "webpack": "^5.97.1",
     "webpack-cli": "^6.0.1"
   },
-  "browserslist": ["> 1%", "last 2 versions", "not dead", "not ie 11"]
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead",
+    "not ie 11"
+  ]
 }
