@@ -165,7 +165,8 @@ module.exports = {
             headless: true,
             renderAfterDocumentEvent: 'render-event',
             maxConcurrentRoutes: 4,
-            timeout: 30000
+            timeout: 30000,
+             args: ['--no-sandbox', '--disable-setuid-sandbox']
           })
         })
       );
