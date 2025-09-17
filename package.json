@@ -2,9 +2,7 @@
   "name": "frontend-kiezjagd",
   "version": "0.1.0",
   "private": true,
-  "engines": {
-    "node": "20.x"
-  },
+  "engines": { "node": "20.x" },
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
@@ -20,13 +18,12 @@
     "animate.css": "^4.1.1",
     "axios": "^1.7.9",
     "core-js": "^3.8.3",
-     "puppeteer-core": "^22.10.0",
+    "puppeteer": "^22.10.0",
     "register-service-worker": "^1.7.2",
     "vue": "^3.2.13",
     "vue-meta": "^3.0.0-alpha.2",
     "vue-router": "^4.5.0",
-    "vuedraggable": "^4.1.0",
-    "@sparticuz/chromium": "^129.0.0"
+    "vuedraggable": "^4.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.26.0",
@@ -51,22 +48,10 @@
   },
   "eslintConfig": {
     "root": true,
-    "env": {
-      "node": true
-    },
-    "extends": [
-      "plugin:vue/vue3-essential",
-      "eslint:recommended"
-    ],
-    "parserOptions": {
-      "parser": "@babel/eslint-parser"
-    },
+    "env": { "node": true },
+    "extends": ["plugin:vue/vue3-essential", "eslint:recommended"],
+    "parserOptions": { "parser": "@babel/eslint-parser" },
     "rules": {}
   },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions",
-    "not dead",
-    "not ie 11"
-  ]
+  "browserslist": ["> 1%", "last 2 versions", "not dead", "not ie 11"]
 }

@@ -1,33 +1,34 @@
 /* eslint-disable */
 const path = require('path');
 
+// 👉 Prerender nur, wenn ENV aktiv ist und wir im Production-Build sind
 const doPrerender =
   process.env.VUE_APP_PRERENDER === '1' && process.env.NODE_ENV === 'production';
 
-let PrerenderSPAPlugin, Renderer, slugMap, chromium, puppeteerCore;
+let PrerenderSPAPlugin, Renderer, slugMap, puppeteer;
 if (doPrerender) {
   PrerenderSPAPlugin = require('prerender-spa-plugin');
   Renderer = PrerenderSPAPlugin.PuppeteerRenderer;
   try {
-    // Serverless-/Vercel-taugliches Chromium + Puppeteer Core
-    chromium = require('@sparticuz/chromium');
-    puppeteerCore = require('puppeteer-core');
+    puppeteer = require('puppeteer'); // ⬅️ volles Puppeteer
   } catch (e) {
-    chromium = null;
-    puppeteerCore = null;
+    puppeteer = null;
   }
   try {
-    slugMap = require('./src/data/slug-map.json');
+    slugMap = require('./src/data/slug-map.json'); // oder .js
   } catch (e) {
     slugMap = [];
   }
 }
 
 module.exports = {
+  // ✅ PWA-Konfiguration
   pwa: {
     name: 'Kiezjagd',
     themeColor: '#E9E2D0',
     manifestPath: 'manifest.webmanifest',
+
+    // Manifest-Inhalt überschreiben
     manifestOptions: {
       name: 'Kiezjagd',
       short_name: 'Kiezjagd',
@@ -50,6 +51,8 @@ module.exports = {
         { src: '/icons/icon-512x512-maskable.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
       ]
     },
+
+    // Statische Icons im Head angleichen
     iconPaths: {
       favicon32: 'icons/icon-32x32.png',
       favicon16: 'icons/icon-16x16.png',
@@ -57,19 +60,27 @@ module.exports = {
       maskIcon: null,
       msTileImage: 'icons/icon-180x180.png'
     },
+
     workboxOptions: {
       skipWaiting: true,
       clientsClaim: true,
+
+      // SPA-Routing: index.html als Fallback, aber NIE für API/Assets
       navigateFallback: 'index.html',
       navigateFallbackDenylist: [
         new RegExp('^/_'),
         new RegExp('^/api'),
         /\.(?:png|jpg|jpeg|svg|gif|webp|ico|css|js|map|json|woff2?|ttf|eot)$/
       ],
+
       exclude: [/\.map$/, /asset-manifest\.json$/],
+
       runtimeCaching: [
+        // API
         {
-          urlPattern: new RegExp(`^${process.env.VUE_APP_API_BASE_URL || ''}/api/`),
+          urlPattern: new RegExp(
+            `^${process.env.VUE_APP_API_BASE_URL || ''}/api/`
+          ),
           handler: 'NetworkFirst',
           options: {
             cacheName: 'api-cache',
@@ -77,14 +88,18 @@ module.exports = {
             cacheableResponse: { statuses: [0, 200] }
           }
         },
+        // Skripte & Styles
         {
-          urlPattern: ({ request }) => request.destination === 'script' || request.destination === 'style',
+          urlPattern: ({ request }) =>
+            request.destination === 'script' ||
+            request.destination === 'style',
           handler: 'StaleWhileRevalidate',
           options: {
             cacheName: 'assets',
             cacheableResponse: { statuses: [0, 200] }
           }
         },
+        // Bilder
         {
           urlPattern: ({ request }) => request.destination === 'image',
           handler: 'CacheFirst',
@@ -94,6 +109,7 @@ module.exports = {
             rangeRequests: true
           }
         },
+        // HTML-Navigationen
         {
           urlPattern: ({ request }) => request.mode === 'navigate',
           handler: 'NetworkFirst',
@@ -139,6 +155,7 @@ module.exports = {
       alias: { '@': path.resolve(__dirname, 'src') }
     };
 
+    // 👉 Prerender aktivieren
     if (doPrerender) {
       const staticRoutes = ['/', '/agb', '/impressum', '/datenschutz'];
       const gameRoutes = (slugMap || []).map((e) => `/spiel/${e.slug}`);
@@ -149,10 +166,9 @@ module.exports = {
           staticDir: path.join(__dirname, 'dist'),
           routes: [...staticRoutes, ...gameRoutes],
           renderer: new Renderer({
-            // 👉 WICHTIG: Chromium/Flags für Vercel
+            // Stabiler Headless-Start in CI (Vercel)
             headless: 'new',
-            executablePath: chromium && chromium.executablePath ? chromium.executablePath() : undefined,
-            args: chromium && chromium.args ? chromium.args : [
+            args: [
               '--no-sandbox',
               '--disable-setuid-sandbox',
               '--disable-gpu',
@@ -160,9 +176,14 @@ module.exports = {
               '--single-process',
               '--no-zygote'
             ],
-            // Falls @sparticuz/chromium nicht greift, fallback auf puppeteer-core
-            // (Renderer nutzt intern puppeteer-launcher; wir geben nur Pfad/Args vor)
+            // wenn verfügbar, explizit den von Puppeteer geladenen Chromium nehmen
+            executablePath:
+              puppeteer && puppeteer.executablePath ? puppeteer.executablePath() : undefined,
+
+            // dein bestehendes Setup
             renderAfterDocumentEvent: 'render-event',
+
+            // CI-freundliche Limits
             maxConcurrentRoutes: 1,
             timeout: 90000
           })
