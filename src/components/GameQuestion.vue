@@ -12,11 +12,11 @@
 
     <p v-if="currentSalutation">
       {{ currentSalutation }} <span v-html=" question.question"></span>
-      <SpeechButton v-if="gameType === 'Mini'" :text="fullQuestionText" />
+      <SpeechButton v-if="gameType === 'Mini' || gameType === 'Medi'" :text="fullQuestionText" />
     </p>
     <p v-else>
       <span v-html=" question.question"></span>
-      <SpeechButton v-if="gameType === 'Mini'" :text="fullQuestionText" />
+      <SpeechButton v-if="gameType === 'Mini' || gameType === 'Medi'" :text="fullQuestionText" />
     </p>
 
     <!-- Frage mit Bild -->
@@ -34,7 +34,7 @@
       <input v-model="userAnswer" maxlength="35" name="Antwort" placeholder="Deine Antwort" />
     </div>
 
-    <!-- Einzelne Auswahl (vorher Mehrfachauswahl) -->
+    <!-- Einzelne Auswahl (Single Choice) -->
     <div v-else-if="question.type === 'multiple'" class="single-choice">
       <div
         v-for="(option, index) in question.options"
@@ -42,6 +42,9 @@
         class="option-card"
         :class="{ selected: selectedOptions === index }"
         @click="toggleOption(index)"
+        role="button"
+        tabindex="0"
+        @keyup.enter="toggleOption(index)"
       >
         <!-- Text -->
         <span v-if="option.type === 'text'" class="only-text">
@@ -61,12 +64,12 @@
           <SpeechButton v-if="gameType === 'Mini' && option.text" :text="option.text" />
         </span>
 
-        <!-- NEU: Nur Audio -->
+        <!-- Nur Audio -->
         <span v-else-if="option.type === 'audio'" class="only-audio">
           <audio :src="option.audioUrl" controls />
         </span>
 
-        <!-- Optional: Text + Audio -->
+        <!-- Text + Audio -->
         <span v-else-if="option.type === 'text-audio'" class="text-audio">
           <strong>{{ option.text }}</strong>
           <audio :src="option.audioUrl" controls />
@@ -74,24 +77,30 @@
       </div>
     </div>
 
-      <!-- Standard-Antwort Button -->
-      <button
-        v-if="!['anweisung', 'next'].includes(question.type)"
-        class="btn btn--secondary"
-        @click="submitAnswer"
-      >
-        Antwort senden
-      </button>
+    <!-- Hinweis bei fehlender Antwort -->
+    <p v-if="attemptedSubmit && !isAnswerReady" class="form-hint form-hint--error">
+      Du hast noch keine Antwort ausgewählt.
+    </p>
 
-      <!-- Weiter-Button für "next" -->
-      <button
-        v-else-if="question.type === 'next'"
-        class="btn btn--primary"
-        @click="$emit('submitAnswer', { isCorrect: true })"
-      >
-        Weiter
-      </button>
+    <!-- Standard-Antwort Button -->
+    <button
+      v-if="!['anweisung', 'next'].includes(question.type)"
+      class="btn btn--secondary"
+      :disabled="!isAnswerReady"
+      :aria-disabled="!isAnswerReady"
+      @click="submitAnswer"
+    >
+      Antwort senden
+    </button>
 
+    <!-- Weiter-Button für "next" -->
+    <button
+      v-else-if="question.type === 'next'"
+      class="btn btn--primary"
+      @click="$emit('submitAnswer', { isCorrect: true })"
+    >
+      Weiter
+    </button>
   </div>
 </template>
 
@@ -111,10 +120,11 @@ export default {
   data() {
     return {
       userAnswer: "",
-      selectedOptions: null,
+      selectedOptions: -1,       // -1 = nichts gewählt
       salutations: ["Hallo", "Hey"],
       players: [],
-      currentSalutation: ""
+      currentSalutation: "",
+      attemptedSubmit: false     // zeigt Hinweis an
     };
   },
   mounted() {
@@ -137,6 +147,16 @@ export default {
       return this.currentSalutation
         ? `${this.currentSalutation} ${this.question.question}`
         : this.question.question;
+    },
+    // prüft, ob Antwort bereit ist
+    isAnswerReady() {
+      if (this.question.type === "text") {
+        return this.userAnswer.trim().length > 0;
+      }
+      if (this.question.type === "multiple") {
+        return this.selectedOptions !== -1 && this.selectedOptions !== null;
+      }
+      return true;
     }
   },
   methods: {
@@ -146,7 +166,6 @@ export default {
         this.players = JSON.parse(savedPlayers);
         console.log("✅ Spieler geladen:", this.players);
       } else if (Array.isArray(this.playerNames) && this.playerNames.length > 0) {
-        // einmalige zufällige Rotation speichern
         const shuffled = this.shuffleArray([...this.playerNames]);
         this.players = shuffled;
         localStorage.setItem("playerNames", JSON.stringify(shuffled));
@@ -184,8 +203,15 @@ export default {
     },
     toggleOption(index) {
       this.selectedOptions = this.selectedOptions === index ? -1 : index;
+      if (this.selectedOptions !== -1) this.attemptedSubmit = false;
     },
     submitAnswer() {
+      if (!this.isAnswerReady) {
+        this.attemptedSubmit = true;
+        return;
+      }
+
+      this.attemptedSubmit = false;
       let isCorrect = false;
 
       if (this.question.type === "text") {
@@ -215,3 +241,20 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+.form-hint {
+  margin: .75rem 0 0;
+  font-size: 0.95rem;
+}
+.form-hint--error {
+  color: #b00020;
+}
+.option-card.selected {
+  outline: 2px solid currentColor;
+}
+button[disabled] {
+  opacity: .5;
+  cursor: not-allowed;
+}
+</style>

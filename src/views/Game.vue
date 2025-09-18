@@ -16,7 +16,7 @@
         <div v-html="prehistory"></div>
 
         <!-- Sprachausgabe für Mini-Spieltyp -->
-        <SpeechButton v-if="gameType === 'Mini'" :text="prehistory" />
+        <SpeechButton v-if="gameType === 'Mini' || gameType === 'Medi'" :text="prehistory" />
 
         <button @click="openForm" class="btn btn--primary">Los geht’s!</button>
       </div>
@@ -97,7 +97,7 @@
         <div class="result">
           <div v-if="infohistory" class="info-container">
             <div v-html="infohistory"></div>
-            <SpeechButton v-if="gameType === 'Mini'" :text="infohistory" />
+            <SpeechButton v-if="gameType === 'Mini' || gameType === 'Medi'" :text="infohistory" />
           </div>
           <h3>Spiel erfolgreich abgeschlossen!</h3>
           <div class="result-content">
