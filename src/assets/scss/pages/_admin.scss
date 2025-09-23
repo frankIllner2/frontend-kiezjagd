@@ -82,7 +82,7 @@
     /* Inhaltsbereich */
     .content {
       width: 100%;
-      max-width: 900px;
+      max-width: 1036px;
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
@@ -183,9 +183,9 @@
       margin-top: 15px;
       display: flex;
       gap: 10px;
-      justify-content: center;
+      justify-content: space-between;
       button {
-        padding: 0px 15px;
+        padding: 12px;
       }
     }
 
