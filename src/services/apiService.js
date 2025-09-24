@@ -22,24 +22,53 @@ function handleApiError(error, methodName) {
 
 // ✅ Hilfsfunktion zur Umwandlung der Dauer in Sekunden
 function convertDurationToSeconds(duration) {
-  const match = duration.match(/(\d+)h\s(\d+)m\s(\d+)s/);
+  const match = duration?.match?.(/(\d+)h\s(\d+)m\s(\d+)s/) || null;
   if (match) {
     const hours = parseInt(match[1], 10) || 0;
     const minutes = parseInt(match[2], 10) || 0;
     const seconds = parseInt(match[3], 10) || 0;
     return hours * 3600 + minutes * 60 + seconds;
   }
-  return 0; // Fallback, falls das Format nicht korrekt ist
+  return 0; // Fallback
 }
 
-// ✅ Generische Methode für CRUD-Operationen
+// ✅ performRequest so anpassen, dass GET ≙ params unterstützt
 async function performRequest(method, url, data = null) {
   try {
-    const response = await axiosInstance({ method, url, data });
+    const m = String(method || 'get').toLowerCase();
+
+    if (m === 'get') {
+      // Wenn data ein Objekt ist, als Query-Params verwenden
+      const config = data && typeof data === 'object'
+        ? { params: data }
+        : undefined;
+      const response = await axiosInstance.get(url, config);
+      return response.data;
+    }
+
+    // Für alle anderen Methoden standardmäßig body in data
+    const response = await axiosInstance({ method: m, url, data });
     return response.data;
   } catch (error) {
     handleApiError(error, method);
   }
+}
+
+// ✅ Normalizer nur für Orders (Pagination/Objekt-Shape)
+function normalizeOrdersResponse(out) {
+  // Falls performRequest bereits .data returned, ist out das Payload
+  if (Array.isArray(out)) {
+    // Abwärtskompatibel: alte Route, die ein Array zurückgab
+    return { items: out, total: out.length, page: 1, pages: 1 };
+  }
+  if (out && typeof out === 'object') {
+    const items = Array.isArray(out.items) ? out.items : [];
+    const total = Number.isFinite(out.total) ? out.total : items.length;
+    const page = Number.isFinite(out.page) ? out.page : 1;
+    const pages = Number.isFinite(out.pages) ? out.pages : Math.max(Math.ceil(total / (out.limit || items.length || 1)), 1);
+    return { items, total, page, pages };
+  }
+  return { items: [], total: 0, page: 1, pages: 1 };
 }
 
 // ✅ API-Service-Objekt
@@ -51,7 +80,7 @@ export const apiService = {
 
   // alle Spiele abrufen für Admin
   fetchAllGames() {
-    return performRequest("get", "/games?admin=true"); // Spezieller Admin-Parameter
+    return performRequest("get", "/games", { admin: true }); // ?admin=true
   },
 
   // Zwei zufällige Spiele abrufen
@@ -63,7 +92,8 @@ export const apiService = {
   fetchGameById(encryptedId, isAdmin = false) {
     console.log("die Id:" + encryptedId);
     if (!encryptedId) throw new Error('⚠️ GameId darf nicht leer sein.');
-    const adminParam = isAdmin ? "?admin=true" : ""; // Jetzt wird isAdmin definiert
+    // Hier bleibe ich bei Query-String, damit nichts bricht
+    const adminParam = isAdmin ? "?admin=true" : "";
     return performRequest('get', `/games/${encryptedId}${adminParam}`);
   },
 
@@ -104,9 +134,13 @@ export const apiService = {
     return performRequest('post', `/games/${encryptedId}/questions`, question);
   },
 
-  // alle Bestellungen
-  fetchOrders() {
-    return performRequest('get', "/order/orders");
+  // ✅ Alle Bestellungen (mit Pagination/Suche/Sortierung)
+  // params: { page, limit, search, searchBy, sort }
+  //   - searchBy: 'email' | 'gameId' | 'date'
+  //   - sort: z.B. '-createdAt' (neueste zuerst)
+  async fetchOrders(params = {}) {
+    const raw = await performRequest('get', '/order/orders', params);
+    return normalizeOrdersResponse(raw);
   },
 
   // Frage aktualisieren
@@ -132,8 +166,8 @@ export const apiService = {
     if (!encryptedId) throw new Error('⚠️ encryptedId darf nicht leer sein.');
     return performRequest('get', `/games/${encryptedId}/ranking`)
       .then(ranking => {
-        if (sort) {
-          return ranking.sort((a, b) => {
+        if (sort && Array.isArray(ranking)) {
+          return ranking.slice().sort((a, b) => {
             const durationA = convertDurationToSeconds(a.duration);
             const durationB = convertDurationToSeconds(b.duration);
             return durationA - durationB;
@@ -155,6 +189,7 @@ export const apiService = {
     if (!teamName || !gameId) {
       throw new Error('Teamname und Spiel-ID sind erforderlich.');
     }
+    // hier bleiben wir beim Query-String (bewährt)
     return performRequest('get', `/results/check?teamName=${encodeURIComponent(teamName)}&gameId=${encodeURIComponent(gameId)}`);
   },
 
@@ -182,7 +217,6 @@ export const apiService = {
 
   // Standortprüfung
   verifyLocation(encryptedId, questionId, userCoordinates) {
-
     if (!encryptedId || !questionId || !userCoordinates) {
       throw new Error('⚠️ encryptedId, questionId und userCoordinates sind erforderlich.');
     }
@@ -256,11 +290,11 @@ export const apiService = {
   },
 
   // ================================
-  // Admin Newsletter (mini) – NEU
+  // Admin Newsletter (mini)
   // ================================
   fetchNewsletter({ q = "", only = "all" } = {}) {
-    const qs = `?q=${encodeURIComponent(q)}&only=${only}`;
-    return performRequest("get", `/admin-newsletter${qs}`);
+    // Hier nutze ich GET+params statt Query-String
+    return performRequest("get", "/admin-newsletter", { q, only });
   },
 
   sendNewsletter(payload) {
