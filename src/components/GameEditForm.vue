@@ -6,9 +6,8 @@
           <font-awesome-icon icon="arrow-left" /> Zu allen Spielen
         </router-link>
       </div>
-      <h2>Spiel bearbeiten</h2>
+      <h3>Spiel bearbeiten</h3>
       <section class="edit-section">
-        <h3>Allgemeine Informationen</h3>
         <form @submit.prevent="updateGame" class="form-grid">
           <div class="form-row">
             <div class="form-group">

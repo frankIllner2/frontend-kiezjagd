@@ -45,9 +45,11 @@
     }
       
     .logout {
-      display: inline-flex;
-      flex-direction: column;
-      margin: 2em 0 4em;
+    display: flex;
+    flex-direction: row;
+    margin: 2em 0 4em;
+    justify-content: space-between;
+    width: 1024px;
     }
 
     /* Allgemeine Container-Stile */

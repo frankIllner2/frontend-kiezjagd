@@ -1,18 +1,39 @@
 <template>
   <div class="admin-container">
     <div class="logout">
-      <h2>🔒 Admin-Bereich</h2>
+      <h3>Kiezjagd-Admin</h3>
       <button class="btn btn--logout" @click="logout">Logout</button>
       <router-view />
     </div>
 
     <!-- Top-Navigation -->
     <nav class="topbar">
-      <button @click="currentView = 'list'">Alle Spiele</button>
-      <button @click="currentView = 'new'">Neues Spiel</button>
-      <button @click="currentView = 'orders'">Bestellungen</button>
-      <button @click="currentView = 'newsletter'">Newsletter</button>
+      <button 
+        @click="currentView = 'list'" 
+        :class="{ active: currentView === 'list' }"
+      >
+        Alle Spiele
+      </button>
+      <button 
+        @click="currentView = 'new'" 
+        :class="{ active: currentView === 'new' }"
+      >
+        Neues Spiel
+      </button>
+      <button 
+        @click="currentView = 'orders'" 
+        :class="{ active: currentView === 'orders' }"
+      >
+        Bestellungen
+      </button>
+      <button 
+        @click="currentView = 'newsletter'" 
+        :class="{ active: currentView === 'newsletter' }"
+      >
+        Newsletter
+      </button>
     </nav>
+
 
     <!-- Inhaltsbereich -->
     <section class="content">
@@ -38,13 +59,7 @@
             <h3 class="game-card-title">{{ game.name }}</h3>
 
             <div class="game-card-header-actions">
-              <button
-                class="icon-btn"
-                title="Spiel kopieren"
-                @click.stop="copyGame(game._id)"
-              >
-                📋
-              </button>
+    
               <span class="toggle-icon" :title="expandedId === game._id ? 'Zuklappen' : 'Aufklappen'">
                 {{ expandedId === game._id ? '−' : '+' }}
               </span>
@@ -97,10 +112,17 @@
                 >
                   Zum Spiel
                 </router-link>
-                <button @click.stop="editGame(game)"><font-awesome-icon icon="edit" /></button>
+                <button @click.stop="editGame(game)"><font-awesome-icon icon="edit" title="bearbeiten" /></button>
                 <button @click.stop="deleteGame(game._id)">
-                  <font-awesome-icon icon="trash" />
+                  <font-awesome-icon icon="trash" title="löschen" />
                 </button>
+                          <button
+                class="icon-btn"
+                title="Spiel kopieren"
+                @click.stop="copyGame(game._id)"
+              >
+                📋
+              </button>
               </div>
             </div>
           </transition>
@@ -306,20 +328,27 @@ export default {
 }
 
 /* Topbar horizontal */
-.topbar {
-  display: flex;
-  gap: 12px;
-  border-bottom: 1px solid #ddd;
-  padding-bottom: 8px;
-}
 .topbar button {
   background: #f7f7f7;
   border: 1px solid #ccc;
   border-radius: 6px;
   padding: 6px 12px;
   cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+  margin: 0 5px;
 }
-.topbar button:hover { background: #eee; }
+
+.topbar button:hover {
+  background: #eee;
+}
+
+.topbar button.active {
+  background: #355b4c;       /* deine Primärfarbe */
+  border-color: #355b4c;
+  color: #fff;
+  font-weight: 600;
+}
+
 
 /* Cards nebeneinander: Flex statt Grid → unabhängige Höhen */
 .game-list {
@@ -371,11 +400,9 @@ export default {
   border: none;
   background: transparent;
   cursor: pointer;
-  font-size: 1rem;
-  padding: 4px 6px;
-  position: absolute;
-  top: 0;
-  left: 0;
+  font-size: 1.4rem;
+  padding: 0 !important;
+
 }
 
 .toggle-icon {

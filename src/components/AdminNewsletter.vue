@@ -18,7 +18,11 @@
 
       <div class="actions">
         <button class="btn" @click="openComposer()">E-Mail verfassen</button>
-        <button class="btn outline" @click="openComposer(true)" :disabled="!selected.length">
+        <button
+          class="btn outline"
+          @click="openComposer(true)"
+          :disabled="!selected.length"
+        >
           An Auswahl senden
         </button>
       </div>
@@ -28,13 +32,13 @@
       <table class="table">
         <thead>
           <tr>
-            <th style="width:44px;">
+            <th style="width: 44px">
               <input type="checkbox" :checked="allChecked" @change="toggleAll" />
             </th>
             <th>E-Mail</th>
             <th>Status</th>
             <th>Seit</th>
-            <th style="width:240px;">Aktionen</th>
+            <th style="width: 240px">Aktionen</th>
           </tr>
         </thead>
         <tbody>
@@ -48,8 +52,7 @@
             </td>
             <td>{{ fmt(s.subscribedAt) }}</td>
             <td class="row-actions">
-              <button class="btn tiny"
-                @click="toggle(s)">
+              <button class="btn tiny" @click="toggle(s)">
                 {{ s.isUnsubscribed ? "Reaktivieren" : "Abmelden" }}
               </button>
               <button class="btn tiny danger" @click="del(s)">Löschen</button>
@@ -63,24 +66,38 @@
     </div>
 
     <!-- Composer -->
-    <div v-if="showComposer" class="modal" @click.self="showComposer=false">
+    <div v-if="showComposer" class="modal" @click.self="showComposer = false">
       <div class="modal-content">
         <h3>E-Mail verfassen</h3>
 
         <div class="grid">
           <label class="field">
             <span>Betreff</span>
-            <input v-model="subject" class="input" placeholder="z. B. Neuigkeiten von Kiezjagd" />
+            <input
+              v-model="subject"
+              class="input"
+              placeholder="z. B. Neuigkeiten von Kiezjagd"
+            />
           </label>
 
           <label class="field">
             <span>HTML-Inhalt</span>
-            <textarea v-model="html" rows="7" class="textarea" placeholder="HTML ({{email}} optional)"></textarea>
+            <textarea
+              v-model="html"
+              rows="7"
+              class="textarea"
+              placeholder="HTML ({{email}} optional)"
+            ></textarea>
           </label>
 
           <label class="field">
             <span>Text (Fallback)</span>
-            <textarea v-model="text" rows="3" class="textarea" placeholder="Reiner Text (optional)"></textarea>
+            <textarea
+              v-model="text"
+              rows="3"
+              class="textarea"
+              placeholder="Reiner Text (optional)"
+            ></textarea>
           </label>
         </div>
 
@@ -91,13 +108,17 @@
           </div>
 
           <div class="send">
-            <button class="btn" @click="sendSelected" :disabled="!subject || !selected.length">
+            <button
+              class="btn"
+              @click="sendSelected"
+              :disabled="!subject || !selected.length"
+            >
               An Auswahl
             </button>
             <button class="btn accent" @click="sendAll" :disabled="!subject">
               An alle Abonnenten
             </button>
-            <button class="btn ghost" @click="showComposer=false">Abbrechen</button>
+            <button class="btn ghost" @click="showComposer = false">Abbrechen</button>
           </div>
         </div>
 
@@ -124,58 +145,85 @@ const text = ref("");
 const testEmail = ref("");
 const status = ref("");
 
-const allChecked = computed(() => subs.value.length && selected.value.length === subs.value.length);
-function fmt(d){ return d ? new Date(d).toLocaleString() : ""; }
+const allChecked = computed(
+  () => subs.value.length && selected.value.length === subs.value.length
+);
+function fmt(d) {
+  return d ? new Date(d).toLocaleString() : "";
+}
 
-async function load(){
+async function load() {
   subs.value = await apiService.fetchNewsletter({ q: q.value, only: only.value });
   selected.value = [];
 }
-function toggleAll(e){ selected.value = e.target.checked ? subs.value.map(s=>s._id) : []; }
-async function toggle(s){
+function toggleAll(e) {
+  selected.value = e.target.checked ? subs.value.map((s) => s._id) : [];
+}
+async function toggle(s) {
   if (s.isUnsubscribed) await apiService.newsletterReactivate(s._id);
   else await apiService.newsletterUnsubscribe(s._id);
   await load();
 }
-async function del(s){
+async function del(s) {
   if (!confirm("Wirklich löschen?")) return;
   await apiService.newsletterDelete(s._id);
   await load();
 }
-function openComposer(useSelection=false){
+function openComposer(useSelection = false) {
   if (useSelection && !selected.value.length) return alert("Keine Empfänger ausgewählt.");
-  showComposer.value = true; status.value = "";
+  showComposer.value = true;
+  status.value = "";
 }
-async function sendTest(){
+async function sendTest() {
   if (!testEmail.value) return alert("Test-Adresse fehlt.");
   status.value = "Sende Test…";
   try {
-    const res = await apiService.sendNewsletter({ testEmail: testEmail.value, subject: subject.value || "(Test)", html: html.value, text: text.value });
+    const res = await apiService.sendNewsletter({
+      testEmail: testEmail.value,
+      subject: subject.value || "(Test)",
+      html: html.value,
+      text: text.value,
+    });
     status.value = JSON.stringify(res, null, 2);
   } catch (e) {
-    const msg = e?.response?.data?.error || e?.response?.data?.message || e.message || "Unbekannter Fehler";
+    const msg =
+      e?.response?.data?.error ||
+      e?.response?.data?.message ||
+      e.message ||
+      "Unbekannter Fehler";
     status.value = "Fehler: " + msg;
   }
 }
-async function sendSelected(){
+async function sendSelected() {
   if (!selected.value.length) return alert("Keine Empfänger.");
   status.value = "Sende an Auswahl…";
   try {
-    const res = await apiService.sendNewsletter({ ids: selected.value, subject: subject.value, html: html.value, text: text.value });
+    const res = await apiService.sendNewsletter({
+      ids: selected.value,
+      subject: subject.value,
+      html: html.value,
+      text: text.value,
+    });
     status.value = JSON.stringify(res, null, 2);
-    showComposer.value = false; await load();
+    showComposer.value = false;
+    await load();
   } catch (e) {
     const msg = e?.response?.data?.error || e?.response?.data?.message || e.message;
     status.value = "Fehler: " + msg;
   }
 }
-async function sendAll(){
+async function sendAll() {
   if (!confirm("An alle Abonnenten senden?")) return;
   status.value = "Sende an alle…";
   try {
-    const res = await apiService.sendNewsletter({ subject: subject.value, html: html.value, text: text.value });
+    const res = await apiService.sendNewsletter({
+      subject: subject.value,
+      html: html.value,
+      text: text.value,
+    });
     status.value = JSON.stringify(res, null, 2);
-    showComposer.value = false; await load();
+    showComposer.value = false;
+    await load();
   } catch (e) {
     const msg = e?.response?.data?.error || e?.response?.data?.message || e.message;
     status.value = "Fehler: " + msg;
@@ -187,9 +235,9 @@ onMounted(load);
 <style lang="scss" scoped>
 /* Deine Farben */
 $primary-text-color: #355b4c; // dunkelgrün
-$secondary-text-color: #FAC227; // gelb
+$secondary-text-color: #fac227; // gelb
 
-$gray-50:  #fafafa;
+$gray-50: #fafafa;
 $gray-100: #f4f4f5;
 $gray-200: #e6e6e7;
 $gray-300: #d4d4d8;
@@ -197,16 +245,18 @@ $gray-400: #a1a1aa;
 
 :root {
   --c-primary: #355b4c;
-  --c-accent:  #FAC227;
-  --c-border:  #e6e6e7;
-  --c-text:    #1f1f1f;
-  --c-muted:   #6b7280;
+  --c-accent: #fac227;
+  --c-border: #e6e6e7;
+  --c-text: #1f1f1f;
+  --c-muted: #6b7280;
 }
 
 .nl-admin {
   display: grid;
   gap: 16px;
   color: var(--c-text);
+  width: 100%;
+  padding: 1em 0 3em;
 }
 
 /* Toolbar */
@@ -236,8 +286,6 @@ $gray-400: #a1a1aa;
   }
 }
 
-
-
 /* Table */
 .table-wrap {
   border: 1px solid var(--c-border);
@@ -264,20 +312,31 @@ $gray-400: #a1a1aa;
 
   tbody {
     tr {
-      &:nth-child(2n) { background: #fff; }
-      &:nth-child(2n+1) { background: #fcfcfc; }
-      &:hover { background: #f9faf9; }
+      &:nth-child(2n) {
+        background: #fff;
+      }
+      &:nth-child(2n + 1) {
+        background: #fcfcfc;
+      }
+      &:hover {
+        background: #f9faf9;
+      }
     }
     td {
       padding: 10px 14px;
       vertical-align: middle;
       border-bottom: 1px solid $gray-100;
     }
-    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
     .row-actions {
-      display: flex; gap: 8px; flex-wrap: wrap;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
       .btn {
         padding: 6px 18px;
+        font-size: 12px;
       }
     }
     .empty {
@@ -301,8 +360,8 @@ $gray-400: #a1a1aa;
   border: 1px solid $gray-300;
   &.ok {
     color: $primary-text-color;
-    border-color: rgba(53,91,76,.35);
-    background: rgba(53,91,76,.08);
+    border-color: rgba(53, 91, 76, 0.35);
+    background: rgba(53, 91, 76, 0.08);
   }
   &.muted {
     color: #6b7280;
@@ -312,9 +371,11 @@ $gray-400: #a1a1aa;
 
 /* Modal */
 .modal {
-  position: fixed; inset: 0;
-  display: grid; place-items: center;
-  background: rgba(0,0,0,.35);
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.35);
   padding: 16px;
   z-index: 50;
 }
@@ -323,15 +384,21 @@ $gray-400: #a1a1aa;
   background: #fff;
   border-radius: 14px;
   border: 1px solid var(--c-border);
-  box-shadow: 0 12px 40px rgba(0,0,0,.12);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
   padding: 18px;
 
-  h3 { margin: 0 0 10px; color: var(--c-primary); }
+  h3 {
+    margin: 0 0 10px;
+    color: var(--c-primary);
+  }
 
   .grid {
     display: grid;
     gap: 12px;
-    .field { display: grid; gap: 6px; }
+    .field {
+      display: grid;
+      gap: 6px;
+    }
     @media (min-width: 780px) {
       grid-template-columns: 1fr;
     }
@@ -344,11 +411,22 @@ $gray-400: #a1a1aa;
     align-items: center;
     margin-top: 8px;
 
-    .test { display: flex; gap: 8px; align-items: center; }
-    .send { display: flex; gap: 8px; flex-wrap: wrap; }
+    .test {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .send {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
     @media (max-width: 640px) {
       grid-template-columns: 1fr;
-      .test, .send { justify-content: flex-start; }
+      .test,
+      .send {
+        justify-content: flex-start;
+      }
     }
   }
 
@@ -358,14 +436,18 @@ $gray-400: #a1a1aa;
     border: 1px solid var(--c-border);
     border-radius: 10px;
     padding: 8px;
-    max-height: 220px; overflow: auto;
+    max-height: 220px;
+    overflow: auto;
   }
 }
 
 /* Responsives Tuning für Toolbar */
 @media (max-width: 720px) {
   .toolbar {
-    .inputs, .actions { width: 100%; }
+    .inputs,
+    .actions {
+      width: 100%;
+    }
   }
 }
 </style>

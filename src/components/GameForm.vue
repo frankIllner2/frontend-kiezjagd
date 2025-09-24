@@ -1,6 +1,6 @@
 <template>
   <form @submit.prevent="saveGame" class="game-form">
-    <h2>{{ localGame._id ? 'Spiel bearbeiten' : 'Neues Spiel erstellen' }}</h2>
+    <h4>{{ localGame._id ? 'Spiel bearbeiten' : 'Neues Spiel erstellen' }}</h4><br />
 
     <div class="form-row">
       <div class="form-group">
