@@ -319,6 +319,7 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  padding: 0 10px;
 }
 
 .logout {
@@ -328,14 +329,18 @@ export default {
 }
 
 /* Topbar horizontal */
-.topbar button {
-  background: #f7f7f7;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  padding: 6px 12px;
-  cursor: pointer;
-  transition: background 0.2s, border-color 0.2s;
-  margin: 0 5px;
+.topbar {
+  display: flex;
+  justify-content: flex-end;
+  button {
+    background: #f7f7f7;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+    margin: 0 5px;
+  }
 }
 
 .topbar button:hover {

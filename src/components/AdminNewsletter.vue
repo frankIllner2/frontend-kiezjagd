@@ -292,12 +292,17 @@ $gray-400: #a1a1aa;
   border-radius: 12px;
   overflow: hidden;
   background: #fff;
+   width: 100%;
+  overflow-x: auto;                 /* ← horizontales Scrollen */
+  -webkit-overflow-scrolling: touch;
 }
 
 .table {
   width: 100%;
   border-collapse: collapse;
   font-size: 14px;
+    table-layout: fixed;
+  min-width: 720px;   
 
   thead {
     background: $gray-100;
@@ -346,6 +351,17 @@ $gray-400: #a1a1aa;
       font-style: italic;
     }
   }
+}
+
+.table th, .table td {
+  /* Neu (verhindert hässliche Umbrüche + „…“) */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.table .row-actions {
+  white-space: nowrap;              /* Buttons in einer Zeile lassen */
 }
 
 /* Badges */

@@ -49,7 +49,9 @@
     flex-direction: row;
     margin: 2em 0 4em;
     justify-content: space-between;
-    width: 1024px;
+    width: 100%;
+    max-width: 1024px;
+    padding: 0 5px;
     }
 
     /* Allgemeine Container-Stile */
@@ -221,10 +223,11 @@
 
   .orders-list {
     position: relative;
-    width: 1024px;
+    max-width: 1024px;
+    width: 100%;
     display: flex;
     flex-wrap: wrap;
-    padding: 1rem;
+  
     h2 {
       width: 100%;
     }
