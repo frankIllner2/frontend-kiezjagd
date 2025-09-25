@@ -135,7 +135,7 @@
               <b>{{ item.startloction }}</b>
             </div>
 
-            <!-- Toggle Long-Description als Button -->
+            <!-- Info/Details öffnen (getrackt) -->
             <div class="game-infos">
               <b>{{ formatAge(item.ageGroup) }}</b>
               <button
@@ -143,7 +143,7 @@
                 type="button"
                 :aria-expanded="activeIndex === index ? 'true' : 'false'"
                 :aria-controls="`desc-${index}`"
-                @click="toggleLayer(index)"
+                @click="onInfo(item, index)"
               >
                 <img src="@/assets/img/icons/open-plus.png" alt="Details anzeigen" class="open-layer" />
               </button>
@@ -154,7 +154,7 @@
                 <button
                   class="btn btn--fourth"
                   type="button"
-                  @click="$emit('open-modal', item)"
+                  @click="onBuy(item, 'card', index)"
                 >
                   Kaufen
                 </button>
@@ -216,7 +216,7 @@
               <button
                 class="btn btn--primary"
                 type="button"
-                @click="$emit('open-modal', item)"
+                @click="onBuy(item, 'details', index)"
               >
                 Kaufen
               </button>
@@ -380,6 +380,75 @@ export default {
       if (a === "medi") return "Medi";
       if (a === "maxi") return "Maxi";
       return age || "";
+    },
+
+    // -------- Tracking: INFO (Details öffnen) --------
+    onInfo(item, index) {
+      const willOpen = this.activeIndex !== index; // tracke nur das Öffnen
+      if (willOpen) this.trackInfoOpen(item, index);
+      this.toggleLayer(index);
+    },
+    trackInfoOpen(item, index) {
+      try {
+        const gameId = item?.encryptedId || item?._id || item?.id || item?.slug || null;
+        const props = {
+          gameId,
+          gameName: item?.name || null,
+          ageGroup: (item?.ageGroup || '').toLowerCase() || null,
+          plz: this.getGamePlzDisplay(item) || null,
+          index
+        };
+        if (typeof window !== 'undefined' && typeof window.plausible === 'function') {
+          window.plausible('info_click', { props });
+        }
+        // npm-Variante (falls ihr plausible-tracker nutzt):
+        // import { trackEvent } from '@/plugins/plausible'; trackEvent('info_click', { props });
+      } catch (e) {
+        if (process.env.NODE_ENV !== 'production') console.warn('[analytics] info_click failed', e);
+      }
+    },
+
+    // -------- Tracking: KAUFEN --------
+    onBuy(item, placement, index) {
+      this.trackBuy(item, placement, index);
+      // ursprüngliches Verhalten beibehalten:
+      this.$emit('open-modal', item);
+    },
+    trackBuy(item, placement, index) {
+      try {
+        const gameId =
+          item?.encryptedId || item?._id || item?.id || item?.slug || null;
+
+        const price = this.normalizePrice(item?.price);
+        const props = {
+          gameId,
+          gameName: item?.name || null,
+          ageGroup: (item?.ageGroup || '').toLowerCase() || null,
+          plz: this.getGamePlzDisplay(item) || null,
+          placement, // 'card' | 'details'
+          index,
+          price
+        };
+
+        if (typeof window !== 'undefined' && typeof window.plausible === 'function') {
+          window.plausible('buy_click', { props });
+        }
+        // npm-Variante:
+        // import { trackEvent } from '@/plugins/plausible'; trackEvent('buy_click', { props });
+      } catch (e) {
+        if (process.env.NODE_ENV !== 'production') {
+          console.warn('[analytics] buy_click failed', e);
+        }
+      }
+    },
+    normalizePrice(val) {
+      if (val == null) return null;
+      const s = String(val).replace(/\s/g, '')
+        .replace(/€|eur/gi, '')
+        .replace(',', '.')
+        .replace(/[^0-9.]/g, '');
+      const num = parseFloat(s);
+      return Number.isFinite(num) ? num : null;
     },
 
     // -------- PLZ-Helper --------
