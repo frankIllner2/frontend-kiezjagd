@@ -6,6 +6,7 @@
     background-color: $background-color-1;
     h1, p, strong, button {
         text-transform: uppercase;
+        line-height: 1.6;
     }
     .loading-spinner {
     display: flex;
