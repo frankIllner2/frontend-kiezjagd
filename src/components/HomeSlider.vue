@@ -242,41 +242,49 @@ export default {
       activeIndex: null,
       plzQuery: "",
       selectedAge: "Alle",
-      // 👇 Autocomplete State
+      // Autocomplete State
       showPlzMenu: false,
       plzActiveIndex: -1,
     };
   },
   computed: {
     matchText() {
-      const n = (this.plzQuery || this.selectedAge !== 'Alle') ? this.rawFiltered.length : this.games.length
-      return n === 1 ? '1 Spiel gefunden' : `${n} Spiele gefunden`
+      const hasFilter = !!this.plzQuery || this.selectedAge !== 'Alle';
+      const n = hasFilter ? this.rawFiltered.length : this.games.length;
+      return n === 1 ? '1 Spiel gefunden' : (n + ' Spiele gefunden');
     },
+
     // alle verfügbaren PLZs (einmalig aus den Games extrahiert)
     plzCandidates() {
       const set = new Set();
-      for (const g of this.games || []) {
-        const a = this.extractPlz(String(g.plz ?? ""));
-        const b = this.extractPlz(String(g.startloction ?? ""));
-        const c = this.extractPlz(String(g.endloction ?? ""));
-        const d = this.extractPlz(String(g.city ?? ""));
+      const src = Array.isArray(this.games) ? this.games : [];
+      for (let i = 0; i < src.length; i++) {
+        const g = src[i] || {};
+        const a = this.extractPlz(String(g.plz || ""));
+        const b = this.extractPlz(String(g.startloction || ""));
+        const c = this.extractPlz(String(g.endloction || ""));
+        const d = this.extractPlz(String(g.city || ""));
         if (a) set.add(a);
         if (b) set.add(b);
         if (c) set.add(c);
         if (d) set.add(d);
       }
       // sortiert aufsteigend numerisch (Fallback: string)
-      return Array.from(set).sort((x, y) => {
+      return Array.from(set).sort(function (x, y) {
         const nx = parseInt(x, 10); const ny = parseInt(y, 10);
-        return isNaN(nx) || isNaN(ny) ? x.localeCompare(y) : nx - ny;
+        if (isNaN(nx) || isNaN(ny)) return String(x).localeCompare(String(y));
+        return nx - ny;
       });
     },
+
     // Vorschläge ab der 2. Ziffer, Prefix-Match
     plzSuggestions() {
       const q = this.normalizePlz(this.plzQuery);
       if (q.length < 2) return [];
       const out = [];
-      for (const s of this.plzCandidates) {
+      const list = this.plzCandidates;
+      for (let i = 0; i < list.length; i++) {
+        const s = list[i];
         if (this.normalizePlz(s).startsWith(q)) out.push(s);
         if (out.length >= 8) break; // max 8 Vorschläge
       }
@@ -285,7 +293,7 @@ export default {
 
     // echtes Filterergebnis (kann 0 sein)
     rawFiltered() {
-      let list = this.games || [];
+      let list = Array.isArray(this.games) ? this.games.slice() : [];
 
       // PLZ: normalisieren & Prefix-Match über mehrere Felder
       const qDigits = this.normalizePlz(this.plzQuery);
@@ -296,9 +304,7 @@ export default {
       // Altersgruppe
       if (this.selectedAge !== "Alle") {
         const age = String(this.selectedAge).toLowerCase();
-        list = list.filter(
-          (g) => String(g.ageGroup || "").toLowerCase() === age
-        );
+        list = list.filter((g) => String((g && g.ageGroup) || "").toLowerCase() === age);
       }
 
       return list;
@@ -306,19 +312,19 @@ export default {
 
     // Fallback: bei 0 Treffern alle Spiele anzeigen
     filteredGames() {
-      if (
-        (this.plzQuery || this.selectedAge !== "Alle") &&
-        this.rawFiltered.length === 0
-      ) {
-        return this.games;
-      }
+      const hasFilter = !!this.plzQuery || this.selectedAge !== "Alle";
+      if (hasFilter && this.rawFiltered.length === 0) return this.games;
       return this.rawFiltered;
     },
   },
+
   methods: {
-    // -------- Autocomplete UI --------
+    /* =========================
+     * Autocomplete UI
+     * ========================= */
     onPlzInput(e) {
-      const digits = (e.target.value || "").replace(/\D/g, "").slice(0, 5);
+      const inputVal = e && e.target ? e.target.value : "";
+      const digits = String(inputVal || "").replace(/\D/g, "").slice(0, 5);
       this.plzQuery = digits;
       // Dropdown nur ab 2 Ziffern
       this.showPlzMenu = this.plzQuery.length >= 2 && this.plzSuggestions.length > 0;
@@ -329,26 +335,34 @@ export default {
     },
     onPlzBlur() {
       // kurz verzögert, damit click auf Option noch greift
-      setTimeout(() => { this.showPlzMenu = false; this.plzActiveIndex = -1; }, 120);
+      const self = this;
+      setTimeout(function () {
+        self.showPlzMenu = false;
+        self.plzActiveIndex = -1;
+      }, 120);
     },
     onPlzKeydown(e) {
-      if (!this.showPlzMenu && !(e.key === 'ArrowDown' && this.plzSuggestions.length)) return;
-      if (['ArrowDown', 'ArrowUp', 'Enter', 'Escape', 'Home', 'End'].includes(e.key)) e.preventDefault();
+      if (!this.showPlzMenu && !(e && e.key === 'ArrowDown' && this.plzSuggestions.length)) return;
 
-      const last = this.plzSuggestions.length - 1
-      if (e.key === 'ArrowDown') {
+      const key = e ? e.key : '';
+      if (key === 'ArrowDown' || key === 'ArrowUp' || key === 'Enter' || key === 'Escape' || key === 'Home' || key === 'End') {
+        e.preventDefault();
+      }
+
+      const last = this.plzSuggestions.length - 1;
+      if (key === 'ArrowDown') {
         this.showPlzMenu = true;
         this.plzActiveIndex = this.plzActiveIndex < last ? this.plzActiveIndex + 1 : 0;
-      } else if (e.key === 'ArrowUp') {
+      } else if (key === 'ArrowUp') {
         this.plzActiveIndex = this.plzActiveIndex > 0 ? this.plzActiveIndex - 1 : last;
-      } else if (e.key === 'Home') {
-        this.plzActiveIndex = 0
-      } else if (e.key === 'End') {
-        this.plzActiveIndex = last
-      } else if (e.key === 'Enter') {
+      } else if (key === 'Home') {
+        this.plzActiveIndex = 0;
+      } else if (key === 'End') {
+        this.plzActiveIndex = last;
+      } else if (key === 'Enter') {
         if (this.plzActiveIndex >= 0) this.applyPlzSuggestion(this.plzSuggestions[this.plzActiveIndex]);
         this.showPlzMenu = false;
-      } else if (e.key === 'Escape') {
+      } else if (key === 'Escape') {
         this.showPlzMenu = false;
         this.plzActiveIndex = -1;
       }
@@ -357,23 +371,32 @@ export default {
       this.plzQuery = this.normalizePlz(s).slice(0, 5); // übernehmen (nur Ziffern)
       this.showPlzMenu = false;
       this.plzActiveIndex = -1;
-      this.$refs.plzInput?.focus();
+      if (this.$refs && this.$refs.plzInput && typeof this.$refs.plzInput.focus === 'function') {
+        this.$refs.plzInput.focus();
+      }
     },
     clearPlz() {
       this.plzQuery = "";
       this.showPlzMenu = false;
       this.plzActiveIndex = -1;
-      this.$refs.plzInput?.focus();
+      if (this.$refs && this.$refs.plzInput && typeof this.$refs.plzInput.focus === 'function') {
+        this.$refs.plzInput.focus();
+      }
     },
 
-    // -------- UI / Sonstiges --------
+    /* =========================
+     * UI / Sonstiges
+     * ========================= */
     getGameImagePath(imagePath) {
-      try { return new URL(imagePath, import.meta.url).href; } catch { return imagePath; }
+      // konservativ: einfach zurückgeben (keine optional chaining / import.meta)
+      return imagePath || "";
     },
     toggleLayer(index) {
-      this.activeIndex = this.activeIndex === index ? null : index;
+      this.activeIndex = (this.activeIndex === index) ? null : index;
     },
-    closeLayer() { this.activeIndex = null; },
+    closeLayer() {
+      this.activeIndex = null;
+    },
     formatAge(age) {
       const a = String(age || "").toLowerCase();
       if (a === "mini") return "Mini";
@@ -382,33 +405,74 @@ export default {
       return age || "";
     },
 
-    // -------- Tracking: INFO (Details öffnen) --------
+    /* =========================
+     * Tracking-Helpers
+     * ========================= */
+    slugify(str) {
+      if (!str) return null;
+      return String(str)
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, '-')       // spaces -> dash
+        .replace(/[^\w-]+/g, '')    // remove non-word
+        .replace(/--+/g, '-')       // collapse dashes
+        .replace(/^-+|-+$/g, '');   // trim dashes
+    },
+    getGameId(item) {
+      if (!item || typeof item !== 'object') return null;
+      if (item.encryptedId) return String(item.encryptedId);
+      if (item._id)         return String(item._id);
+      if (item.id)          return String(item.id);
+      if (item.slug)        return String(item.slug);
+      if (item.name)        return this.slugify(item.name); // Fallback
+      return null;
+    },
+    normalizePrice(val) {
+      if (val === undefined || val === null) return null;
+      // akzeptiert: 29.9 | "29,90 €" | "29.90EUR"
+      var s = String(val)
+        .replace(/\s+/g, '')
+        .replace(/€|eur/gi, '')
+        .replace(',', '.')
+        .replace(/[^0-9.]/g, '');
+      var num = parseFloat(s);
+      return isFinite(num) ? num : null;
+    },
+
+    /* =========================
+     * Tracking: INFO (Details öffnen)
+     * ========================= */
     onInfo(item, index) {
-      const willOpen = this.activeIndex !== index; // tracke nur das Öffnen
+      var willOpen = this.activeIndex !== index; // nur Öffnen tracken
       if (willOpen) this.trackInfoOpen(item, index);
       this.toggleLayer(index);
     },
     trackInfoOpen(item, index) {
       try {
-        const gameId = item?.encryptedId || item?._id || item?.id || item?.slug || null;
-        const props = {
-          gameId,
-          gameName: item?.name || null,
-          ageGroup: (item?.ageGroup || '').toLowerCase() || null,
-          plz: this.getGamePlzDisplay(item) || null,
-          index
+        var gameId   = this.getGameId(item);
+        var gameName = item && item.name ? String(item.name) : null;
+        var ageGroup = item && item.ageGroup ? String(item.ageGroup).toLowerCase() : null;
+        var plz      = this.getGamePlzDisplay(item) || null;
+
+        var props = {
+          gameId: gameId,
+          gameName: gameName,
+          ageGroup: ageGroup,
+          plz: plz,
+          index: (typeof index === 'number') ? index : null
         };
-        if (typeof window !== 'undefined' && typeof window.plausible === 'function') {
-          window.plausible('info_click', { props });
+
+        if (typeof window !== 'undefined' && window && typeof window.plausible === 'function') {
+          window.plausible('info_click', { props: props });
         }
-        // npm-Variante (falls ihr plausible-tracker nutzt):
-        // import { trackEvent } from '@/plugins/plausible'; trackEvent('info_click', { props });
       } catch (e) {
         if (process.env.NODE_ENV !== 'production') console.warn('[analytics] info_click failed', e);
       }
     },
 
-    // -------- Tracking: KAUFEN --------
+    /* =========================
+     * Tracking: KAUFEN (CTA)
+     * ========================= */
     onBuy(item, placement, index) {
       this.trackBuy(item, placement, index);
       // ursprüngliches Verhalten beibehalten:
@@ -416,73 +480,68 @@ export default {
     },
     trackBuy(item, placement, index) {
       try {
-        const gameId =
-          item?.encryptedId || item?._id || item?.id || item?.slug || null;
+        var gameId   = this.getGameId(item);
+        var gameName = item && item.name ? String(item.name) : null;
+        var ageGroup = item && item.ageGroup ? String(item.ageGroup).toLowerCase() : null;
+        var plz      = this.getGamePlzDisplay(item) || null;
+        var price    = this.normalizePrice(item && item.price !== undefined ? item.price : null);
 
-        const price = this.normalizePrice(item?.price);
-        const props = {
-          gameId,
-          gameName: item?.name || null,
-          ageGroup: (item?.ageGroup || '').toLowerCase() || null,
-          plz: this.getGamePlzDisplay(item) || null,
-          placement, // 'card' | 'details'
-          index,
-          price
+        var props = {
+          gameId: gameId,
+          gameName: gameName,
+          ageGroup: ageGroup,
+          plz: plz,
+          placement: placement, // 'card' | 'details'
+          index: (typeof index === 'number') ? index : null,
+          price: price
         };
 
-        if (typeof window !== 'undefined' && typeof window.plausible === 'function') {
-          window.plausible('buy_click', { props });
+        if (typeof window !== 'undefined' && window && typeof window.plausible === 'function') {
+          window.plausible('buy_click', { props: props });
         }
-        // npm-Variante:
-        // import { trackEvent } from '@/plugins/plausible'; trackEvent('buy_click', { props });
       } catch (e) {
-        if (process.env.NODE_ENV !== 'production') {
-          console.warn('[analytics] buy_click failed', e);
-        }
+        if (process.env.NODE_ENV !== 'production') console.warn('[analytics] buy_click failed', e);
       }
     },
-    normalizePrice(val) {
-      if (val == null) return null;
-      const s = String(val).replace(/\s/g, '')
-        .replace(/€|eur/gi, '')
-        .replace(',', '.')
-        .replace(/[^0-9.]/g, '');
-      const num = parseFloat(s);
-      return Number.isFinite(num) ? num : null;
-    },
 
-    // -------- PLZ-Helper --------
+    /* =========================
+     * PLZ-Helper
+     * ========================= */
     getGamePlzDisplay(g) {
-      const fromPlz = this.extractPlz(String(g.plz ?? ""));
+      g = g || {};
+      const fromPlz   = this.extractPlz(String(g.plz || ""));
       if (fromPlz) return fromPlz;
-      return (
-        this.extractPlz(String(g.startloction ?? "")) ||
-        this.extractPlz(String(g.endloction ?? "")) ||
-        this.extractPlz(String(g.city ?? "")) ||
-        ""
-      );
+      const fromStart = this.extractPlz(String(g.startloction || ""));
+      if (fromStart) return fromStart;
+      const fromEnd   = this.extractPlz(String(g.endloction || ""));
+      if (fromEnd) return fromEnd;
+      const fromCity  = this.extractPlz(String(g.city || ""));
+      if (fromCity) return fromCity;
+      return "";
     },
     getGamePlz(g) {
-      const fromPlz = this.extractPlz(String(g.plz ?? ""));
+      g = g || {};
+      const fromPlz   = this.extractPlz(String(g.plz || ""));
       if (fromPlz) return this.normalizePlz(fromPlz);
-      const fromStart = this.extractPlz(String(g.startloction ?? ""));
+      const fromStart = this.extractPlz(String(g.startloction || ""));
       if (fromStart) return this.normalizePlz(fromStart);
-      const fromEnd = this.extractPlz(String(g.endloction ?? ""));
+      const fromEnd   = this.extractPlz(String(g.endloction || ""));
       if (fromEnd) return this.normalizePlz(fromEnd);
-      const fromCity = this.extractPlz(String(g.city ?? ""));
+      const fromCity  = this.extractPlz(String(g.city || ""));
       if (fromCity) return this.normalizePlz(fromCity);
       return "";
     },
-    extractPlz(text = "") {
-      const m = String(text).match(/\b\d{4,5}\b/);
+    extractPlz(text) {
+      const m = String(text || "").match(/\b\d{4,5}\b/);
       return m ? m[0] : "";
     },
-    normalizePlz(val = "") {
-      return String(val).replace(/\D/g, "").replace(/^0+/, "");
+    normalizePlz(val) {
+      return String(val || "").replace(/\D/g, "").replace(/^0+/, "");
     },
   },
 };
 </script>
+
 
 <style scoped>
 /* ---------- A11y Utilities ---------- */
