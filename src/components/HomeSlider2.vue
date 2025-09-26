@@ -38,7 +38,7 @@
       <template #default="{ item }">
         <div class="game-header">
           <router-link 
-            :to="`/spiel/${item.slug}`" 
+            :to="item.landingPageUrl" 
             class="game-link"
           >
             <b>{{ item.gameName }}</b>

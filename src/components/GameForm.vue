@@ -110,7 +110,7 @@
         v-model="localGame.mailtext" 
         id="mailtextEmail" 
         maxlength="1200" 
-        placeholder="Email Text zum Spie" 
+        placeholder="Email Text zum Spiel" 
         rows="4"
       ></textarea>
       <small>{{ localGame.mailtext?.length || 0}}/1200 Zeichen</small><br />
@@ -145,7 +145,16 @@
         placeholder="z. B. TEST2025"
         
       />
-   
+    </div>
+
+    <div class="form-group">
+      <label for="landingPageUrl">LP - URL</label>
+      <input
+        id="landingPageUrl"
+        v-model="localGame.landingPageUrl"
+        placeholder="/spiel/spurensuche-mama"
+        
+      />
     </div>
 
     <div class="form-actions">

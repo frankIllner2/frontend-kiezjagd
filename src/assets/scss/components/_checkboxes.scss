@@ -1,7 +1,8 @@
 @use "../abstracts/variables" as *;
 /* Checkbox-Styling */
 .checkbox-group {
-    display: flex;
+    display: flex !important;
+    flex-direction: row !important;
     align-items: left;
     gap: 12px; /* Abstand zwischen Checkbox und Label */
     cursor: pointer;

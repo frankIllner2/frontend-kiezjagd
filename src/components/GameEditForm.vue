@@ -153,6 +153,15 @@
               placeholder="z. B. TEST2025"
               
             />
+          </div>
+          <div class="form-group">
+            <label for="landingPageUrl">Url - LP</label>
+            <input
+              id="landingPageUrl"
+              v-model="game.landingPageUrl"
+              placeholder="/spiel/spurensuche-mama"
+              
+            />
             
           </div>
 
@@ -198,6 +207,7 @@ export default {
         encryptedId: "",
         description: "",
         prehistory: "",
+        landingPageUrl: "",
         infohistory: "",
         questions: [],
         isDisabled: false,
