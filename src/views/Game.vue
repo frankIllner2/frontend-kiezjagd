@@ -180,6 +180,7 @@ export default {
       feedbackMessage2: "",
       prehistory: "",
       infohistory: "",
+      landingPageUrl: "",
       timerInterval: null,
       startTime: null,
       endTime: null,
@@ -262,7 +263,7 @@ export default {
         this.gameType = response.ageGroup || "Maxi";
         this.prehistory = response.prehistory || "";
         this.infohistory = response.infohistory || "";
-
+        this.landingPageUrl = response.landingPageUrl || "";
         console.log("Game - Spieldaten geladen:");
       } catch (error) {
         console.error("❌ Fehler beim Laden des Spiels:", error);
@@ -513,6 +514,7 @@ export default {
         const resultPayload = {
           gameId: this.gameId,
           teamName: this.teamName,
+          landingPageUrl: this.landingPageUrl,
           email: this.email,
           gameType: this.gameType,
           gameName: this.gameName,

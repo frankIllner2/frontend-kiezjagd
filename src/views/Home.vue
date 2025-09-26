@@ -430,49 +430,58 @@ export default {
         this.lastFocusedEl.focus()
       }
     },
-    async fetchRandomGameRankings() {
-      try {
-        // ✅ Zufällige Spiele abrufen
-        let randomGameIds = await apiService.getRandomGames();
+  async fetchRandomGameRankings() {
+  try {
+    // ✅ Zufällige Spiele abrufen
+    let randomGameIds = await apiService.getRandomGames();
 
-        // 🛑 Deaktivierte Spiele herausfiltern
-        const allGames = await apiService.fetchGames();
-        const activeGameIds = allGames
-          .filter((game) => !game.isDisabled)
-          .map((game) => game.encryptedId);
+    // 🛑 Alle aktiven Spiele laden (mit landingPageUrl)
+    const allGames = await apiService.fetchGames();
+    const activeGames = allGames.filter((game) => !game.isDisabled);
+    const activeGameIds = activeGames.map((game) => game.encryptedId);
 
-        // Entferne zufällige Spiele, die deaktiviert sind
-        randomGameIds = randomGameIds.filter((id) => activeGameIds.includes(id));
+    // Lookup-Map für schnellen Zugriff
+    const gameById = Object.fromEntries(
+      activeGames.map((g) => [g.encryptedId, g])
+    );
 
-        if (!randomGameIds || randomGameIds.length === 0) {
-          console.warn("⚠️ Keine zufälligen Spiele gefunden");
-          return;
+    // Entferne zufällige Spiele, die deaktiviert sind
+    randomGameIds = randomGameIds.filter((id) => activeGameIds.includes(id));
+
+    if (!randomGameIds.length) {
+      console.warn("⚠️ Keine zufälligen Spiele gefunden");
+      return;
+    }
+
+    // ✅ Top-5-Ergebnisse für jedes zufällige Spiel abrufen
+    const rankings = await Promise.all(
+      randomGameIds.map(async (id) => {
+        try {
+          return await apiService.getTop5Results(id);
+        } catch (error) {
+          console.error(`❌ Fehler beim Abrufen von Top 5 für Spiel ${id}:`, error);
+          return null;
         }
+      })
+    );
 
-        // ✅ Top-5-Ergebnisse für jedes zufällige Spiel abrufen
-        const rankings = await Promise.all(
-          randomGameIds.map(async (id) => {
-            try {
-              return await apiService.getTop5Results(id);
-            } catch (error) {
-              console.error(`❌ Fehler beim Abrufen von Top 5 für Spiel ${id}:`, error);
-              return null;
-            }
-          })
-        );
-
-        // ✅ Daten filtern, falls einzelne Abfragen fehlschlagen
-        this.randomRankings = rankings
-          .filter((ranking) => ranking !== null)
-          .map((ranking, index) => ({
-            gameId: randomGameIds[index],
-            gameName: ranking.gameName,
-            topResults: ranking.topResults,
-          }));
-      } catch (error) {
-        console.error("❌ Fehler beim Laden zufälliger Rankings:", error);
-      }
-    },
+    // ✅ Daten filtern + mit landingPageUrl aus Games anreichern
+    this.randomRankings = rankings
+      .filter(Boolean)
+      .map((ranking, index) => {
+        const id = randomGameIds[index];
+        const game = gameById[id] || {};
+        return {
+          gameId: id,
+          gameName: ranking?.gameName || game.name || "Unbekannt",
+          landingPageUrl: ranking?.landingPageUrl || game.landingPageUrl || null,
+          topResults: ranking?.topResults || [],
+        };
+      });
+  } catch (error) {
+    console.error("❌ Fehler beim Laden zufälliger Rankings:", error);
+  }
+},
     trapFocus(e) {
       const modal = this.$refs.modalEl
       if (!modal) return

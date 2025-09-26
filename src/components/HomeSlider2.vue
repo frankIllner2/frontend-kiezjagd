@@ -42,6 +42,7 @@
             class="game-link"
           >
             <b>{{ item.gameName }}</b>
+           
           </router-link>
           <img
             v-if="getGameType(item.topResults) === 'Mini'"
