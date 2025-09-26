@@ -37,7 +37,12 @@
       <!-- Cards -->
       <template #default="{ item }">
         <div class="game-header">
-          <b>{{ item.gameName }}</b>
+          <router-link 
+            :to="`/spiel/${item.slug}`" 
+            class="game-link"
+          >
+            <b>{{ item.gameName }}</b>
+          </router-link>
           <img
             v-if="getGameType(item.topResults) === 'Mini'"
             src="@/assets/img/icons/hand.png"
