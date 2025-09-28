@@ -1,6 +1,11 @@
 <template>
   <div class="gps-checker">
-    <img v-if="question.imageUrl" :src="question.imageUrl" alt="Bild zur Anweisung" class="instruction-image" />
+    <img
+      v-if="question.imageUrl"
+      :src="question.imageUrl"
+      alt="Bild zur Anweisung"
+      class="instruction-image"
+    />
     <h3>{{ question.question }}</h3>
     <button class="btn btn--primary" @click="getLocation" :disabled="loading">
       {{ loading ? "Bestimme Standort..." : "Koordinaten senden" }}
@@ -111,9 +116,7 @@ export default {
 
 <style lang="scss" scoped>
 img {
-    max-width: 100%;
-    height: auto;
+  max-width: 100%;
+  height: auto;
 }
-  
-
 </style>
