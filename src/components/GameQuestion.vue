@@ -3,7 +3,7 @@
     <div v-if="question.answerquestion" class="answer-section">
       <div v-html="question.answerquestion"></div>
       <SpeechButton
-        v-if="gameType === 'Mini'"
+        v-if="gameType === 'Mini'  || gameType === 'Medi'"
         :text="question.answerquestion"
       />
     </div>
@@ -49,7 +49,7 @@
         <!-- Text -->
         <span v-if="option.type === 'text'" class="only-text">
           {{ option.text }}
-          <SpeechButton v-if="gameType === 'Mini' && option.text" :text="option.text" />
+          <SpeechButton v-if="(gameType === 'Mini'  || gameType === 'Medi') && option.text" :text="option.text" />
         </span>
 
         <!-- Bild -->
@@ -61,7 +61,7 @@
         <span v-else-if="option.type === 'both'" class="text-image">
           <img :src="getCorrectImageUrl(option.imageUrl)" alt="Option Bild" />
           <strong>{{ option.text }}</strong>
-          <SpeechButton v-if="gameType === 'Mini' && option.text" :text="option.text" />
+          <SpeechButton v-if="(gameType === 'Mini' || gameType === 'Medi') && option.text" :text="option.text" />
         </span>
 
         <!-- Nur Audio -->
