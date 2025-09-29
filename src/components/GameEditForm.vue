@@ -90,12 +90,12 @@
             <textarea
               v-model="game.description"
               id="description"
-              maxlength="560"
+              maxlength="500"
               placeholder="Kurze Beschreibung des Spiels hinzufügen"
               rows="4"
               required
             ></textarea>
-            <small>{{ game.description?.length || 0 }}/560 Zeichen</small>
+            <small>{{ game.description?.length || 0 }}/500 Zeichen</small>
           </div>
 
           <div class="form-group">
