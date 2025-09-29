@@ -7,6 +7,7 @@ import slugMap from '@/data/slug-map.json';
 // ✅ Seiten importieren
 import HomePage from '../views/Home.vue';
 import GamePage from '../views/Game.vue';
+import FaqPage from '../views/FaqPage.vue';
 import AdminPage from '../views/Admin.vue';
 import AdminGameView from '../views/AdminGame.vue';
 import GameEditForm from '../components/GameEditForm.vue';
@@ -134,6 +135,11 @@ const routes = [
     path: '/datenschutz',
     name: 'Datenschutz',
     component: PrivacypolicySite,
+  },
+    {
+    path: '/faq',
+    name: 'Faq',
+    component: FaqPage,
   },
   {
     path: '/shop',

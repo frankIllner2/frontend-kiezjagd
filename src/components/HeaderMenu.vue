@@ -115,6 +115,11 @@
           >
         </li>
         <li>
+          <a href="/faq" target="_blank" rel="noopener" @click="closeMenu"
+            >FAQ</a
+          >
+        </li>
+        <li>
           <div class="social-icons">
             <a
               href="https://www.instagram.com/kiezjaeger/"
