@@ -45,21 +45,27 @@
     <!-- Fragenbereich -->
     <div v-else-if="!gameFinished" class="game-card question-section">
       <!-- 🔹 Navigation für Vor/Zurück + Lesemodus-Hinweis -->
-      <header class="question-nav">
-        <button class="btn btn--third"
-                :disabled="currentQuestionIndex === 0"
-                @click="goBack">
-         Zurück
+     <header class="question-nav">
+        <!-- Zurück nur ab Frage 2 -->
+        <button
+          v-if="currentQuestionIndex > 0"
+          class="btn btn--third"
+          @click="goBack"
+        >
+          Zurück
         </button>
 
         <div>
           Frage {{ currentQuestionIndex + 1 }} / {{ questions.length }}
-          <small v-if="currentQuestionIndex < progressIndex" ></small>
+          <small v-if="currentQuestionIndex < progressIndex">(nur ansehen)</small>
         </div>
 
-        <button class="btn btn--third"
-                :disabled="!canForward"
-                @click="goForward">
+        <!-- Weiter nur anzeigen, wenn man schon einmal die nächste Frage besucht hat -->
+        <button
+          v-if="currentQuestionIndex > 0 && canForward"
+          class="btn btn--third"
+          @click="goForward"
+        >
           Weiter
         </button>
       </header>
