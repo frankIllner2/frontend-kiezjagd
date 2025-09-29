@@ -8,6 +8,7 @@
       <h2 v-if="!this.gameStarted">Dein Abenteuer startet jetzt!</h2>
       <h3 v-if="!this.gameStarted && !gameFinished">Du spielst "{{ gameName }}"</h3>
     </div>
+
     <div v-if="!gameStarted" class="game-card-prehistory">
       <div v-if="prehistory" class="card content-prehistory">
         <h4>Die Geschichte zum Spiel</h4>
@@ -43,23 +44,49 @@
 
     <!-- Fragenbereich -->
     <div v-else-if="!gameFinished" class="game-card question-section">
+      <!-- 🔹 Navigation für Vor/Zurück + Lesemodus-Hinweis -->
+      <header class="question-nav">
+        <button class="btn btn--third"
+                :disabled="currentQuestionIndex === 0"
+                @click="goBack">
+         Zurück
+        </button>
+
+        <div>
+          Frage {{ currentQuestionIndex + 1 }} / {{ questions.length }}
+          <small v-if="currentQuestionIndex < progressIndex" ></small>
+        </div>
+
+        <button class="btn btn--third"
+                :disabled="!canForward"
+                @click="goForward">
+          Weiter
+        </button>
+      </header>
+
       <transition name="fade-question" mode="out-in">
-        <component
-          :is="
-            currentQuestion && currentQuestion.type === 'anweisung'
-              ? 'GpsChecker'
-              : 'GameQuestion'
-          "
-          v-if="currentQuestion"
-          :key="currentQuestionIndex"
+        <!-- Anweisungsfragen (GPS) -->
+        <GpsChecker
+          v-if="currentQuestion && currentQuestion.type === 'anweisung'"
+          :key="'gps-' + currentQuestionIndex"
+          :question="currentQuestion"
+          :locked="currentQuestionIndex < progressIndex"
+          :onSuccess="nextQuestion"
+          :gameType="gameType"
+        />
+
+        <!-- Alle anderen Fragetypen -->
+        <GameQuestion
+          v-else-if="currentQuestion"
+          :key="'q-' + currentQuestionIndex"
           :question="currentQuestion"
           :currentIndex="currentQuestionIndex"
           :gameType="gameType"
-          :onSuccess="nextQuestion"
           :feedbackMessage="feedbackMessage"
           @submitAnswer="handleAnswer"
         />
       </transition>
+
 
       <FeedbackAnimation
         v-if="showFeedback && currentQuestion?.type !== 'next'"
@@ -152,6 +179,7 @@ import TimeBonusAnimation from "@/components/TimeBonusAnimation.vue";
 import SpeechButton from "@/components/SpeechButton.vue";
 
 export default {
+  name: "GamePage",
   components: {
     StartForm,
     GameQuestion,
@@ -172,6 +200,8 @@ export default {
       questions: [],
       currentAnswerQuestion: "",
       currentQuestionIndex: 0,
+      progressIndex: 0,
+      viewMaxIndex: 0,
       gameStarted: false,
       gameFinished: false,
       gameDuration: "0h 0m 0s",
@@ -194,6 +224,7 @@ export default {
       correctSound: null,
       correctSounds: [],
       lastCorrectSoundIndex: null,
+      countingStarted: false,
     };
   },
   computed: {
@@ -203,6 +234,10 @@ export default {
         ? this.questions[this.currentQuestionIndex]
         : null;
     },
+    canForward() {
+      return this.currentQuestionIndex < Math.min(this.questions.length - 1, this.viewMaxIndex);
+    },
+
   },
   async mounted() {
     // Prüfe, ob der Nutzer über einen neuen Spiel-Link kommt
@@ -219,12 +254,24 @@ export default {
       localStorage.getItem(`currentQuestionIndex_${savedGameId}`),
       10
     );
+    const savedProgress = parseInt(
+      localStorage.getItem(`progressIndex_${savedGameId}`),
+      10
+    );
+    const savedViewMax = parseInt(
+      localStorage.getItem(`viewMaxIndex_${savedGameId}`), 10
+    );
+    this.viewMaxIndex = Number.isFinite(savedViewMax)
+      ? savedViewMax
+      : this.currentQuestionIndex;
+
 
     if (gameInProgress && savedGameId) {
       this.gameId = savedGameId;
       this.teamName = localStorage.getItem("teamName") || "";
       this.email = localStorage.getItem("email") || "";
-      this.currentQuestionIndex = savedIndex || 0;
+      this.currentQuestionIndex = Number.isFinite(savedIndex) ? savedIndex : 0;
+      this.progressIndex = Number.isFinite(savedProgress) ? savedProgress : this.currentQuestionIndex; // 🔹
       this.gameStarted = true;
       this.starCount = parseInt(localStorage.getItem("starCount"), 10) || 0;
       this.startTime = parseInt(localStorage.getItem("startTime"), 10) || Date.now();
@@ -234,6 +281,7 @@ export default {
       this.startTimer();
     } else {
       this.gameId = currentUrlGameId;
+      this.progressIndex = 0; // 🔹
     }
 
     if (!this.gameId) {
@@ -247,13 +295,10 @@ export default {
     this.correctSounds = ["sound-julia-2.mp3", "correct.flac", "sound-julia-3.mp3"].map((file) => {
       const a = new Audio(require(`@/assets/sound/${file}`));
       a.preload = "auto";
-      a.volume = 1.0; // ggf. 0.8
+      a.volume = 1.0;
       return a;
     });
-
-
   },
-  name: "GamePage",
   methods: {
     async loadGameData(gameId) {
       try {
@@ -285,12 +330,19 @@ export default {
       this.showStartForm = false;
       this.gameStarted = true;
 
+      // Fortschritts-Indizes initialisieren
+      this.currentQuestionIndex = 0;
+      this.progressIndex = 0;
+      this.viewMaxIndex = 0;
       localStorage.setItem("gameInProgress", "true");
       localStorage.setItem("currentGameId", this.gameId);
       localStorage.setItem("teamName", teamName);
       localStorage.setItem("email", email);
       localStorage.setItem("startTime", this.startTime);
       localStorage.setItem("playerNames", JSON.stringify(playerNames));
+      localStorage.setItem(`currentQuestionIndex_${this.gameId}`, 0);
+      localStorage.setItem(`progressIndex_${this.gameId}`, 0);
+      localStorage.setItem(`viewMaxIndex_${this.gameId}`, 0);
     },
     handleAnswer({ isCorrect }) {
       this.currentAnswerQuestion = this.currentQuestion;
@@ -369,30 +421,28 @@ export default {
     playRandomCorrectSound() {
       if (!this.correctSounds || this.correctSounds.length === 0) return;
 
-      // Nicht denselben Clip zweimal hintereinander
       let idx;
       do {
         idx = Math.floor(Math.random() * this.correctSounds.length);
       } while (this.correctSounds.length > 1 && idx === this.lastCorrectSoundIndex);
 
-      // Alle stoppen/zurücksetzen, falls etwas noch spielt
       this.correctSounds.forEach(a => {
-        try { a.pause(); a.currentTime = 0; } catch (_) {
-          // ignore
+        try { a.pause(); a.currentTime = 0; } catch (e) {
+          console.debug('Audio reset ignoriert:', e);
         }
       });
+
 
       const clip = this.correctSounds[idx];
       this.lastCorrectSoundIndex = idx;
 
-      // iOS/Safari: play() kann ein Promise sein
       const p = clip.play();
-      if (p && typeof p.catch === "function") {
-        p.catch(() => {
-          // Falls Autoplay blockiert: ignorieren oder leise fallbacken
-          // (hier kein extra Handling nötig, da durch User-Interaktion ausgelöst)
-        });
-      }
+        if (p && typeof p.catch === "function") {
+          p.catch((err) => {
+            console.debug('Autoplay blockiert (ok):', err);
+          });
+        }
+
     },
     getTimeBonus() {
       if (this.attemptCount === 0) return 60;
@@ -405,10 +455,35 @@ export default {
       if (this.attemptCount === 1) return 3;
       return 1;
     },
+
+    // 🔹 Zurück/Vor – nur Ansicht ändern, Fortschritt bleibt
+    goBack() {
+      if (this.currentQuestionIndex > 0) {
+        this.currentQuestionIndex--;
+        this.saveViewIndex();
+      }
+    },
+    goForward() {
+      if (!this.canForward) return;
+      this.currentQuestionIndex++;
+      // 🔹 wenn wir weiter gehen, haben wir diese Frage nun „besucht“
+      this.viewMaxIndex = Math.max(this.viewMaxIndex, this.currentQuestionIndex);
+      localStorage.setItem(`viewMaxIndex_${this.gameId}`, this.viewMaxIndex);
+      this.saveViewIndex();
+    },
+
     nextQuestion() {
       this.attemptCount = 0;
+      const next = this.currentQuestionIndex + 1;
+
+      // Fortschritt erhöhen (nächste erwartete Frage)
+      this.progressIndex = Math.max(this.progressIndex, next);
+      localStorage.setItem(`progressIndex_${this.gameId}`, this.progressIndex);
+
       if (this.currentQuestionIndex < this.questions.length - 1) {
-        this.currentQuestionIndex++;
+        this.currentQuestionIndex = next;
+        this.viewMaxIndex = Math.max(this.viewMaxIndex, this.currentQuestionIndex);
+        localStorage.setItem(`viewMaxIndex_${this.gameId}`, this.viewMaxIndex);
         this.saveQuestionIndex();
       } else {
         this.finishGame();
@@ -421,7 +496,7 @@ export default {
       let targetStars = this.starCount + this.earnedStars;
 
       if (!this.countingStarted) {
-        this.countingStarted = true; // Verhindert mehrfaches Starten
+        this.countingStarted = true;
 
         const interval = setInterval(() => {
           if (currentStars < targetStars) {
@@ -430,13 +505,13 @@ export default {
             localStorage.setItem("starCount", this.starCount);
           } else {
             clearInterval(interval);
-            this.countingStarted = false; // Zurücksetzen für nächste Animation
+            this.countingStarted = false;
             console.log("🎯 Zählen abgeschlossen, wechsle zur nächsten Frage.");
             setTimeout(() => {
-              this.nextQuestion(); // ✅ Wechsle zur nächsten Frage nach kurzem Delay
+              this.nextQuestion();
             }, 500);
           }
-        }, 300); // Geschwindigkeit des Hochzählens
+        }, 300);
       }
     },
     onTimeBonusDone() {
@@ -445,8 +520,8 @@ export default {
       this.nextQuestion();
     },
     startCounting() {
-      if (this.countingStarted) return; // 🚀 Blockiert doppeltes Hochzählen
-      this.countingStarted = true; // ✅ Markiert als gestartet
+      if (this.countingStarted) return;
+      this.countingStarted = true;
 
       let currentStars = this.starCount;
       let targetStars = this.starCount + this.earnedStars;
@@ -458,10 +533,10 @@ export default {
           localStorage.setItem("starCount", this.starCount);
         } else {
           clearInterval(interval);
-          this.countingStarted = false; // 🔄 Zurücksetzen für die nächste Frage
+          this.countingStarted = false;
           console.log("🎯 Zählen abgeschlossen.");
           setTimeout(() => {
-            this.nextQuestion(); // ✅ Wechsle zur nächsten Frage nach kurzem Delay
+            this.nextQuestion();
           }, 500);
         }
       }, 1000);
@@ -477,6 +552,15 @@ export default {
         this.showTimeGlow = false;
       }, 1500);
     },
+
+    // 🔹 Nur die Sicht (aktuellen Index) speichern
+    saveViewIndex() {
+      localStorage.setItem(
+        `currentQuestionIndex_${this.gameId}`,
+        this.currentQuestionIndex
+      );
+    },
+
     saveQuestionIndex() {
       localStorage.setItem(
         `currentQuestionIndex_${this.gameId}`,
@@ -489,7 +573,7 @@ export default {
         const currentTime = Date.now();
 
         let elapsedTime = (currentTime - this.startTime) / 1000;
-        if (elapsedTime < 0) elapsedTime = 0; // ⛔ verhindert negative Anzeige
+        if (elapsedTime < 0) elapsedTime = 0;
         elapsedTime = Math.round(elapsedTime);
 
         const hours = Math.floor(elapsedTime / 3600);
@@ -532,8 +616,11 @@ export default {
         localStorage.removeItem("gameInProgress");
         localStorage.removeItem("startTime");
         localStorage.removeItem(`currentQuestionIndex_${this.gameId}`);
+        localStorage.removeItem(`progressIndex_${this.gameId}`);   // 🔹
         localStorage.removeItem("starCount");
         localStorage.removeItem("playerNames");
+        localStorage.removeItem(`viewMaxIndex_${this.gameId}`);
+
       } catch (error) {
         console.error("❌ Fehler beim Speichern der Ergebnisse:", error);
         alert("❌ Fehler beim Speichern der Ergebnisse. Bitte versuche es erneut.");
@@ -553,17 +640,18 @@ export default {
   },
   beforeUnmount() {
     clearInterval(this.timerInterval);
-    if (this.correctSounds && this.correctSounds.length) {
-      this.correctSounds.forEach(a => { try { a.pause(); } catch(_) {
-        // ignore
-      } });
-    }
+    this.correctSounds.forEach(a => {
+      try { a.pause(); } catch (e) {
+        console.debug('Pause-Fehler ignoriert:', e);
+      }
+    });
+
   },
 };
 </script>
 
 <style scoped>
-/* Allgemeine Spielcontainer-Stile */
+/* Fade für Fragewechsel */
 .fade-question-enter-active,
 .fade-question-leave-active {
   transition: opacity 0.5s ease;
@@ -603,6 +691,14 @@ export default {
   justify-content: space-around;
 }
 
+.question-nav {
+  display: flex;
+  flex-direction: row;
+  gap: 35px;
+  align-items: center;
+  justify-content: space-between;
+}
+
 /* Startformular */
 .start-form {
   text-align: left;
@@ -618,14 +714,6 @@ export default {
   margin-bottom: 10px;
 }
 
-/* Feedback-Nachricht */
-.feedback {
-  margin-top: 15px;
-  font-size: 1rem;
-  font-weight: bold;
-  color: #4caf50;
-}
-
 /* Spiel abgeschlossen */
 .game-finished {
   text-align: center;
@@ -637,7 +725,7 @@ export default {
   color: #333;
 }
 
-/* Fixierte Sterne-Anzeige unten */
+/* Fixierte Sterne-Anzeige oben */
 .star-status {
   position: fixed;
   width: 100%;
@@ -647,8 +735,7 @@ export default {
   font-weight: bold;
   text-align: center;
   color: #fac227;
-  z-index: 10; /* Sicherstellen, dass es unter dem Button bleibt */
-  pointer-events: none; /* Verhindert, dass es Klicks blockiert */
+  pointer-events: none;
   background-color: #355b4c;
   padding: 10px 15px;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
@@ -680,27 +767,13 @@ export default {
 }
 
 @keyframes glow-pulse {
-  0% {
-    text-shadow: 0 0 0 rgba(250, 194, 39, 0);
-    transform: scale(1);
-  }
-  25% {
-    text-shadow: 0 0 12px rgba(250, 194, 39, 0.9);
-    transform: scale(1.1);
-  }
-  50% {
-    text-shadow: 0 0 0 rgba(250, 194, 39, 0);
-    transform: scale(1);
-  }
-  75% {
-    text-shadow: 0 0 12px rgba(250, 194, 39, 0.9);
-    transform: scale(1.1);
-  }
-  100% {
-    text-shadow: 0 0 0 rgba(250, 194, 39, 0);
-    transform: scale(1);
-  }
+  0% { text-shadow: 0 0 0 rgba(250, 194, 39, 0); transform: scale(1); }
+  25% { text-shadow: 0 0 12px rgba(250, 194, 39, 0.9); transform: scale(1.1); }
+  50% { text-shadow: 0 0 0 rgba(250, 194, 39, 0); transform: scale(1); }
+  75% { text-shadow: 0 0 12px rgba(250, 194, 39, 0.9); transform: scale(1.1); }
+  100% { text-shadow: 0 0 0 rgba(250, 194, 39, 0); transform: scale(1); }
 }
+
 /* Overlay-Zustände */
 .slide-up-enter-active,
 .slide-up-leave-active {
@@ -719,7 +792,7 @@ export default {
   right: 0;
   background: #f4ebd0;
   padding: 1rem;
-  z-index: 1000; /* wichtig: höher als alles darunter */
+  z-index: 1000;
 }
 
 .close-button {
@@ -739,4 +812,7 @@ export default {
     width: 100%;
   }
 }
+
+/* Optional: kleiner Stil, wenn gesperrt */
+.question-nav .btn[disabled] { opacity:.6; cursor:not-allowed; }
 </style>

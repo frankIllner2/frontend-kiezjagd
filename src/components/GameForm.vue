@@ -116,7 +116,7 @@
       <small>{{ localGame.mailtext?.length || 0}}/1200 Zeichen</small><br />
       <div class="form-group checkbox-group">
         <input type="checkbox" id="withCertificate" v-model="localGame.withCertificate" />
-        <label for="withCertificate">Mit Urkunde im Anhang</label>
+        <label for="withCertificate">E-Mail mit Urkunde im Anhang</label>
       </div>
     </div>
 

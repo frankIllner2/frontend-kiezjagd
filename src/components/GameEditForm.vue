@@ -122,7 +122,7 @@
             <br />
             <div class="form-group checkbox-group">
               <input type="checkbox" id="withCertificate" v-model="game.withCertificate" />
-              <label for="withCertificate">Mit Urkunde im Anhang</label>
+              <label for="withCertificate">E-Mail mit Urkunde im Anhang</label>
             </div>
           </div>
 

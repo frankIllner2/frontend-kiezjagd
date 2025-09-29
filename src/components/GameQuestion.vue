@@ -31,7 +31,12 @@
 
     <!-- Freitextantwort -->
     <div v-if="question.type === 'text'" class="text-answer">
-      <input v-model="userAnswer" maxlength="35" name="Antwort" placeholder="Deine Antwort" />
+      <input
+        v-model="userAnswer"
+        maxlength="35"
+        name="Antwort"
+        placeholder="Deine Antwort"
+        :disabled="locked" />
     </div>
 
     <!-- Einzelne Auswahl (Single Choice) -->
@@ -40,14 +45,15 @@
         v-for="(option, index) in question.options"
         :key="index"
         class="option-card"
-        :class="{ selected: selectedOptions === index }"
+        :class="{ selected: selectedOptions === index, 'is-locked': locked }"
         @click="toggleOption(index)"
         role="button"
         tabindex="0"
         @keyup.enter="toggleOption(index)"
+        :aria-disabled="locked"
       >
         <!-- Text -->
-        <span v-if="option.type === 'text'" class="only-text">
+        <span v-if="option.type === 'text' " class="only-text">
           {{ option.text }}
           <SpeechButton v-if="(gameType === 'Mini'  || gameType === 'Medi') && option.text" :text="option.text" />
         </span>
@@ -77,8 +83,9 @@
       </div>
     </div>
 
-    <!-- Hinweis bei fehlender Antwort -->
-    <p v-if="attemptedSubmit && !isAnswerReady" class="form-hint form-hint--error">
+    <!-- Hinweise -->
+    <p v-if="locked" class="form-hint">Frühere Frage – nur ansehen, Antwort ist gesperrt.</p>
+    <p v-else-if="attemptedSubmit && !isAnswerReady" class="form-hint form-hint--error">
       Du hast noch keine Antwort ausgewählt.
     </p>
 
@@ -86,8 +93,8 @@
     <button
       v-if="!['anweisung', 'next'].includes(question.type)"
       class="btn btn--secondary"
-      :disabled="!isAnswerReady"
-      :aria-disabled="!isAnswerReady"
+      :disabled="!isAnswerReady || locked"
+      :aria-disabled="!isAnswerReady || locked"
       @click="submitAnswer"
     >
       Antwort senden
@@ -108,14 +115,13 @@
 import SpeechButton from "./SpeechButton.vue";
 
 export default {
-  components: {
-    SpeechButton
-  },
+  components: { SpeechButton },
   props: {
     question: Object,
     currentIndex: Number,
     playerNames: Array,
     gameType: String,
+    locked: { type: Boolean, default: false }  // 🔹 NEU
   },
   data() {
     return {
@@ -202,10 +208,12 @@ export default {
       }
     },
     toggleOption(index) {
+      if (this.locked) return; // 🔹 Block bei Lesemodus
       this.selectedOptions = this.selectedOptions === index ? -1 : index;
       if (this.selectedOptions !== -1) this.attemptedSubmit = false;
     },
     submitAnswer() {
+      if (this.locked) return; // 🔹 Block bei Lesemodus
       if (!this.isAnswerReady) {
         this.attemptedSubmit = true;
         return;
@@ -217,7 +225,7 @@ export default {
       if (this.question.type === "text") {
         isCorrect =
           this.userAnswer.trim().toLowerCase() ===
-          this.question.answer.toLowerCase();
+          String(this.question.answer || "").toLowerCase();
       } else if (this.question.type === "multiple") {
         const correctIndex = this.question.options.findIndex(
           (option) => option.correct
@@ -230,11 +238,13 @@ export default {
       this.selectedOptions = -1;
     },
     saveProgress(index) {
+      // Hinweis: Der parent speichert bereits mit gameId-Namespace.
+      // Dieses Feld ist nur noch ein generisches Fallback.
       localStorage.setItem("currentQuestionIndex", index);
-      console.log(`📍 Fortschritt gespeichert: Frage ${index + 1}`);
+      console.log(`📍 Fortschritt (local) gespeichert: Frage ${index + 1}`);
     },
     getCorrectImageUrl(imageUrl) {
-      return imageUrl.startsWith("http://localhost")
+      return imageUrl && imageUrl.startsWith("http://localhost")
         ? imageUrl.replace("localhost", window.location.hostname)
         : imageUrl;
     }
@@ -256,5 +266,11 @@ export default {
 button[disabled] {
   opacity: .5;
   cursor: not-allowed;
+}
+
+/* 🔹 Optik, wenn gesperrt */
+.option-card.is-locked {
+  cursor: not-allowed;
+  opacity: .7;
 }
 </style>
