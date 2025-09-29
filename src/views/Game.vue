@@ -57,12 +57,11 @@
 
         <div>
           Frage {{ currentQuestionIndex + 1 }} / {{ questions.length }}
-          <small v-if="currentQuestionIndex < progressIndex">(nur ansehen)</small>
         </div>
 
         <!-- Weiter nur anzeigen, wenn man schon einmal die nächste Frage besucht hat -->
         <button
-          v-if="currentQuestionIndex > 0 && canForward"
+          v-if="canForward"
           class="btn btn--third"
           @click="goForward"
         >
@@ -89,6 +88,7 @@
           :currentIndex="currentQuestionIndex"
           :gameType="gameType"
           :feedbackMessage="feedbackMessage"
+          :locked="currentQuestionIndex < progressIndex"
           @submitAnswer="handleAnswer"
         />
       </transition>

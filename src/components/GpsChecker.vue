@@ -13,7 +13,7 @@
     <SpeechButton
       v-if="gameType === 'Mini' || gameType === 'Medi'"
       :text="question.question"
-    />
+    /><br />
 
     <button
       class="btn btn--primary"
@@ -33,7 +33,7 @@
     <ul v-if="showTips" class="tips">
       <li>Aktiviere GPS/Standort am Gerät und erlaube den Zugriff im Browser.</li>
       <li>Geht ein paar Meter ins Freie oder wartet kurz für ein genaueres Signal.</li>
-      <li>Prüft, ob ihr die Seite über <strong>https://</strong> geöffnet habt.</li>
+      <li>Prüft, ob ihr die Seite über https:// geöffnet habt.</li>
     </ul>
   </div>
 </template>

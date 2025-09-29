@@ -11,49 +11,54 @@
     <hr style="border-width: 60%;">
 
     <p v-if="currentSalutation">
-      {{ currentSalutation }} <span v-html=" question.question"></span>
+      {{ currentSalutation }} <span v-html="question.question"></span>
       <SpeechButton v-if="gameType === 'Mini' || gameType === 'Medi'" :text="fullQuestionText" />
     </p>
     <p v-else>
-      <span v-html=" question.question"></span>
+      <span v-html="question.question"></span>
       <SpeechButton v-if="gameType === 'Mini' || gameType === 'Medi'" :text="fullQuestionText" />
     </p>
 
-    <!-- Frage mit Bild -->
+    <!-- Bild -->
     <div v-if="question.imageUrl" class="question-image">
       <img :src="getCorrectImageUrl(question.imageUrl)" alt="Frage Bild" />
     </div>
 
-    <!-- Frage mit Sound -->
+    <!-- Audio -->
     <div v-if="question.audioUrl" class="question-audio">
       <audio :src="getCorrectImageUrl(question.audioUrl)" controls />
     </div>
 
-    <!-- Freitextantwort -->
+    <!-- Freitext -->
     <div v-if="question.type === 'text'" class="text-answer">
       <input
-        v-model="userAnswer"
+        v-model="userAnswerProxy"
         maxlength="35"
         name="Antwort"
         placeholder="Deine Antwort"
-        :disabled="locked" />
+        :disabled="locked"
+        :readonly="locked"
+        aria-label="Freitext-Antwort"
+      />
     </div>
 
-    <!-- Einzelne Auswahl (Single Choice) -->
+    <!-- Single Choice -->
     <div v-else-if="question.type === 'multiple'" class="single-choice">
       <div
         v-for="(option, index) in question.options"
         :key="index"
         class="option-card"
         :class="{ selected: selectedOptions === index, 'is-locked': locked }"
-        @click="toggleOption(index)"
+        @click="onOptionClick(index)"
+        @mousedown.prevent="locked && true"
+        @touchstart.prevent="locked && true"
         role="button"
-        tabindex="0"
-        @keyup.enter="toggleOption(index)"
+        :tabindex="locked ? -1 : 0"
+        @keyup.enter="onOptionEnter(index)"
         :aria-disabled="locked"
       >
         <!-- Text -->
-        <span v-if="option.type === 'text' " class="only-text">
+        <span v-if="option.type === 'text'" class="only-text">
           {{ option.text }}
           <SpeechButton v-if="(gameType === 'Mini'  || gameType === 'Medi') && option.text" :text="option.text" />
         </span>
@@ -89,18 +94,18 @@
       Du hast noch keine Antwort ausgewählt.
     </p>
 
-    <!-- Standard-Antwort Button -->
+    <!-- Senden -->
     <button
       v-if="!['anweisung', 'next'].includes(question.type)"
       class="btn btn--secondary"
-      :disabled="!isAnswerReady || locked"
-      :aria-disabled="!isAnswerReady || locked"
+      :disabled="locked || !isAnswerReady"
+      :aria-disabled="locked || !isAnswerReady"
       @click="submitAnswer"
     >
       Antwort senden
     </button>
 
-    <!-- Weiter-Button für "next" -->
+    <!-- Weiter (Typ next) -->
     <button
       v-else-if="question.type === 'next'"
       class="btn btn--primary"
@@ -121,16 +126,16 @@ export default {
     currentIndex: Number,
     playerNames: Array,
     gameType: String,
-    locked: { type: Boolean, default: false }  // 🔹 NEU
+    locked: { type: Boolean, default: false }
   },
   data() {
     return {
       userAnswer: "",
-      selectedOptions: -1,       // -1 = nichts gewählt
+      selectedOptions: -1, // -1 = nichts gewählt
       salutations: ["Hallo", "Hey"],
       players: [],
       currentSalutation: "",
-      attemptedSubmit: false     // zeigt Hinweis an
+      attemptedSubmit: false
     };
   },
   mounted() {
@@ -146,6 +151,18 @@ export default {
     currentIndex() {
       this.updateSalutation();
       this.saveProgress(this.currentIndex);
+      // Reset lokale Eingaben beim Fragewechsel
+      this.userAnswer = "";
+      this.selectedOptions = -1;
+      this.attemptedSubmit = false;
+    },
+    // Falls der Modus auf "locked" wechselt → alles zurücksetzen
+    locked(newVal) {
+      if (newVal) {
+        this.userAnswer = "";
+        this.selectedOptions = -1;
+        this.attemptedSubmit = false;
+      }
     }
   },
   computed: {
@@ -154,8 +171,19 @@ export default {
         ? `${this.currentSalutation} ${this.question.question}`
         : this.question.question;
     },
+    // v-model-Proxy, der im Lesemodus NICHT zurückschreibt
+    userAnswerProxy: {
+      get() {
+        return this.userAnswer;
+      },
+      set(val) {
+        if (this.locked) return; // blockt Tipp-Eingaben hart
+        this.userAnswer = val;
+      }
+    },
     // prüft, ob Antwort bereit ist
     isAnswerReady() {
+      if (this.locked) return false; // Lesemodus sperrt immer
       if (this.question.type === "text") {
         return this.userAnswer.trim().length > 0;
       }
@@ -170,12 +198,10 @@ export default {
       const savedPlayers = localStorage.getItem("playerNames");
       if (this.isValidJsonArray(savedPlayers)) {
         this.players = JSON.parse(savedPlayers);
-        console.log("✅ Spieler geladen:", this.players);
       } else if (Array.isArray(this.playerNames) && this.playerNames.length > 0) {
         const shuffled = this.shuffleArray([...this.playerNames]);
         this.players = shuffled;
         localStorage.setItem("playerNames", JSON.stringify(shuffled));
-        console.log("🔀 Spieler zufällig gemischt:", shuffled);
       } else {
         this.players = [];
       }
@@ -192,7 +218,7 @@ export default {
       try {
         const parsed = JSON.parse(data);
         return Array.isArray(parsed);
-      } catch (error) {
+      } catch {
         return false;
       }
     },
@@ -202,26 +228,30 @@ export default {
         const playerName = this.players[playerIndex];
         const salutation = this.salutations[this.currentIndex % this.salutations.length];
         this.currentSalutation = `${salutation} ${playerName}!`;
-        console.log(`🎯 Frage ${this.currentIndex + 1}: ${this.currentSalutation}`);
       } else {
         this.currentSalutation = "";
       }
     },
+    onOptionClick(index) {
+      if (this.locked) return;
+      this.toggleOption(index);
+    },
+    onOptionEnter(index) {
+      if (this.locked) return;
+      this.toggleOption(index);
+    },
     toggleOption(index) {
-      if (this.locked) return; // 🔹 Block bei Lesemodus
       this.selectedOptions = this.selectedOptions === index ? -1 : index;
       if (this.selectedOptions !== -1) this.attemptedSubmit = false;
     },
     submitAnswer() {
-      if (this.locked) return; // 🔹 Block bei Lesemodus
+      if (this.locked) return; // Lesemodus blockt
       if (!this.isAnswerReady) {
         this.attemptedSubmit = true;
         return;
       }
 
-      this.attemptedSubmit = false;
       let isCorrect = false;
-
       if (this.question.type === "text") {
         isCorrect =
           this.userAnswer.trim().toLowerCase() ===
@@ -236,39 +266,28 @@ export default {
       this.$emit("submitAnswer", { isCorrect });
       this.userAnswer = "";
       this.selectedOptions = -1;
+      this.attemptedSubmit = false;
     },
     saveProgress(index) {
-      // Hinweis: Der parent speichert bereits mit gameId-Namespace.
-      // Dieses Feld ist nur noch ein generisches Fallback.
       localStorage.setItem("currentQuestionIndex", index);
-      console.log(`📍 Fortschritt (local) gespeichert: Frage ${index + 1}`);
     },
-    getCorrectImageUrl(imageUrl) {
-      return imageUrl && imageUrl.startsWith("http://localhost")
-        ? imageUrl.replace("localhost", window.location.hostname)
-        : imageUrl;
+    getCorrectImageUrl(url) {
+      return url && url.startsWith("http://localhost")
+        ? url.replace("localhost", window.location.hostname)
+        : url;
     }
   }
 };
 </script>
 
 <style scoped>
-.form-hint {
-  margin: .75rem 0 0;
-  font-size: 0.95rem;
-}
-.form-hint--error {
-  color: #b00020;
-}
-.option-card.selected {
-  outline: 2px solid currentColor;
-}
-button[disabled] {
-  opacity: .5;
-  cursor: not-allowed;
-}
+.form-hint { margin: .75rem 0 0; font-size: 0.95rem; }
+.form-hint--error { color: #b00020; }
 
-/* 🔹 Optik, wenn gesperrt */
+.option-card.selected { outline: 2px solid currentColor; }
+button[disabled] { opacity: .5; cursor: not-allowed; }
+
+/* 🔒 Lesemodus-Optik und Interaktion */
 .option-card.is-locked {
   cursor: not-allowed;
   opacity: .7;

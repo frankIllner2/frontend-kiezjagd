@@ -1,25 +1,21 @@
 <template>
   <button @click="speakText" :disabled="isSpeaking" class="speech-btn">
-    <font-awesome-icon
-      icon="volume-up"
-      :class="{ 'is-speaking': isSpeaking }"
-    />
+    <font-awesome-icon icon="volume-up" :class="{ 'is-speaking': isSpeaking }" />
   </button>
 </template>
-
 
 <script>
 export default {
   props: {
     text: {
       type: String,
-      required: true
-    }
+      required: true,
+    },
   },
   data() {
     return {
       isSpeaking: false,
-      selectedVoice: null
+      selectedVoice: null,
     };
   },
   mounted() {
@@ -34,10 +30,11 @@ export default {
       const voices = window.speechSynthesis.getVoices();
       console.log("🎙️ Verfügbare Stimmen:", voices);
 
-      this.selectedVoice = voices.find(voice => voice.name === "Google Deutsch") ||
-        voices.find(voice => voice.name === "Microsoft Katja - German (Germany)") ||
-        voices.find(voice => voice.name === "Microsoft Hedda - German (Germany)") ||
-        voices.find(voice => voice.name === "Microsoft Stefan - German (Germany)");
+      this.selectedVoice =
+        voices.find((voice) => voice.name === "Google Deutsch") ||
+        voices.find((voice) => voice.name === "Microsoft Katja - German (Germany)") ||
+        voices.find((voice) => voice.name === "Microsoft Hedda - German (Germany)") ||
+        voices.find((voice) => voice.name === "Microsoft Stefan - German (Germany)");
 
       console.log("✅ Gewählte Stimme:", this.selectedVoice?.name || "Standard");
     },
@@ -63,7 +60,7 @@ export default {
       const utterance = new SpeechSynthesisUtterance(plainText);
       utterance.lang = "de-DE";
       utterance.rate = 0.95;
-      utterance.pitch = 1.15;
+      utterance.pitch = 1.2;
       utterance.volume = 1;
 
       if (this.selectedVoice) {
@@ -77,7 +74,7 @@ export default {
       };
 
       window.speechSynthesis.speak(utterance);
-    }
-  }
+    },
+  },
 };
 </script>
