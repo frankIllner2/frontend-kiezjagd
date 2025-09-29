@@ -75,7 +75,7 @@
           v-if="currentQuestion && currentQuestion.type === 'anweisung'"
           :key="'gps-' + currentQuestionIndex"
           :question="currentQuestion"
-          :locked="currentQuestionIndex < progressIndex"
+          :locked="lockedForCurrent"
           :onSuccess="nextQuestion"
           :gameType="gameType"
         />
@@ -88,7 +88,7 @@
           :currentIndex="currentQuestionIndex"
           :gameType="gameType"
           :feedbackMessage="feedbackMessage"
-          :locked="currentQuestionIndex < progressIndex"
+          :locked="lockedForCurrent"
           @submitAnswer="handleAnswer"
         />
       </transition>
@@ -243,6 +243,12 @@ export default {
     canForward() {
       return this.currentQuestionIndex < Math.min(this.questions.length - 1, this.viewMaxIndex);
     },
+    lockedForCurrent() {
+      // Nur gesperrt, wenn wir auf einer FRÜHEREN Frage sind.
+      // Die aktuelle, zu beantwortende Frage hat Index === progressIndex.
+      return this.currentQuestionIndex < this.progressIndex;
+    },
+
 
   },
   async mounted() {
@@ -701,7 +707,7 @@ export default {
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: space-between;
+  justify-content: space-around; 
 }
 
 /* Startformular */
