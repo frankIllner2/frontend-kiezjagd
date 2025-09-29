@@ -43,24 +43,22 @@
     </div>
 
     <!-- Single Choice -->
-    <div v-else-if="question.type === 'multiple'" class="single-choice">
+    <div v-else-if="question.type === 'multiple'" class="single-choice" :class="{ locked: locked }">
       <div
         v-for="(option, index) in question.options"
-        :key="index"
-        class="option-card"
-        :class="{ selected: selectedOptions === index, 'is-locked': locked }"
-        @click="onOptionClick(index)"
-        @mousedown.prevent="locked && true"
-        @touchstart.prevent="locked && true"
-        role="button"
-        :tabindex="locked ? -1 : 0"
-        @keyup.enter="onOptionEnter(index)"
-        :aria-disabled="locked"
-      >
+          :key="index"
+          class="option-card"
+          :class="{ selected: selectedOptions === index }"
+          @click="onOptionClick(index)" 
+          role="button"
+          :tabindex="locked ? -1 : 0"
+          @keyup.enter="onOptionEnter(index)"
+          :aria-disabled="locked"
+        >
         <!-- Text -->
         <span v-if="option.type === 'text'" class="only-text">
           {{ option.text }}
-          <SpeechButton v-if="(gameType === 'Mini'  || gameType === 'Medi') && option.text" :text="option.text" />
+          <SpeechButton v-if="(gameType === 'Mini'  || gameType === 'Medi') && option.text" :text="option.text" @click.stop />
         </span>
 
         <!-- Bild -->
@@ -292,4 +290,17 @@ button[disabled] { opacity: .5; cursor: not-allowed; }
   cursor: not-allowed;
   opacity: .7;
 }
+/* Sperrt alle Klicks auf Optionen, wenn locked */
+.single-choice.locked .option-card {
+  pointer-events: none;
+  opacity: .7;
+  cursor: not-allowed;
+}
+
+/* Aber: Vorlesen-Button darf trotzdem klickbar sein */
+.single-choice.locked .speech-btn {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
 </style>
