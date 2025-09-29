@@ -41,7 +41,6 @@
                 </div>
               </div>
             </div>
-
           </div>
 
           <div class="form-group" :class="{ 'has-image': previewImage }">
@@ -70,6 +69,20 @@
               <label for="price">Preis</label>
               <input v-model="game.price" id="price" placeholder="Preis" required />
             </div>
+          </div>
+
+          <!-- 🔥 Sortierung (neu) -->
+          <div class="form-group">
+            <label for="sortIndex">Sortierung im Slider</label>
+            <input
+              id="sortIndex"
+              v-model.number="game.sortIndex"
+              type="number"
+              min="0"
+              step="1"
+              placeholder="z. B. 1 für ganz vorne"
+            />
+            <small>Kleinere Zahl = weiter vorne. Standard: 9999.</small>
           </div>
 
           <div class="form-group">
@@ -142,7 +155,6 @@
 
             <input type="checkbox" id="isVoucher" v-model="game.isVoucher" />
             <label for="isVoucher">Spiel mit Gutschein-Code einlösen</label>
-
           </div>
 
           <div class="form-group" v-if="game.isVoucher">
@@ -151,18 +163,16 @@
               id="voucherName"
               v-model="game.voucherName"
               placeholder="z. B. TEST2025"
-              
             />
           </div>
+
           <div class="form-group">
             <label for="landingPageUrl">Url - LP</label>
             <input
               id="landingPageUrl"
               v-model="game.landingPageUrl"
               placeholder="/spiel/spurensuche-mama"
-              
             />
-            
           </div>
 
           <div class="form-actions">
@@ -190,9 +200,10 @@
     </div>
   </div>
 </template>
+
 <script>
-import QuestionList from "@/components/QuestionList.vue"; 
-import OptimizedImageUploader from "@/components/OptimizedImageUploader.vue"; 
+import QuestionList from "@/components/QuestionList.vue";
+import OptimizedImageUploader from "@/components/OptimizedImageUploader.vue";
 import apiService from "@/services/apiService";
 
 export default {
@@ -212,8 +223,9 @@ export default {
         questions: [],
         isDisabled: false,
         isVoucher: false,
-        voucherName: "",        // 👈 neu
+        voucherName: "",
         gameImage: "",
+        sortIndex: 9999, // 🔥 neu: Default weit hinten
       },
       previewImage: null,
       uploadedImage: null,
@@ -231,8 +243,11 @@ export default {
     async fetchGame(id) {
       try {
         const response = await apiService.fetchGameById(id, true);
-        // Falls ältere Datensätze noch kein voucherName haben → Default setzen
-        this.game = { voucherName: "", ...response };
+        // Default-Werte abfedern (insb. sortIndex)
+        this.game = { voucherName: "", sortIndex: 9999, ...response };
+        if (this.game.sortIndex === undefined || this.game.sortIndex === null) {
+          this.game.sortIndex = 9999;
+        }
         this.uploadedImage = response.gameImage;
       } catch (error) {
         console.error("Fehler beim Laden des Spiels:", error);
@@ -283,9 +298,8 @@ export default {
         const payload = {
           ...this.game,
           gameImage: imageUrl,
-          // Sicherheit: Wenn Gutscheine für dieses Spiel deaktiviert sind,
-          // voucherName serverseitig nicht versehentlich beibehalten.
           voucherName: this.game.isVoucher ? this.game.voucherName : "",
+          // sortIndex ist bereits in this.game enthalten
         };
 
         await apiService.updateGame({ _id: this.id, ...payload });
@@ -300,10 +314,9 @@ export default {
 </script>
 
 <style lang="sass" scoped>
-
 .form-group--city-plz .two-col {
   display: grid;
-  grid-template-columns: minmax(90px,140px) 1fr; /* PLZ schmal, Stadt flexibel */
+  grid-template-columns: minmax(90px,140px) 1fr;
   gap: 12px;
   align-items: end;
 }
@@ -314,8 +327,7 @@ export default {
 
 @media (max-width: 640px) {
   .form-group--city-plz .two-col {
-    grid-template-columns: 1fr; /* mobil: untereinander */
+    grid-template-columns: 1fr;
   }
 }
-
 </style>

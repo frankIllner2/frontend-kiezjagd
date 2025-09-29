@@ -22,7 +22,7 @@
             @blur="onPlzBlur"
             @keydown="onPlzKeydown"
             type="search"
-            class="filters__input"
+            class="filters__input" 
             placeholder="Suche nach PLZ"
             inputmode="numeric"
             autocomplete="postal-code"
@@ -291,7 +291,7 @@ export default {
       return out;
     },
 
-    // echtes Filterergebnis (kann 0 sein)
+    // echtes Filterergebnis (kann 0 sein) – inkl. Sortierung
     rawFiltered() {
       let list = Array.isArray(this.games) ? this.games.slice() : [];
 
@@ -307,13 +307,40 @@ export default {
         list = list.filter((g) => String((g && g.ageGroup) || "").toLowerCase() === age);
       }
 
+      // 🔥 Sortierung: sortIndex (aufsteigend), dann Name
+      const toNum = (v) => {
+        const n = Number(v);
+        return Number.isFinite(n) ? n : 9999;
+      };
+      list.sort((a, b) => {
+        const sa = toNum(a && a.sortIndex);
+        const sb = toNum(b && b.sortIndex);
+        if (sa !== sb) return sa - sb;
+        const an = (a && a.name) ? String(a.name) : '';
+        const bn = (b && b.name) ? String(b.name) : '';
+        return an.localeCompare(bn, 'de');
+      });
+
       return list;
     },
 
-    // Fallback: bei 0 Treffern alle Spiele anzeigen
+    // Fallback: bei 0 Treffern alle Spiele anzeigen – ebenfalls sortiert
     filteredGames() {
       const hasFilter = !!this.plzQuery || this.selectedAge !== "Alle";
-      if (hasFilter && this.rawFiltered.length === 0) return this.games;
+      if (hasFilter && this.rawFiltered.length === 0) {
+        const toNum = (v) => {
+          const n = Number(v);
+          return Number.isFinite(n) ? n : 9999;
+        };
+        return (Array.isArray(this.games) ? this.games.slice() : []).sort((a, b) => {
+          const sa = toNum(a && a.sortIndex);
+          const sb = toNum(b && b.sortIndex);
+          if (sa !== sb) return sa - sb;
+          const an = (a && a.name) ? String(a.name) : '';
+          const bn = (b && b.name) ? String(b.name) : '';
+          return an.localeCompare(bn, 'de');
+        });
+      }
       return this.rawFiltered;
     },
   },
@@ -541,7 +568,6 @@ export default {
   },
 };
 </script>
-
 
 <style scoped>
 /* ---------- A11y Utilities ---------- */

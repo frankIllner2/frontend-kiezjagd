@@ -9,32 +9,32 @@
       </div>
 
       <div class="form-group form-group--city-plz">
-          <div class="two-col">
-            <div class="col col-plz">
-              <label for="plz">PLZ</label>
-              <input
-                id="plz"
-                v-model="localGame.plz"
-                placeholder="z. B. 10407"
-                inputmode="numeric"
-                maxlength="5"
-                autocomplete="postal-code"
-                required
-              />
-            </div>
+        <div class="two-col">
+          <div class="col col-plz">
+            <label for="plz">PLZ</label>
+            <input
+              id="plz"
+              v-model="localGame.plz"
+              placeholder="z. B. 10407"
+              inputmode="numeric"
+              maxlength="5"
+              autocomplete="postal-code"
+              required
+            />
+          </div>
 
-            <div class="col col-city">
-              <label for="city">Stadt</label>
-              <input
-                id="city"
-                v-model="localGame.city"
-                placeholder="z. B. Berlin"
-                autocomplete="address-level2"
-                required
-              />
-            </div>
+          <div class="col col-city">
+            <label for="city">Stadt</label>
+            <input
+              id="city"
+              v-model="localGame.city"
+              placeholder="z. B. Berlin"
+              autocomplete="address-level2"
+              required
+            />
           </div>
         </div>
+      </div>
     </div>
 
     <div class="form-group">
@@ -67,13 +67,27 @@
       </div>
     </div>
 
+    <!-- 🔥 Sortierung (neu) -->
+    <div class="form-group">
+      <label for="sortIndex">Sortierung im Slider</label>
+      <input
+        id="sortIndex"
+        v-model.number="localGame.sortIndex"
+        type="number"
+        min="0"
+        step="1"
+        placeholder="z. B. 1 für ganz vorne"
+      />
+      <small>Kleinere Zahl = weiter vorne. Standard: 9999.</small>
+    </div>
+
     <div class="form-group">
       <label for="description">Spielbeschreibung</label>
-      <textarea 
-        v-model="localGame.description" 
+      <textarea
+        v-model="localGame.description"
         id="description"
-        maxlength="560" 
-        placeholder="Kurze Beschreibung des Spiels hinzufügen" 
+        maxlength="560"
+        placeholder="Kurze Beschreibung des Spiels hinzufügen"
         rows="4"
         required
       ></textarea>
@@ -82,11 +96,11 @@
 
     <div class="form-group">
       <label for="prehistory">Vorgeschiechte</label>
-      <textarea 
-        v-model="localGame.prehistory" 
+      <textarea
+        v-model="localGame.prehistory"
         id="prehistory"
-        maxlength="650" 
-        placeholder="Die Geschichte des Spiels" 
+        maxlength="650"
+        placeholder="Die Geschichte des Spiels"
         rows="4"
       ></textarea>
       <small>{{ localGame.prehistory?.length || 0 }}/650 Zeichen</small>
@@ -94,11 +108,11 @@
 
     <div class="form-group">
       <label for="infohistory">Infos zur Geschichte</label>
-      <textarea 
-        v-model="localGame.infohistory" 
-        id="infohistory" 
-        maxlength="1200" 
-        placeholder="Infos zur Geschichte" 
+      <textarea
+        v-model="localGame.infohistory"
+        id="infohistory"
+        maxlength="1200"
+        placeholder="Infos zur Geschichte"
         rows="4"
       ></textarea>
       <small>{{ localGame.infohistory?.length || 0}}/1200 Zeichen</small>
@@ -106,11 +120,11 @@
 
     <div class="form-group">
       <label for="mailtext">Individueller E-Mail Text</label>
-      <textarea 
-        v-model="localGame.mailtext" 
-        id="mailtextEmail" 
-        maxlength="1200" 
-        placeholder="Email Text zum Spiel" 
+      <textarea
+        v-model="localGame.mailtext"
+        id="mailtextEmail"
+        maxlength="1200"
+        placeholder="Email Text zum Spiel"
         rows="4"
       ></textarea>
       <small>{{ localGame.mailtext?.length || 0}}/1200 Zeichen</small><br />
@@ -131,19 +145,19 @@
     </div>
 
     <div class="form-group checkbox-group">
-        <input type="checkbox" id="disabled" v-model="localGame.isDisabled" />
-        <label for="disabled">Spiel deaktivieren</label>
+      <input type="checkbox" id="disabled" v-model="localGame.isDisabled" />
+      <label for="disabled">Spiel deaktivieren</label>
 
-        <input type="checkbox" id="isVoucher" v-model="localGame.isVoucher" />
-        <label for="isVoucher">Spiel mit Gutschein-Code einlösen</label>
+      <input type="checkbox" id="isVoucher" v-model="localGame.isVoucher" />
+      <label for="isVoucher">Spiel mit Gutschein-Code einlösen</label>
     </div>
+
     <div class="form-group" v-if="localGame.isVoucher">
       <label for="voucherName">Gutschein-Name (Admin)</label>
       <input
         id="voucherName"
         v-model="localGame.voucherName"
         placeholder="z. B. TEST2025"
-        
       />
     </div>
 
@@ -153,7 +167,6 @@
         id="landingPageUrl"
         v-model="localGame.landingPageUrl"
         placeholder="/spiel/spurensuche-mama"
-        
       />
     </div>
 
@@ -175,16 +188,22 @@ export default {
   emits: ['save', 'update:game'],
   data() {
     return {
-      localGame: { voucherName: '', 
-      ...this.game }, 
-      previewImage: null, 
-      uploadedImage: null 
+      localGame: {
+        voucherName: '',
+        sortIndex: 9999, // 🔥 neu
+        ...this.game
+      },
+      previewImage: null,
+      uploadedImage: null
     };
   },
   watch: {
     game: {
       handler(newValue) {
-        this.localGame = { voucherName: '', ...newValue };
+        this.localGame = { voucherName: '', sortIndex: 9999, ...newValue };
+        if (this.localGame.sortIndex === undefined || this.localGame.sortIndex === null) {
+          this.localGame.sortIndex = 9999;
+        }
       },
       deep: true,
     },
@@ -203,7 +222,7 @@ export default {
     async saveGame() {
       try {
         let imageUrl = '';
-    
+
         if (this.uploadedImage instanceof File) {
           imageUrl = await apiService.uploadImage(this.uploadedImage);
         } else if (typeof this.localGame.gameImage === 'string' && this.localGame.gameImage.startsWith('http')) {
@@ -211,13 +230,15 @@ export default {
         } else {
           console.warn("⚠️ Kein Bild zum Hochladen ausgewählt.");
         }
-        const gameData = { 
+
+        const gameData = {
           ...this.localGame,
-          gameImage: imageUrl, 
+          gameImage: imageUrl,
           voucherName: this.localGame.isVoucher ? this.localGame.voucherName : ''
+          // sortIndex ist bereits enthalten
         };
-        
-        this.$emit('save', gameData);  // Sende die Daten an Admin.vue
+
+        this.$emit('save', gameData); // Sende die Daten an Admin.vue
       } catch (error) {
         console.error('❌ Fehler beim Hochladen des Bildes:', error);
       }
@@ -230,7 +251,7 @@ export default {
 /* City + PLZ nebeneinander, mobil untereinander */
 .form-group--city-plz .two-col {
   display: grid;
-  grid-template-columns: minmax(90px, 140px) 1fr; /* PLZ schmal, Stadt flexibel */
+  grid-template-columns: minmax(90px, 140px) 1fr;
   gap: 12px;
   align-items: end;
 }
@@ -241,9 +262,7 @@ export default {
 
 @media (max-width: 640px) {
   .form-group--city-plz .two-col {
-    grid-template-columns: 1fr; /* mobil: untereinander */
+    grid-template-columns: 1fr;
   }
 }
-
-
 </style>
