@@ -700,7 +700,6 @@ export default {
 .question-nav {
   display: flex;
   flex-direction: row;
-  gap: 35px;
   align-items: center;
   justify-content: space-between;
 }
