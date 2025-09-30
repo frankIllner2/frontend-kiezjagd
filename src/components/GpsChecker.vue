@@ -45,11 +45,12 @@ import SpeechButton from "@/components/SpeechButton.vue";
 export default {
   name: "GpsChecker",
   components: { SpeechButton },
+  emits: ["gpsSuccess", "gpsAttempt"],
   props: {
     question: { type: Object, required: true },
     onSuccess: { type: Function, required: true },
     locked: { type: Boolean, default: false },
-    gameType: { type: String, required: true } // 🔹 von Game.vue durchreichen
+    gameType: { type: String, required: true }
   },
   data() {
     return {
@@ -80,6 +81,8 @@ export default {
       }
 
       this.attempts++;
+      // 🔔 Game über aktuellen Stand informieren
+      this.$emit("gpsAttempt", { attempts: this.attempts });
 
       navigator.geolocation.getCurrentPosition(
         async (position) => {
@@ -97,7 +100,8 @@ export default {
 
             if (resultApi?.success) {
               this.success = true;
-              this.onSuccess();
+              // ⬇️ Animation in Game.vue starten (dort erfolgt auch der Wechsel zur nächsten Frage)
+              this.$emit("gpsSuccess", { attempts: this.attempts });
             } else {
               this.error =
                 "Ihr seid noch zu weit weg vom Zielpunkt. Geht näher hin und versucht es erneut.";
@@ -129,7 +133,7 @@ export default {
 
     handleFailedAttempt() {
       if (this.attempts >= this.maxAttempts) {
-        // Nach 3 Versuchen automatisch weiter
+        // Nach 3 Versuchen automatisch weiter (ohne Animation)
         this.error = null;
         this.success = true;
         this.onSuccess();
@@ -138,6 +142,7 @@ export default {
   },
 };
 </script>
+
 
 <style scoped>
 .instruction-image { max-width: 100%; margin-bottom: .75rem; }

@@ -78,6 +78,8 @@
           :locked="lockedForCurrent"
           :onSuccess="nextQuestion"
           :gameType="gameType"
+          @gpsAttempt="onGpsAttempt"
+          @gpsSuccess="handleGpsSuccess"
         />
 
         <!-- Alle anderen Fragetypen -->
@@ -414,7 +416,7 @@ export default {
         this.feedbackMessage = "Du bist auf der richtigen Spur!";
         this.feedbackMessage2 = "Versuch es noch einmal!";
 
-        // ❌ Random False-Bild
+        // Random False-Bild
         const falseImages = [
           require("@/assets/img/frida-false.png"),
           require("@/assets/img/fritz-false.png"),
@@ -444,7 +446,6 @@ export default {
         }
       });
 
-
       const clip = this.correctSounds[idx];
       this.lastCorrectSoundIndex = idx;
 
@@ -454,7 +455,6 @@ export default {
             console.debug('Autoplay blockiert (ok):', err);
           });
         }
-
     },
     getTimeBonus() {
       if (this.attemptCount === 0) return 60;
@@ -502,7 +502,7 @@ export default {
       }
     },
     handleAnimationDone() {
-      console.log("🎬 Animation beendet, starte Hochzählen...");
+      console.log(" Animation beendet, starte Hochzählen...");
 
       let currentStars = this.starCount;
       let targetStars = this.starCount + this.earnedStars;
@@ -638,6 +638,56 @@ export default {
         alert("❌ Fehler beim Speichern der Ergebnisse. Bitte versuche es erneut.");
       } finally {
         clearInterval(this.timerInterval);
+      }
+    },
+    onGpsAttempt({ attempts }) {
+      this.attemptCount = Math.max(0, (attempts || 1) - 1);
+    },
+
+    handleGpsSuccess() {
+      // Spiegel die "isCorrect"-Logik aus handleAnswer()
+      this.earnedStars = this.calculateStars();
+      this.feedbackMessage = '';
+      this.feedbackMessage2 = '';
+
+      // ✅ Random Correct-GIF
+      const correctGifs = [
+        require("@/assets/img/fritz-correct.gif"),
+        require("@/assets/img/frida-correct.gif")
+      ];
+      this.feedbackImage = correctGifs[Math.floor(Math.random() * correctGifs.length)];
+      this.showFeedback = true;
+
+      this.playRandomCorrectSound();
+
+      if (this.gameType === "Maxi") {
+        const bonus = this.getTimeBonus();
+        if (bonus > 0) {
+          setTimeout(() => {
+            this.$refs.timeBonusAnimation.startTimeBonusAnimation(bonus);
+          }, 1000);
+
+          // Weiter-Navigation passiert in onTimeBonusDone()
+          setTimeout(() => {
+            this.showFeedback = false;
+          }, 6000);
+        } else {
+          setTimeout(() => {
+            this.showFeedback = false;
+            this.nextQuestion(); // Kein Bonus => direkt weiter
+          }, 6000);
+        }
+      } else {
+        // Mini/Medi: Sternchen-Animation + Hochzählen => danach weiter
+        setTimeout(() => {
+          if (this.earnedStars > 0) {
+            this.$refs.feedbackAnimation.start(this.earnedStars);
+          }
+        }, 1000);
+
+        setTimeout(() => {
+          this.showFeedback = false;
+        }, 8000);
       }
     },
     goToHome() {
