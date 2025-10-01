@@ -169,7 +169,7 @@ const sections = [
       },
       {
         q: 'Wo kann ich meinen Gutschein oder Promo-Code eingeben?',
-        a: p`Im Stripe-Checkout findest du – sofern kein automatischer Rabatt aktiv ist – das Feld „Promotion code“. Code eingeben und bestätigen.`
+        a: p`Im Stripe-Checkout findest du – sofern kein automatischer Rabatt aktiv ist – das Feld „Gutscheincode“. Code eingeben und bestätigen.`
       },
       {
         q: 'Wie erhalte ich eine Rechnung?',
@@ -208,7 +208,7 @@ const sections = [
     items: [
       {
         q: 'Wie können wir euch erreichen?',
-        a: p`Am schnellsten per E-Mail an <a href="mailto:${contactEmail}">${contactEmail}</a>.`
+        a: p`Am schnellsten per E-Mail an <a href="mailto:info@kiezjagd.de">info@kiezjagd.de</a>.`
       }
     ]
   },
