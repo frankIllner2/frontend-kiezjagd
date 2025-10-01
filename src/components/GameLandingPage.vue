@@ -24,28 +24,29 @@
               class="game-image"
               v-if="gameData.gameImage"
             />
-            <div class="badge">{{ gameData.ageGroup }}</div>
+            <!-- Nur zeigen, wenn vorhanden -->
+            <div class="badge" v-if="gameData.ageGroup">{{ gameData.ageGroup }}</div>
           </div>
         </div>
 
         <div class="game-details">
           <h1>{{ gameData.name }}</h1>
-          <p>{{ gameData.description }}</p>
+          <p v-if="gameData.description">{{ gameData.description }}</p>
         </div>
       </div>
 
-      <!-- Teaser Infos -->
+      <!-- Teaser Infos (nur wenn Werte existieren) -->
       <div class="game-teasers">
-        <div class="game-teaser price">
+        <div class="game-teaser price" v-if="gameData.price">
           <strong>Preis:</strong> {{ gameData.price }}
         </div>
-        <div class="game-teaser duration">
+        <div class="game-teaser duration" v-if="gameData.playtime">
           <strong>Spieldauer:</strong> {{ gameData.playtime }}
         </div>
-        <div class="game-teaser start-location">
+        <div class="game-teaser start-location" v-if="gameData.startloction">
           <strong>Startort:</strong> {{ gameData.startloction }}
         </div>
-        <div class="game-teaser end-location">
+        <div class="game-teaser end-location" v-if="gameData.endloction">
           <strong>Endort:</strong> {{ gameData.endloction }}
         </div>
       </div>
@@ -161,6 +162,7 @@ export default {
       document.title = title;
 
       const setMeta = (name, content, attr = "name") => {
+        if (!content) return; // verhindert leere/„doppelte“ Platzhalter
         let tag = document.querySelector(`meta[${attr}="${name}"]`);
         if (!tag) {
           tag = document.createElement("meta");
@@ -172,7 +174,7 @@ export default {
 
       // Basis
       setMeta("description", description);
-      setMeta("keywords", keywords);
+      if (this.gameData?.location) setMeta("keywords", keywords);
 
       // OpenGraph
       setMeta("og:title", title, "property");
@@ -181,13 +183,6 @@ export default {
       setMeta("og:url", url, "property");
       setMeta("og:image", image, "property");
       setMeta("og:site_name", "Kiezjagd", "property");
-
-      // Twitter
-      setMeta("twitter:card", "summary_large_image");
-      setMeta("twitter:title", title);
-      setMeta("twitter:description", description);
-      setMeta("twitter:image", image);
-      setMeta("twitter:site", "@kiezjagd");
 
       // Canonical
       let link = document.querySelector('link[rel="canonical"]');
