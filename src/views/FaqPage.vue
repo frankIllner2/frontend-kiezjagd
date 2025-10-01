@@ -155,7 +155,7 @@ const sections = [
       },
       {
         q: 'Kann ich das Spiel auf mehreren Geräten nutzen?',
-        a: p`Euer Zugang ist 72 Stunden nach Start gültig. Standardmäßig ist das Spielen für das zuerst verwendete Gerät vorgesehen,
+        a: p`Euer Zugang ist 48 Stunden nach Start gültig. Standardmäßig ist das Spielen für das zuerst verwendete Gerät vorgesehen,
             damit Teams nicht parallel auf mehreren Geräten spielen.`
       }
     ]

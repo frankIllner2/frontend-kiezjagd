@@ -1,7 +1,11 @@
 <template>
   <div class="legal-wrap">
     <header class="legal-header">
-      <div class="brand">Kiezjagd</div>
+      <div class="logo">
+        <a href="/" aria-label="Zur Startseite">
+          <img src="@/assets/img/logo.svg" alt="Kiezjagd" />
+        </a>
+      </div>
       <div class="meta">
         Stand: <time datetime="2025-08-27">27.08.2025</time>
       </div>
