@@ -3,41 +3,95 @@
     <h1 class="page-title">Häufige Fragen (FAQ)</h1>
 
     <!-- Intro -->
-    <p class="intro">
-      Hier beantworten wir die wichtigsten Fragen rund um Kiezjagd: Bedienung, Technik,
-      Rechtliches und Kontakt. Tippe/Klicke auf eine Frage, um die Antwort zu öffnen.
-    </p>
+    <div class="intro">
+    <p>Willkommen bei den Kiezjagd-FAQs!</p><br />
+    <p>Hier findest du Antworten auf alles, was euch rund um unsere Abenteuer-Spiele beschäftigt:<br>
+    Wie funktioniert Kiezjagd?<br>
+    Was braucht ihr an Technik?<br>
+    Und was ist, wenn mal etwas nicht klappt?</p><br />
+    <p>Tippt oder klickt einfach auf eine Frage und schon öffnet sich die passende Antwort – schnell, einfach und verständlich. So seid ihr bestens vorbereitet für euer Rätsel-Abenteuer im Kiez!</p>
+    </div>
+
+    <!-- Suchleiste -->
+    <div class="faq-controls" role="search">
+      <label class="visually-hidden" for="faq-search">FAQ durchsuchen</label>
+      <input
+        id="faq-search"
+        v-model="query"
+        type="search"
+        inputmode="search"
+        placeholder="Suche nach Stichworten (z. B. Standort, Gutschein, Audio)"
+        aria-label="FAQ durchsuchen"
+      />
+    </div>
 
     <!-- Categories as accordions -->
-    <div v-for="(section, sIdx) in sections" :key="sIdx" class="faq-section">
+    <div
+      v-for="(section, sIdx) in filteredSections"
+      :key="sIdx"
+      class="faq-section"
+      v-show="section.items.length"
+    >
       <h2 class="section-title">{{ section.title }}</h2>
 
-      <details v-for="(item, idx) in section.items" :key="idx" class="faq-item" :open="idx === 0 && sIdx === 0">
+      <details
+        v-for="(item, idx) in section.items"
+        :key="idx"
+        class="faq-item"
+        :open="isInitiallyOpen(section, item, sIdx, idx)"
+      >
         <summary class="faq-q">{{ item.q }}</summary>
-        <div class="faq-a" v-html="item.a" />
+        <div class="faq-a">
+          <div class="faq-a-inner" v-html="item.a" />
+        </div>
       </details>
     </div>
 
-    <!-- Contact Teaser -->
-    <div class="contact-teaser">
-      <h2>Noch Fragen?</h2>
-      <p>
-        Schreib uns gern: <a :href="`mailto:${contactEmail}`">{{ contactEmail }}</a>
-        <span v-if="contactPhone"> · Tel.: <a :href="`tel:${contactPhone}`">{{ contactPhone }}</a></span>
-      </p>
+    <p v-if="filteredSections.length === 0" class="no-results">
+      Keine Treffer. Versuch es mit anderen Begriffen (z. B. „Standort“, „Promo-Code“, „Rechnung“).
+    </p>
+
+    <div class="wrapper">
+      <div class="icons-header" aria-hidden="true">
+        <img src="@/assets/img/icons/fritz.png" alt="" />
+        <img src="@/assets/img/icons/susi.png" alt="" />
+        <img src="@/assets/img/icons/julia.png" alt="" />
+        <img src="@/assets/img/icons/frank.png" alt="" />
+      </div>
+
+      <!-- Contact Teaser -->
+      <div class="contact-teaser">
+        <b>Noch Fragen?</b>
+        <p>
+          Schreib uns gern: <a :href="`mailto:${contactEmail}`">{{ contactEmail }}</a>
+          <span v-if="contactPhone"> · Tel.: <a :href="`tel:${contactPhone}`">{{ contactPhone }}</a></span>
+        </p>
+      </div>
     </div>
   </section>
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 
-// 🔧 Passen Sie diese Kontaktdaten an Ihr Projekt an
+// 🔧 Kontakte anpassen
 const contactEmail = 'support@kiezjagd.de'
-const contactPhone = '' // optional, z. B. '+49 30 1234567'
+const contactPhone = '' // z. B. '+49 30 1234567'
 
-// Helper to wrap paragraphs safely
+// Helper: Paragraph
 const p = (strings) => strings[0]
+
+// Suche
+const query = ref('')
+const stripTags = (s) => s.replace(/<[^>]*>/g, ' ')
+const isMatch = (item) => {
+  const q = query.value.trim().toLowerCase()
+  if (!q) return false
+  return (
+    item.q.toLowerCase().includes(q) ||
+    stripTags(item.a).toLowerCase().includes(q)
+  )
+}
 
 const sections = [
   {
@@ -45,27 +99,33 @@ const sections = [
     items: [
       {
         q: 'Was ist Kiezjagd?',
-        a: p`Kiezjagd ist ein interaktives Rätsel- und Entdeckungsspiel für Familien und Gruppen.
-            Ihr folgt einer Geschichte, löst Aufgaben vor Ort (z. B. an Brunnen, Statuen oder Schildern)
-            und sammelt Hinweise, um am Ende den Geheimcode zu knacken.`
+        a: p`Gemeinsam mit eurer Familie oder Freund:innen startet ihr draußen ein interaktives Abenteuer direkt in eurem Kiez.
+            Jede Kiezjagd erzählt eine spannende Geschichte und stellt euch vor Rätsel und Aufgaben, die sich an besonderen Orten verstecken.`
+      },
+      {
+        q: 'Was ist das Besondere an Kiezjagd?',
+        a: p`Kiezjagd ist interaktiv und verknüpft Draußenzeit mit spielerischem Lernen. Anders als bei klassischen Schnitzeljagden braucht es keine Vorbereitung.
+            Ihr wählt euer Spiel und euer Smartphone wird zum Spielleiter. So könnt ihr sofort loslegen – jederzeit und ohne Material.`
       },
       {
         q: 'Wie starte ich ein Spiel?',
-        a: p`Nach dem Kauf erhaltet ihr einen Link per E-Mail. Öffnet den Link auf eurem Gerät,
-            gebt euren Teamnamen ein und folgt der ersten Anweisung. Das Spiel führt euch Schritt für Schritt.`
+        a: p`Nach dem Kauf erhaltet ihr eine E-Mail mit eurem Spiel-Link. Klickt ihn an, tippt euren Teamnamen ein – und das Abenteuer startet.
+            Ab dann führt euch Kiezjagd Schritt für Schritt durch die Geschichte. Manchmal braucht die E-Mail ein paar Minuten – bitte etwas Geduld.`
       },
       {
         q: 'Wie lange dauert ein Spiel?',
-        a: p`Je nach Spiel und Tempo ca. 15–60 Minuten. Plant bei Ausflügen mit Kindern lieber etwas Luft ein.`
+        a: p`Je nach Spiel und Tempo seid ihr ca. 15 bis 60 Minuten unterwegs. Mit Kindern lohnt es sich, etwas Extra-Zeit einzuplanen
+            – für Staunen, Toben und kleine Pausen.`
       },
       {
         q: 'Brauche ich mobiles Internet?',
-        a: p`Ja, ein stabiler Internetzugang ist empfohlen. Kurze Unterbrechungen sind unkritisch,
-            die Seite puffert Inhalte. Für Standort-Aufgaben müssen die Standortdienste aktiviert sein.`
+        a: p`Ja, eine stabile Verbindung ist ideal. Kurze Aussetzer sind kein Problem – die Seite merkt sich den Fortschritt.
+            Für ortsbezogene Aufgaben müssen die Standortdienste aktiviert sein.`
       },
       {
         q: 'Kann ich mit mehreren Personen auf einem Gerät spielen?',
-        a: p`Ja. Am bequemsten spielt es sich zu zweit/dritt an einem Smartphone. Alternativ kann ein Tablet genutzt werden.`
+        a: p`Am bequemsten zu zweit oder dritt an einem Smartphone; ein Tablet geht auch. Seid ihr mehr Personen?
+            Teilt euch in zwei Teams auf – mit je einem eigenen Spiel-Link – und startet gleichzeitig.`
       }
     ]
   },
@@ -74,26 +134,24 @@ const sections = [
     items: [
       {
         q: 'Welche Geräte und Browser werden unterstützt?',
-        a: p`Aktuelle Versionen von Chrome, Safari, Firefox und Edge auf iOS (ab iOS 15) und Android (ab Android 9)
-            sowie moderne Desktop-Browser. Bitte automatische Browser-Updates aktivieren.`
+        a: p`Aktuelle Versionen von Chrome, Safari, Firefox und Edge auf iOS (ab iOS 15), Android (ab Android 9) und moderne Desktop-Browser.
+            Bitte automatische Browser-Updates aktivieren.`
       },
       {
-        q: 'Tablet ohne SIM – funktioniert die Standortprüfung?',
-        a: p`Ja. Verbindet das Tablet per WLAN und aktiviert die Standortdienste. Die Position wird dann über WLAN-Netze
-            (und ggf. GPS je nach Gerät) bestimmt.`
+        q: 'Funktioniert die Standortprüfung auch mit einem Tablet ohne SIM-Karte?',
+        a: p`Ja. Verbindet euer Tablet mit dem WLAN und schaltet die Standortdienste ein – der Standort wird über WLAN (und je nach Gerät auch GPS) bestimmt.`
       },
       {
-        q: 'Muss ich meinen Standort freigeben?',
-        a: p`Nur bei Aufgaben, die einen Ort prüfen. Der Browser fragt euch automatisch. Ihr könnt die Freigabe später in den Einstellungen widerrufen.`
+        q: 'Brauche ich die Standortfreigabe?',
+        a: p`Nur für Rätsel, die an einen Ort gebunden sind. Der Browser fragt euch automatisch; ihr könnt die Freigabe später wieder entziehen.`
       },
       {
         q: 'Speichert ihr meinen Standort?',
-        a: p`Nein. Die Standortprüfung passiert im Browser. Wir speichern lediglich, ob eine Aufgabe gelöst wurde – keine Roh-Koordinaten.`
+        a: p`Nein. Die Prüfung läuft im Browser. Wir speichern lediglich, ob eine Aufgabe gelöst wurde – keine Roh-Koordinaten.`
       },
       {
-        q: 'Audio wird nicht abgespielt – was tun?',
-        a: p`Tippt zuerst einmal auf den ▶️-Button (Autoplay-Schutz). Prüft die Systemlautstärke und den Stumm-Schalter.
-            In iOS: Lautlos-Schalter deaktivieren. In Android: Medienlautstärke erhöhen.`
+        q: 'Das Audio wird nicht abgespielt – was tun?',
+        a: p`Tippt einmal aktiv auf ▶️ (Autoplay-Schutz). Prüft Stumm-Schalter und Medienlautstärke. iOS: Lautlos-Schalter aus. Android: Medienlautstärke hoch.`
       },
       {
         q: 'Kann ich das Spiel auf mehreren Geräten nutzen?',
@@ -106,21 +164,21 @@ const sections = [
     title: 'Bestellung, Zahlung & Gutscheine',
     items: [
       {
-        q: 'Welche Zahlungsarten sind möglich?',
-        a: p`Die Bezahlung erfolgt sicher über Stripe mit gängigen Karten. Apple Pay / Google Pay können – je nach Gerät und Browser – ebenfalls verfügbar sein.`
+        q: 'Wie könnt ihr bezahlen?',
+        a: p`Einfach und sicher über Stripe mit gängigen Karten. Je nach Gerät und Browser funktionieren auch Apple Pay oder Google Pay.`
       },
       {
-        q: 'Wo gebe ich einen Gutschein- oder Promo-Code ein?',
-        a: p`Im Stripe-Checkout gibt es (sofern kein automatischer Rabatt aktiv ist) ein Feld "Promotion code".
-            Den Code dort eingeben und bestätigen.`
+        q: 'Wo kann ich meinen Gutschein oder Promo-Code eingeben?',
+        a: p`Im Stripe-Checkout findest du – sofern kein automatischer Rabatt aktiv ist – das Feld „Promotion code“. Code eingeben und bestätigen.`
       },
       {
-        q: 'Erhalte ich eine Rechnung / Bestätigung?',
-        a: p`Ja, nach dem Kauf erhaltet ihr eine E-Mail-Bestätigung mit Bestellinformationen und dem Spiel-Link.`
+        q: 'Wie erhalte ich eine Rechnung?',
+        a: p`Nach dem Kauf erhaltet ihr eine E-Mail-Bestätigung mit Bestellinfos sowie eine Rechnung. Den Spiel-Link erhaltet ihr in einer separaten E-Mail.`
       },
       {
         q: 'Bekommen wir am Ende eine Urkunde?',
-        a: p`Optional: Am Ende kann automatisch eine personalisierte PDF-Urkunde erzeugt und per E-Mail gesendet werden (wenn beim Spiel aktiviert).`
+        a: p`Bei manchen Kiezjagden gibt es am Ende eine persönliche PDF-Urkunde. Wenn die Funktion für das Spiel aktiviert ist,
+            bekommt ihr sie automatisch per E-Mail.`
       }
     ]
   },
@@ -128,23 +186,20 @@ const sections = [
     title: 'Rechtliches & Datenschutz',
     items: [
       {
-        q: 'Wie geht ihr mit Datenschutz um?',
-        a: p`Wir erheben nur die Daten, die für den Betrieb notwendig sind (z. B. E-Mail zur Zustellung des Spiel-Links).
-            Für Reichweitenmessung nutzen wir Plausible Analytics – cookielos und ohne personalisierte Profile.`
+        q: 'Wie steht’s mit dem Datenschutz?',
+        a: p`Wir erheben nur notwendige Daten (z. B. eure E-Mail für den Spiel-Link). Für Reichweitenmessung nutzen wir Plausible – cookielos und ohne Profile.`
       },
       {
-        q: 'Gibt es ein Widerrufsrecht?',
-        a: p`Für digitale Inhalte kann das Widerrufsrecht erlöschen, sobald ihr ausdrücklich zustimmt, dass wir mit der Ausführung vor Ablauf der Frist beginnen.
-            Details findet ihr in der Widerrufsbelehrung auf unserer Website.`
+        q: 'Habt ihr ein Widerrufsrecht?',
+        a: p`Bei digitalen Inhalten kann das Widerrufsrecht erlöschen, sobald ihr zustimmt, dass wir direkt starten. Details stehen in der Widerrufsbelehrung.`
       },
       {
-        q: 'Wer haftet bei Unfällen während des Spiels?',
-        a: p`Ihr spielt eigenverantwortlich im öffentlichen Raum. Achtet auf Verkehr, Wege und Witterung.
-            Kinder benötigen die Aufsicht ihrer Begleitpersonen.`
+        q: 'Wer haftet, wenn etwas passiert?',
+        a: p`Ihr spielt eigenverantwortlich im öffentlichen Raum. Achtet auf Verkehr, Wege und Wetter. Kinder brauchen die Begleitung und Aufsicht Erwachsener.`
       },
       {
-        q: 'Urheberrecht & Nutzung der Inhalte',
-        a: p`Texte, Bilder, Audio und Spielmaterialien sind urheberrechtlich geschützt. Eine Weitergabe oder Veröffentlichung außerhalb des Spiels ist nicht gestattet.`
+        q: 'Darf ich Texte, Bilder und Materialien weiterverwenden?',
+        a: p`Alle Inhalte sind urheberrechtlich geschützt und nur für das Spiel gedacht. Eine Weitergabe oder Veröffentlichung ist nicht erlaubt.`
       }
     ]
   },
@@ -153,12 +208,7 @@ const sections = [
     items: [
       {
         q: 'Wie können wir euch erreichen?',
-        a: p`Am schnellsten per E-Mail an <a href="mailto:${contactEmail}">${contactEmail}</a>.
-            Bitte nennt Spieltitel, Kaufdatum und – falls vorhanden – eure Bestellnummer, damit wir schneller helfen können.`
-      },
-      {
-        q: 'Support-Zeiten',
-        a: p`Wir antworten i. d. R. werktags binnen 24–48 Stunden.`
+        a: p`Am schnellsten per E-Mail an <a href="mailto:${contactEmail}">${contactEmail}</a>.`
       }
     ]
   },
@@ -166,25 +216,42 @@ const sections = [
     title: 'Troubleshooting (Kurz & Knapp)',
     items: [
       {
-        q: 'Seite reagiert nicht oder lädt langsam',
-        a: p`Browser neu laden, schwaches Netz wechseln (WLAN/LTE), ggf. Browser-Cache leeren. Notfalls Gerät neu starten.`
+        q: 'Die Seite reagiert nicht oder lädt langsam – was tun?',
+        a: p`Browser neu laden, schwaches Netz wechseln (WLAN/LTE), ggf. Browser-Cache leeren. Wenn gar nichts hilft: Gerät neu starten.`
       },
       {
-        q: 'Standort wird nicht erkannt',
-        a: p`Standortfreigabe erteilen, WLAN/GPS aktivieren, Browser-Rechte prüfen. Bei Tablets ohne SIM: mit WLAN verbinden.`
+        q: 'Warum wird mein Standort nicht erkannt?',
+        a: p`Standortfreigabe erteilen, WLAN/GPS aktivieren und Browser-Rechte prüfen. Bei Tablets ohne SIM: mit WLAN verbinden.`
       },
       {
-        q: 'Audio ist stumm',
-        a: p`Einmal aktiv abspielen (Tap/Klick), Stummschalter aus, Medienlautstärke hoch. Externe Bluetooth-Geräte prüfen.`
+        q: 'Warum höre ich kein Audio?',
+        a: p`Einmal aktiv auf ▶️ tippen, Stummschalter aus, Medienlautstärke hoch. Verbundene Bluetooth-Geräte prüfen.`
       }
     ]
   }
 ]
 
-// SEO: FAQPage Schema.org
+// Gefilterte Ansicht für die Suche
+const filteredSections = computed(() => {
+  const q = query.value.trim()
+  if (!q) return sections
+  const mapped = sections.map((sec) => ({
+    title: sec.title,
+    items: sec.items.filter(isMatch)
+  }))
+  return mapped.filter((sec) => sec.items.length > 0)
+})
+
+// Auto-Öffnen: Bei Suche öffnen wir nur die Treffer; ohne Suche bleibt (0,0) geöffnet
+const isInitiallyOpen = (section, item, sIdx, idx) => {
+  if (query.value.trim()) return isMatch(item)
+  return idx === 0 && sIdx === 0
+}
+
+// SEO: FAQPage Schema.org (unabhängig von der Suche immer mit allen Fragen)
 const schemaOrg = computed(() => {
-  const qa = sections.flatMap(sec =>
-    sec.items.map(item => ({
+  const qa = sections.flatMap((sec) =>
+    sec.items.map((item) => ({
       '@type': 'Question',
       name: item.q,
       acceptedAnswer: { '@type': 'Answer', text: item.a }
@@ -197,7 +264,7 @@ const schemaOrg = computed(() => {
   })
 })
 
-// JSON-LD via Head einfügen ohne zusätzliche Abhängigkeit
+// JSON-LD in <head> einfügen (ohne externe Abhängigkeit)
 let ldScriptEl = null
 onMounted(() => {
   try {
@@ -224,6 +291,7 @@ onUnmounted(() => {
   max-width: 960px;
   margin: 0 auto;
   padding: 1.5rem;
+  color: #355b4c;
 }
 .page-title {
   font-size: clamp(1.6rem, 2vw, 2.2rem);
@@ -231,9 +299,26 @@ onUnmounted(() => {
   margin: 0 0 0.75rem;
 }
 .intro {
-  color: #475569;
+  color: #355b4c;
   margin-bottom: 1.25rem;
 }
+
+/* Suche */
+.faq-controls { margin: 1rem 0 1.25rem; }
+.faq-controls input[type="search"] {
+  width: 100%;
+  padding: .75rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: .75rem;
+  font-size: 1rem;
+  outline: none;
+}
+.faq-controls input[type="search"]:focus {
+  border-color: #355b4c;
+  box-shadow: 0 0 0 3px rgba(53,91,76,.15);
+}
+.no-results { color: #6b7280; font-style: italic; margin: .75rem 0 1rem; }
+
 .faq-section { margin: 1.5rem 0; }
 .section-title {
   font-size: 1.125rem;
@@ -244,7 +329,7 @@ onUnmounted(() => {
   border: 1px solid #e5e7eb;
   border-radius: 0.75rem;
   margin: 0.5rem 0;
-  background: #fff;
+  background: #f4ebd0;
   overflow: hidden;
 }
 .faq-item[open] {
@@ -261,20 +346,30 @@ onUnmounted(() => {
 .faq-q::marker { display: none; }
 .faq-q::-webkit-details-marker { display: none; }
 .faq-q::after {
-  content: '\25BC';
+  content: '▼';
   position: absolute;
   right: 1rem;
   transition: transform .2s ease;
 }
 .faq-item[open] .faq-q::after { transform: rotate(180deg); }
-.faq-a {
-  padding: 0 1rem 1rem;
+
+/* Animierte Antwort (Fade + leichter Slide) */
+.faq-a { padding: 0 1rem 1rem; }
+.faq-a-inner {
   color: #334155;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity .22s ease, transform .22s ease;
 }
+.faq-item[open] .faq-a-inner {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 .contact-teaser {
   margin-top: 2rem;
   padding: 1rem;
-  background: #f8fafc;
+  background: #f4ebd0;
   border: 1px solid #e5e7eb;
   border-radius: 0.75rem;
 }
@@ -285,9 +380,45 @@ onUnmounted(() => {
   .faq-item { background: #0b1220; border-color: #1f2937; }
   .faq-item[open] { border-color: #334155; }
   .faq-q { color: #e5e7eb; }
-  .faq-a { color: #cbd5e1; }
+  .faq-a-inner { color: #cbd5e1; }
   .intro { color: #9aa7b3; }
   .section-title { color: #e5e7eb; }
   .contact-teaser { background: #0b1220; border-color: #1f2937; }
+}
+
+.icons-header {
+  display: flex;
+  justify-content: space-evenly;
+  flex-direction: row;
+  margin-bottom: -30px;
+}
+.icons-header img {
+  max-width: 100px;
+  height: auto;
+}
+
+/* Mobile: nur 1 Bild sichtbar */
+@media (max-width: 599px) {
+  .icons-header img:not(:first-child) { display: none; }
+}
+/* Tablet: nur die ersten 2 sichtbar */
+@media (min-width: 600px) and (max-width: 899px) {
+  .icons-header img:nth-child(n+3) { display: none; }
+}
+/* Größeres Tablet: nur die ersten 3 sichtbar */
+@media (min-width: 900px) and (max-width: 1199px) {
+  .icons-header img:nth-child(n+4) { display: none; }
+}
+/* Desktop: alle 4 sichtbar */
+@media (min-width: 1200px) {
+  .icons-header img { display: inline; }
+}
+
+/* A11y helper */
+.visually-hidden {
+  position: absolute !important;
+  height: 1px; width: 1px;
+  overflow: hidden; clip: rect(1px,1px,1px,1px);
+  white-space: nowrap;
 }
 </style>
