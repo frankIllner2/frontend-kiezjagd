@@ -59,7 +59,7 @@ export default {
 
       const utterance = new SpeechSynthesisUtterance(plainText);
       utterance.lang = "de-DE";
-      utterance.rate = 0.95;
+      utterance.rate = 1.05;
       utterance.pitch = 1.2;
       utterance.volume = 1;
 
