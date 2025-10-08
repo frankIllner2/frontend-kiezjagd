@@ -4,10 +4,11 @@
     <div class="form-group">
       <label for="teamName">Dein Team heißt</label>
       <input
-        v-model="localTeamName"
+        v-model="localTeamName" 
         id="teamName"
         placeholder="Teamname eingeben"
-        @blur="checkTeamName"
+        @input="onTeamInput"
+        @blur="checkTeamName" 
         maxlength="30" 
         required
       />
@@ -84,6 +85,7 @@ export default {
       localPlayerNames: [...(this.playerNames || [])],
       localTeamExists: this.teamExists || false,
       emailError: '',
+      checkTimer: null,
     };
   },
   watch: {
@@ -95,18 +97,26 @@ export default {
     },
   },
   methods: {
+    
+    normalizeName(s) {
+      return (s || '')
+        .normalize('NFKC')
+        .replace(/\s+/g, ' ')
+        .trim();
+    },
+    onTeamInput() {
+      clearTimeout(this.checkTimer);
+      this.checkTimer = setTimeout(() => this.checkTeamName(false), 300);
+    },
     async checkTeamName() {
-     
-      if (!this.localTeamName.trim()) {
-        this.localTeamExists = false;
-        return;
-      }
+      const name = this.normalizeName(this.localTeamName);
+      if (!name) { this.localTeamExists = false; return; }
       try {
-        const response = await apiService.checkTeamName(this.localTeamName, this.gameId);
-        this.localTeamExists = response.exists || false;
-      } catch (error) {
-        console.error('Fehler bei der Teamnamenprüfung:', error);
-        this.localTeamExists = false;
+        const res = await apiService.checkTeamName(name, this.gameId);
+        this.localTeamExists = !!(res && res.exists);
+      } catch (e) {
+        console.error('Teamcheck Fehler:', e);
+        this.localTeamExists = false; // im Zweifel nicht blockieren
       }
     },
 

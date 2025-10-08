@@ -185,7 +185,7 @@ export const apiService = {
 
   // Teamname prüfen
   checkTeamName(teamName, gameId) {
-    console.log('Name' + teamName);
+    console.log('id' + gameId);
     if (!teamName || !gameId) {
       throw new Error('Teamname und Spiel-ID sind erforderlich.');
     }
