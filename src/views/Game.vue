@@ -80,6 +80,7 @@
           :gameType="gameType"
           @gpsAttempt="onGpsAttempt"
           @gpsSuccess="handleGpsSuccess"
+          @gpsFail="handleGpsFail"
         />
 
         <!-- Alle anderen Fragetypen -->
@@ -94,7 +95,6 @@
           @submitAnswer="handleAnswer"
         />
       </transition>
-
 
       <FeedbackAnimation
         v-if="showFeedback && currentQuestion?.type !== 'next'"
@@ -250,8 +250,6 @@ export default {
       // Die aktuelle, zu beantwortende Frage hat Index === progressIndex.
       return this.currentQuestionIndex < this.progressIndex;
     },
-
-
   },
   async mounted() {
     // Prüfe, ob der Nutzer über einen neuen Spiel-Link kommt
@@ -278,7 +276,6 @@ export default {
     this.viewMaxIndex = Number.isFinite(savedViewMax)
       ? savedViewMax
       : this.currentQuestionIndex;
-
 
     if (gameInProgress && savedGameId) {
       this.gameId = savedGameId;
@@ -431,6 +428,31 @@ export default {
           this.showFeedback = false;
         }, 5000);
       }
+    },
+    // 💥 NEU: Fail-Feedback bei gescheitertem GPS-Check
+    handleGpsFail(payload = {}) {
+      // Versuchsstand spiegeln (onGpsAttempt setzt bereits attempts-1 – hier nur absichern)
+      const attempts = typeof payload.attempts === "number" ? payload.attempts : (this.attemptCount + 1);
+      this.attemptCount = Math.max(0, attempts - 1);
+
+      // „falsch“-Feedback wie bei handleAnswer(false)
+      this.earnedStars = 0;
+      this.feedbackMessage = "Du bist auf der richtigen Spur!";
+      this.feedbackMessage2 = "Versuch es noch einmal!";
+
+      const falseImages = [
+        require("@/assets/img/frida-false.png"),
+        require("@/assets/img/fritz-false.png"),
+        require("@/assets/img/lupe-false.png")
+      ];
+      this.feedbackImage = falseImages[Math.floor(Math.random() * falseImages.length)];
+
+      this.showFeedback = true;
+
+      // nur zeigen, nicht weiterblättern (Weiter erst bei korrektem Standort oder Auto-Weiter nach 3 Versuchen)
+      setTimeout(() => {
+        this.showFeedback = false;
+      }, 5000);
     },
     playRandomCorrectSound() {
       if (!this.correctSounds || this.correctSounds.length === 0) return;
@@ -707,7 +729,6 @@ export default {
         console.debug('Pause-Fehler ignoriert:', e);
       }
     });
-
   },
 };
 </script>
