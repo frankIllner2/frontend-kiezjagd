@@ -1,7 +1,7 @@
 <template>
   <div class="ranking-wrapper">
     <BaseSlider
-      v-if="rankings.length > 0"
+      v-if="participatedRankings.length > 0"
       title="Mitgemacht"
       :items="filteredRankings"
       sliderId="ranking-slider"
@@ -25,12 +25,11 @@
               aria-label="Filter zurücksetzen"
             ></button>
           </div>
-          
         </div>
 
-        <!-- Hinweis, wenn keine Treffer → es werden alle gezeigt -->
+        <!-- Hinweis, wenn keine Treffer → es werden alle 'Mitgemacht'-Spiele gezeigt -->
         <p v-if="searchQuery && matchCount === 0" class="filterbar__info">
-          Keine Treffer – zeige alle Spiele.
+          Keine Treffer – zeige alle Spiele mit Ergebnissen.
         </p>
       </template>
 
@@ -42,8 +41,8 @@
             class="game-link"
           >
             <b>{{ item.gameName }}</b>
-           
           </router-link>
+
           <img
             v-if="getGameType(item.topResults) === 'Mini'"
             src="@/assets/img/icons/hand.png"
@@ -82,6 +81,9 @@
         </ul>
       </template>
     </BaseSlider>
+
+    <!-- Optional: Leerer Zustand -->
+    <p v-else class="filterbar__info">Noch keine Ergebnisse vorhanden.</p>
   </div>
 </template>
 
@@ -97,25 +99,38 @@ export default {
     return { searchQuery: "" };
   },
   computed: {
-    // echtes Filterergebnis (kann 0 sein)
+    // Nur Spiele, bei denen schon jemand gespielt hat
+    participatedRankings() {
+      return (this.rankings || []).filter(
+        (item) =>
+          Array.isArray(item.topResults) &&
+          item.topResults.length > 0 &&
+          // optional: Teamnamen vorhanden
+          item.topResults.some(r => (r.teamName || "").trim().length > 0)
+      );
+    },
+
+    // echtes Filterergebnis basierend auf participatedRankings
     rawFiltered() {
-      if (!this.searchQuery) return this.rankings;
+      if (!this.searchQuery) return this.participatedRankings;
       const q = this.normalize(this.searchQuery);
-      return this.rankings.filter(item =>
+      return this.participatedRankings.filter(item =>
         Array.isArray(item.topResults) &&
         item.topResults.some(r => this.normalize(r.teamName || "").includes(q))
       );
     },
-    // Fallback auf ALLE, wenn 0 Treffer
+
+    // Fallback zeigt ALLE mit Ergebnissen (nicht alle Rankings)
     filteredRankings() {
       if (this.searchQuery && this.rawFiltered.length === 0) {
-        return this.rankings;
+        return this.participatedRankings;
       }
       return this.rawFiltered;
     },
-    // Zähler zeigt die echte Trefferzahl (0..N)
+
+    // Zähler zeigt echte Trefferzahl (0..N) innerhalb der "Mitgemacht"-Menge
     matchCount() {
-      return this.searchQuery ? this.rawFiltered.length : this.rankings.length;
+      return this.searchQuery ? this.rawFiltered.length : this.participatedRankings.length;
     },
   },
   methods: {
@@ -204,19 +219,17 @@ export default {
 </script>
 
 <style scoped>
-/* Grundlayout: Mobile-First */
+/* (unverändert) */
 .filterbar {
   display: grid;
-  grid-template-columns: 1fr auto; /* Input+Clear | Count */
+  grid-template-columns: 1fr auto;
   align-items: center;
 }
-
 .filterbar__field {
   display: grid;
-  grid-template-columns: 1fr auto; /* Input | Clear */
+  grid-template-columns: 1fr auto;
   width: 100%;
 }
-
 .filterbar__input {
   width: 100%;
   padding: .65rem .75rem;
@@ -226,15 +239,12 @@ export default {
   color: #FAC227;
   background-color: #355b4c;
 }
-
 .filterbar__input::placeholder,
 .filterbar__input::-webkit-input-placeholder {
   color: #FAC227;
   opacity: 1;
 }
-
 .filterbar__input:focus::placeholder { color: #FAC227; }
-
 .filterbar__clear {
   border: none;
   background: transparent;
@@ -242,25 +252,12 @@ export default {
   cursor: pointer;
   font-size: 1rem;
 }
-
-.filterbar__count {
-  justify-self: end;
-  font-size: .85rem;
-  opacity: .7;
-}
-
-.filterbar__info {
-  margin-top: .35rem;
-  font-size: .85rem;
-  opacity: .75;
-}
+.filterbar__count { justify-self: end; font-size: .85rem; opacity: .7; }
+.filterbar__info { margin-top: .35rem; font-size: .85rem; opacity: .75; }
 
 /* Desktop kompakter */
 @media (min-width: 1024px) {
-  .filterbar {
-    justify-content: flex-end;
-    display: flex;
-  }
+  .filterbar { justify-content: flex-end; display: flex; }
   .filterbar__field { width: 320px; }
 }
 
@@ -275,19 +272,7 @@ export default {
   padding: 0 .1em;
   border-radius: .2em;
 }
-.filterbar__input::placeholder {
-  color: #FAC227;   /* deine Farbe */
-  opacity: 1;       /* Safari/Firefox setzen sonst oft < 1 */
-}
-
-/* Optional: WebKit-Fallback (ältere Safari/Chrome) */
-.filterbar__input::-webkit-input-placeholder {
-  color: #FAC227;
-  opacity: 1;
-}
-
-/* Auf Focus etwas heller/ausgrauen */
-.filterbar__input:focus::placeholder {
-  color: #FAC227;
-}
+.filterbar__input::placeholder { color: #FAC227; opacity: 1; }
+.filterbar__input::-webkit-input-placeholder { color: #FAC227; opacity: 1; }
+.filterbar__input:focus::placeholder { color: #FAC227; }
 </style>
