@@ -18,8 +18,8 @@ const axiosInstance = axios.create({
   timeout: 15000,
 });
 
-axiosInstance.interceptors.request.use(config => {
-  const token = localStorage.getItem("token");
+axiosInstance.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -34,22 +34,28 @@ function handleApiError(error, methodName) {
 
 // ✅ Hilfsfunktion zur Umwandlung der Dauer in Sekunden (robuster)
 function convertDurationToSeconds(duration) {
-  if (!duration || typeof duration !== 'string') return 0;
+  if (!duration) return 0;
 
-  // Formate wie "1h 2m 3s", "2m 10s", "45s"
-  const hms = duration.match(/(?:(\d+)h)?\s*(?:(\d+)m)?\s*(?:(\d+)s)?/i);
-  if (hms && (hms[1] || hms[2] || hms[3])) {
-    const hours = parseInt(hms[1] || '0', 10);
-    const minutes = parseInt(hms[2] || '0', 10);
-    const seconds = parseInt(hms[3] || '0', 10);
-    return hours * 3600 + minutes * 60 + seconds;
+  if (typeof duration === 'number' && Number.isFinite(duration)) {
+    return duration; // schon Sekunden
   }
 
-  // Fallback: "HH:MM:SS" oder "MM:SS"
-  const parts = duration.split(':').map(n => parseInt(n, 10));
-  if (parts.every(n => Number.isFinite(n))) {
-    if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
-    if (parts.length === 2) return parts[0] * 60 + parts[1];
+  if (typeof duration === 'string') {
+    // Formate wie "1h 2m 3s", "2m 10s", "45s"
+    const hms = duration.match(/(?:(\d+)\s*h)?\s*(?:(\d+)\s*m)?\s*(?:(\d+)\s*s)?/i);
+    if (hms && (hms[1] || hms[2] || hms[3])) {
+      const hours = parseInt(hms[1] || '0', 10);
+      const minutes = parseInt(hms[2] || '0', 10);
+      const seconds = parseInt(hms[3] || '0', 10);
+      return hours * 3600 + minutes * 60 + seconds;
+    }
+
+    // Fallback: "HH:MM:SS" oder "MM:SS"
+    const parts = duration.split(':').map((n) => parseInt(n, 10));
+    if (parts.every((n) => Number.isFinite(n))) {
+      if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+      if (parts.length === 2) return parts[0] * 60 + parts[1];
+    }
   }
 
   return 0;
@@ -62,9 +68,7 @@ async function performRequest(method, url, data = null) {
 
     if (m === 'get') {
       // Wenn data ein Objekt ist, als Query-Params verwenden
-      const config = data && typeof data === 'object'
-        ? { params: data }
-        : undefined;
+      const config = data && typeof data === 'object' ? { params: data } : undefined;
       const response = await axiosInstance.get(url, config);
       return response.data;
     }
@@ -79,7 +83,6 @@ async function performRequest(method, url, data = null) {
 
 // ✅ Normalizer nur für Orders (Pagination/Objekt-Shape)
 function normalizeOrdersResponse(out) {
-  // Falls performRequest bereits .data returned, ist out das Payload
   if (Array.isArray(out)) {
     // Abwärtskompatibel: alte Route, die ein Array zurückgab
     return { items: out, total: out.length, page: 1, pages: 1 };
@@ -88,7 +91,9 @@ function normalizeOrdersResponse(out) {
     const items = Array.isArray(out.items) ? out.items : [];
     const total = Number.isFinite(out.total) ? out.total : items.length;
     const page = Number.isFinite(out.page) ? out.page : 1;
-    const pages = Number.isFinite(out.pages) ? out.pages : Math.max(Math.ceil(total / (out.limit || items.length || 1)), 1);
+    const pages = Number.isFinite(out.pages)
+      ? out.pages
+      : Math.max(Math.ceil(total / (out.limit || items.length || 1)), 1);
     return { items, total, page, pages };
   }
   return { items: [], total: 0, page: 1, pages: 1 };
@@ -97,14 +102,13 @@ function normalizeOrdersResponse(out) {
 // ✅ API-Service-Objekt
 export const apiService = {
   // -----------------------
-  // Auth (optional zentral)
+  // Auth
   // -----------------------
   login(credentials) {
-    return performRequest('post', '/auth/login', credentials)
-      .then(data => {
-        if (data?.token) localStorage.setItem('token', data.token);
-        return data;
-      });
+    return performRequest('post', '/auth/login', credentials).then((data) => {
+      if (data?.token) localStorage.setItem('token', data.token);
+      return data;
+    });
   },
 
   validateToken() {
@@ -124,21 +128,21 @@ export const apiService = {
     return performRequest('get', '/games', params);
   },
 
-  // Alle Spiele abrufen für Admin — jetzt mit optionaler Projection via fields
-  // Beispiel-Aufruf:
+  // Alle Spiele abrufen für Admin — optional mit Projection via fields
+  // Beispiel:
   // apiService.fetchAllGames({ fields: '_id,name,city,ageGroup,encryptedId,isDisabled,questionsCount' })
   fetchAllGames({ fields } = {}) {
     const params = { admin: true };
     if (fields) params.fields = fields;
-    return performRequest("get", "/games", params); // ?admin=true&fields=...
+    return performRequest('get', '/games', params); // ?admin=true&fields=...
   },
 
-  // Zwei zufällige Spiele abrufen
+  // Zufällige Spiele abrufen
   getRandomGames() {
     return performRequest('get', '/games/random');
   },
 
-  // Ein Spiel anhand der encryptedId abrufen
+  // Spiel anhand encryptedId abrufen
   fetchGameById(encryptedId, isAdmin = false) {
     if (!encryptedId) throw new Error('⚠️ GameId darf nicht leer sein.');
     const params = isAdmin ? { admin: true } : undefined;
@@ -163,7 +167,7 @@ export const apiService = {
   // Spiel löschen
   deleteGame(id) {
     if (!id) throw new Error('⚠️ ID darf nicht leer sein.');
-    const isConfirmed = window.confirm("Bist du sicher, dass du dieses Spiel löschen möchtest?");
+    const isConfirmed = window.confirm('Bist du sicher, dass du dieses Spiel löschen möchtest?');
     if (!isConfirmed) return;
     return performRequest('delete', `/games/${id}`);
   },
@@ -187,7 +191,11 @@ export const apiService = {
     if (!encryptedId || !questionId || !question) {
       throw new Error('⚠️ encryptedId, questionId und Frage dürfen nicht leer sein.');
     }
-    return performRequest('put', `/games/${encodeURIComponent(encryptedId)}/questions/${questionId}`, question);
+    return performRequest(
+      'put',
+      `/games/${encodeURIComponent(encryptedId)}/questions/${questionId}`,
+      question
+    );
   },
 
   // Frage löschen
@@ -195,7 +203,7 @@ export const apiService = {
     if (!encryptedId || !questionId) {
       throw new Error('⚠️ encryptedId und questionId dürfen nicht leer sein.');
     }
-    const isConfirmed = window.confirm("Bist du sicher, dass du diese Frage löschen möchtest?");
+    const isConfirmed = window.confirm('Bist du sicher, dass du diese Frage löschen möchtest?');
     if (!isConfirmed) return;
     return performRequest('delete', `/games/${encodeURIComponent(encryptedId)}/questions/${questionId}`);
   },
@@ -210,7 +218,7 @@ export const apiService = {
 
   // Spiel kopieren
   copyGame(gameId) {
-    if (!gameId) throw new Error("⚠️ Spiel-ID darf nicht leer sein.");
+    if (!gameId) throw new Error('⚠️ Spiel-ID darf nicht leer sein.');
     return performRequest('post', `/games/${gameId}/copy`);
   },
 
@@ -221,21 +229,20 @@ export const apiService = {
   // Einzel-Ranking (Kompatibilität)
   fetchRanking(encryptedId, sort = true) {
     if (!encryptedId) throw new Error('⚠️ encryptedId darf nicht leer sein.');
-    return performRequest('get', `/games/${encodeURIComponent(encryptedId)}/ranking`)
-      .then(ranking => {
+    return performRequest('get', `/games/${encodeURIComponent(encryptedId)}/ranking`).then(
+      (ranking) => {
         if (sort && Array.isArray(ranking)) {
-          return ranking.slice().sort((a, b) => {
-            const durationA = convertDurationToSeconds(a.duration);
-            const durationB = convertDurationToSeconds(b.duration);
-            return durationA - durationB;
-          });
+          return ranking
+            .slice()
+            .sort((a, b) => convertDurationToSeconds(a.duration) - convertDurationToSeconds(b.duration));
         }
         return ranking;
-      });
+      }
+    );
   },
 
   // 🚀 Batch-Top8 für mehrere Spiele – erwartet Backend-Route /rankings/top8?ids=a,b,c
-  // Rückgabe: { [encryptedId]: [{ teamName, duration }, ...] }
+  // Rückgabe: { [encryptedId]: [{ teamName, duration, ... }], ... }
   async fetchRankingsBatch(encryptedIds = [], sort = true) {
     if (!encryptedIds.length) return {};
     const data = await performRequest('get', '/rankings/top8', { ids: encryptedIds.join(',') });
@@ -247,11 +254,9 @@ export const apiService = {
     const sorted = {};
     for (const id of Object.keys(data)) {
       const arr = Array.isArray(data[id]) ? data[id] : [];
-      sorted[id] = arr.slice().sort((a, b) => {
-        const da = convertDurationToSeconds(a.duration);
-        const db = convertDurationToSeconds(b.duration);
-        return da - db;
-      });
+      sorted[id] = arr
+        .slice()
+        .sort((a, b) => convertDurationToSeconds(a.duration) - convertDurationToSeconds(b.duration));
     }
     return sorted;
   },
@@ -262,12 +267,34 @@ export const apiService = {
     return performRequest('get', `/games/${encodeURIComponent(encryptedId)}/top8`);
   },
 
+  // (zusätzlich verfügbar – falls Top5-Route aktiv ist)
+  getTop5Results(encryptedId) {
+    if (!encryptedId) throw new Error('⚠️ encryptedId darf nicht leer sein.');
+    return performRequest('get', `/games/${encodeURIComponent(encryptedId)}/top5`);
+  },
+
   // Ergebnis speichern
   saveGameResult(result) {
-    if (!result || !result.gameId || !result.teamName || !result.email || !result.startTime || !result.endTime ) {
+    if (
+      !result ||
+      !result.gameId ||
+      !result.teamName ||
+      !result.email ||
+      !result.startTime ||
+      !result.endTime
+    ) {
       throw new Error('⚠️ Fehlende Felder beim Speichern des Ergebnisses.');
     }
     return performRequest('post', `/results`, result);
+  },
+
+  // ✅ Team speichern (neu/ergänzt)
+  saveTeam(team) {
+    if (!team || !team.name || !team.email || !team.gameId || !Array.isArray(team.players)) {
+      throw new Error('⚠️ Teamdaten sind unvollständig.');
+    }
+    // Erwartet: POST /api/teams (serverseitig vorhanden machen)
+    return performRequest('post', '/teams', team);
   },
 
   // Teamname prüfen
@@ -302,11 +329,12 @@ export const apiService = {
     const formData = new FormData();
     formData.append('image', file);
 
-    return axiosInstance.post('/upload/image', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    })
-    .then(res => res.data.imageUrl)
-    .catch(error => handleApiError(error, 'uploadImage'));
+    return axiosInstance
+      .post('/upload/image', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      .then((res) => res.data.imageUrl)
+      .catch((error) => handleApiError(error, 'uploadImage'));
   },
 
   uploadAudio(file) {
@@ -314,11 +342,12 @@ export const apiService = {
     const formData = new FormData();
     formData.append('audio', file); // Feldname muss zu `upload.single('audio')` passen
 
-    return axiosInstance.post('/upload/audio', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    })
-    .then(res => res.data.audioUrl)
-    .catch(error => handleApiError(error, 'uploadAudio'));
+    return axiosInstance
+      .post('/upload/audio', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      .then((res) => res.data.audioUrl)
+      .catch((error) => handleApiError(error, 'uploadAudio'));
   },
 
   // -----------------------
@@ -349,41 +378,53 @@ export const apiService = {
   },
 
   // -----------------------
-  // Newsletter (Admin)
+  // Newsletter (public & admin)
   // -----------------------
-  fetchNewsletter({ q = "", only = "all" } = {}) {
-    return performRequest("get", "/admin-newsletter", { q, only });
+  // Öffentlich
+  subscribeToNewsletter(email) {
+    if (!email) throw new Error('E-Mail erforderlich');
+    return performRequest('post', '/newsletter/subscribe', { email });
+  },
+
+  unsubscribeFromNewsletter(email) {
+    if (!email) throw new Error('E-Mail erforderlich');
+    return performRequest('post', '/newsletter/unsubscribe', { email });
+  },
+
+  // Admin
+  fetchNewsletter({ q = '', only = 'all' } = {}) {
+    return performRequest('get', '/admin-newsletter', { q, only });
   },
 
   sendNewsletter(payload) {
     // payload: { ids?: string[], subject: string, html?: string, text?: string, testEmail?: string }
     if (!payload || (!payload.testEmail && !payload.subject)) {
-      throw new Error("⚠️ Subject fehlt (außer beim Test mit testEmail).");
+      throw new Error('⚠️ Subject fehlt (außer beim Test mit testEmail).');
     }
-    return performRequest("post", "/admin-newsletter/send", payload);
+    return performRequest('post', '/admin-newsletter/send', payload);
   },
 
   newsletterUnsubscribe(id) {
-    if (!id) throw new Error("⚠️ ID fehlt.");
-    return performRequest("put", `/admin-newsletter/${id}/unsubscribe`);
+    if (!id) throw new Error('⚠️ ID fehlt.');
+    return performRequest('put', `/admin-newsletter/${id}/unsubscribe`);
   },
 
   newsletterReactivate(id) {
-    if (!id) throw new Error("⚠️ ID fehlt.");
-    return performRequest("put", `/admin-newsletter/${id}/reactivate`);
+    if (!id) throw new Error('⚠️ ID fehlt.');
+    return performRequest('put', `/admin-newsletter/${id}/reactivate`);
   },
 
   newsletterDelete(id) {
-    if (!id) throw new Error("⚠️ ID fehlt.");
-    return performRequest("delete", `/admin-newsletter/${id}`);
+    if (!id) throw new Error('⚠️ ID fehlt.');
+    return performRequest('delete', `/admin-newsletter/${id}`);
   },
 
   // Optional: CSV-Export für Newsletter-Liste
-  exportNewsletterCSV(only = "all") {
+  exportNewsletterCSV(only = 'all') {
     return axiosInstance
-      .get(`/admin-newsletter/export?filter=${encodeURIComponent(only)}`, { responseType: "blob" })
-      .then(res => res.data)
-      .catch(err => handleApiError(err, "exportNewsletterCSV"));
+      .get(`/admin-newsletter/export?filter=${encodeURIComponent(only)}`, { responseType: 'blob' })
+      .then((res) => res.data)
+      .catch((err) => handleApiError(err, 'exportNewsletterCSV'));
   },
 };
 

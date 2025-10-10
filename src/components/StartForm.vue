@@ -1,35 +1,37 @@
 <template>
-  <form @submit.prevent="submitForm" @keydown.enter.prevent="submitForm" class="start-form">
-    
+  <form @submit.prevent="submitForm" class="start-form" novalidate>
     <div class="form-group">
       <label for="teamName">Dein Team heißt</label>
       <input
-        v-model="localTeamName" 
+        v-model="localTeamName"
         id="teamName"
         placeholder="Teamname eingeben"
         @input="onTeamInput"
-        @blur="checkTeamName" 
-        maxlength="30" 
+        @blur="checkTeamName"
+        maxlength="30"
         required
+        :aria-invalid="localTeamExists ? 'true' : 'false'"
       />
-      <p v-if="localTeamExists" class="error">
+      <p v-if="localTeamExists" class="error" role="alert">
         Dieser Teamname ist bereits vergeben. Bitte wähle einen anderen.
       </p>
     </div>
 
     <div class="form-group">
-      <label for="email">Deine E-Maildresse ist</label>
+      <label for="email">Deine E-Mailadresse ist</label>
       <input
         v-model="localEmail"
         id="email"
         placeholder="E-Mail eingeben"
         type="email"
-        maxlength="40" 
+        maxlength="40"
         required
+        :aria-invalid="emailError ? 'true' : 'false'"
+        @blur="validateEmail"
       />
-      <p v-if="emailError" class="error">{{ emailError }}</p>
-
+      <p v-if="emailError" class="error" role="alert">{{ emailError }}</p>
     </div>
+
     <div class="form-group">
       <label for="playerCount">Wie viele Spieler seid ihr?</label>
       <input
@@ -44,7 +46,7 @@
     </div>
 
     <div class="form-group">
-      <label>Wie heisst du?</label>
+      <label>Wie heißt du?</label>
       <div
         v-for="(player, index) in localPlayerNames"
         :key="index"
@@ -59,8 +61,14 @@
       </div>
     </div>
 
-
-    <button type="submit" class="btn btn--secondary" :disabled="localTeamExists || !!emailError">Starte dein Spiel</button>
+    <button
+      type="submit"
+      class="btn btn--secondary"
+      :disabled="isSubmitting || localTeamExists || !!emailError || !canSubmit"
+      :aria-busy="isSubmitting ? 'true' : 'false'"
+    >
+      {{ isSubmitting ? 'Speichere…' : 'Starte dein Spiel' }}
+    </button>
   </form>
 </template>
 
@@ -68,6 +76,7 @@
 import { apiService } from '@/services/apiService';
 
 export default {
+  name: 'StartForm',
   props: {
     gameId: { type: String, required: true },
     teamName: String,
@@ -81,113 +90,171 @@ export default {
     return {
       localTeamName: this.teamName || '',
       localEmail: this.email || '',
-      localPlayerCount: this.playerCount || 1,
-      localPlayerNames: [...(this.playerNames || [])],
-      localTeamExists: this.teamExists || false,
+      localPlayerCount: this.playerCount && this.playerCount >= 1 ? Math.min(this.playerCount, 8) : 1,
+      localPlayerNames: Array.isArray(this.playerNames) && this.playerNames.length
+        ? [...this.playerNames].slice(0, 8)
+        : [''],
+      localTeamExists: !!this.teamExists,
       emailError: '',
       checkTimer: null,
+      lastCheckQuery: '',    // Race-Guard
+      isSubmitting: false,
     };
+  },
+  computed: {
+    canSubmit() {
+      const hasTeam = this.normalizeName(this.localTeamName).length > 0 && !this.localTeamExists;
+      const hasEmail = !this.emailError && this.localEmail.trim().length > 3;
+      const playersOk = this.localPlayerCount >= 1 && this.localPlayerCount <= 8 &&
+        this.localPlayerNames.length === this.localPlayerCount &&
+        this.localPlayerNames.every(n => this.normalizeName(n).length > 0);
+      return hasTeam && hasEmail && playersOk;
+    },
   },
   watch: {
     localPlayerCount() {
       this.adjustPlayerInputs();
     },
     teamExists(newValue) {
-      this.localTeamExists = newValue;
+      this.localTeamExists = !!newValue;
     },
   },
   methods: {
-    
+    // --- Utils ---
     normalizeName(s) {
       return (s || '')
         .normalize('NFKC')
         .replace(/\s+/g, ' ')
         .trim();
     },
+    validateEmail() {
+      this.emailError = '';
+      const email = this.localEmail.trim().toLowerCase();
+      if (!email) {
+        this.emailError = 'Bitte gib deine E-Mail-Adresse ein.';
+        return;
+      }
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
+      if (!emailRegex.test(email)) {
+        this.emailError = 'Bitte gib eine gültige E-Mail-Adresse ein.';
+      }
+    },
+
+    // --- Teamname-Check mit Debounce & Race-Guard ---
     onTeamInput() {
       clearTimeout(this.checkTimer);
-      this.checkTimer = setTimeout(() => this.checkTeamName(false), 300);
+      this.checkTimer = setTimeout(() => this.checkTeamName(), 300);
     },
     async checkTeamName() {
       const name = this.normalizeName(this.localTeamName);
-      if (!name) { this.localTeamExists = false; return; }
+      if (!name) {
+        this.localTeamExists = false;
+        return;
+      }
+      // Race-Guard: merke aktuelle Anfrage
+      this.lastCheckQuery = name;
       try {
         const res = await apiService.checkTeamName(name, this.gameId);
+        // veraltete Antwort ignorieren
+        if (this.lastCheckQuery !== name) return;
         this.localTeamExists = !!(res && res.exists);
       } catch (e) {
         console.error('Teamcheck Fehler:', e);
-        this.localTeamExists = false; // im Zweifel nicht blockieren
+        // Im Zweifel nicht blockieren (aber Nutzer nicht völlig im Dunkeln lassen)
+        this.localTeamExists = false;
       }
     },
 
+    // --- Spieler-Eingabefelder synchronisieren ---
+    onPlayerCountChange() {
+      // Eingabefehler korrigieren
+      if (!Number.isFinite(this.localPlayerCount)) this.localPlayerCount = 1;
+      if (this.localPlayerCount < 1) this.localPlayerCount = 1;
+      if (this.localPlayerCount > 8) this.localPlayerCount = 8;
+      this.adjustPlayerInputs();
+    },
+    adjustPlayerInputs() {
+      const count = Math.min(Math.max(this.localPlayerCount, 1), 8);
+      const current = this.localPlayerNames.length;
+
+      if (current < count) {
+        for (let i = current; i < count; i++) this.localPlayerNames.push('');
+      } else if (current > count) {
+        this.localPlayerNames.splice(count);
+      }
+
+      // Leereinträge säubern (aber Platzhalter behalten)
+      this.localPlayerNames = this.localPlayerNames.map(n => this.normalizeName(n));
+      if (!this.localPlayerNames.length) this.localPlayerNames = [''];
+    },
+
+    // --- Submit ---
     async submitForm() {
-      this.emailError = '';
-
-      // E-Mail prüfen
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
-      if (!emailRegex.test(this.localEmail)) {
-        this.emailError = 'Bitte gib eine gültige E-Mail-Adresse ein.';
-        return;
-      }
-
-      // Teamname prüfen
+      this.isSubmitting = true;
       try {
-        const check = await apiService.checkTeamName(this.localTeamName, this.gameId);
-        this.localTeamExists = check.exists || false;
-      } catch (err) {
-        console.error("❌ Fehler bei Teamnamenprüfung:", err);
-        this.localTeamExists = false; // optional: im Zweifel weitermachen
-      }
+        // Email prüfen
+        this.validateEmail();
+        if (this.emailError) return;
 
-      if (this.localTeamExists) {
-        console.warn('⚠️ Teamname ist bereits vergeben.');
-        return;
-      }
+        // Teamname final prüfen (aktuelle Version)
+        await this.checkTeamName();
+        if (this.localTeamExists) return;
 
-      const playerNamesArray = [...this.localPlayerNames];
+        // Spieler aufbereiten
+        const players = this.localPlayerNames
+          .map(n => this.normalizeName(n))
+          .filter(n => n.length > 0);
 
-      try {
+        // Sicherstellen, dass Länge passt
+        if (players.length !== this.localPlayerCount) {
+          // fallback: fehlende mit Platzhalter auffüllen
+          while (players.length < this.localPlayerCount) players.push(`Spieler ${players.length + 1}`);
+          if (players.length > 8) players.splice(8);
+        }
+
+        // Team speichern
         await apiService.saveTeam({
-          name: this.localTeamName,
-          email: this.localEmail,
-          players: playerNamesArray,
+          name: this.normalizeName(this.localTeamName),
+          email: this.localEmail.trim().toLowerCase(),
+          players,
           gameId: this.gameId,
         });
 
-        localStorage.setItem('playerNames', JSON.stringify(playerNamesArray));
+        // Lokale Speicherung der Namen (optional)
+        try {
+          localStorage.setItem('playerNames', JSON.stringify(players));
+        } catch (e) {
+          // non-blocking
+        }
 
+        // Elternkomponente informieren
         this.$emit('startGame', {
-          teamName: this.localTeamName,
-          email: this.localEmail,
+          teamName: this.normalizeName(this.localTeamName),
+          email: this.localEmail.trim().toLowerCase(),
           playerCount: this.localPlayerCount,
-          playerNames: playerNamesArray,
+          playerNames: players,
         });
       } catch (error) {
         console.error('❌ Fehler beim Speichern des Teams:', error);
         alert('Beim Speichern des Teams ist ein Fehler aufgetreten.');
-      }
-    },
-
-    adjustPlayerInputs() {
-      // Begrenzung auf maximal 8 Spieler
-      if (this.localPlayerCount > 8) {
-        this.localPlayerCount = 8;
-      }
-
-      const currentCount = this.localPlayerNames.length;
-
-      if (this.localPlayerCount > currentCount) {
-        for (let i = currentCount; i < this.localPlayerCount; i++) {
-          this.localPlayerNames.push('');
-        }
-      } else if (this.localPlayerCount < currentCount) {
-        this.localPlayerNames.splice(this.localPlayerCount);
+      } finally {
+        this.isSubmitting = false;
       }
     },
   },
   mounted() {
+    // Felder initial an playerCount angleichen
     this.adjustPlayerInputs();
   },
 };
-
 </script>
+
+<style scoped>
+.error {
+  color: #b00020;
+  margin-top: .25rem;
+}
+.player-input + .player-input {
+  margin-top: .25rem;
+}
+</style>
