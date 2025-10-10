@@ -316,7 +316,7 @@ export default {
     },
   },
   methods: {
-    // --- nur diese Head-Hilfe behalten wir ---
+    // --- Head-Helfer ---
     ensureCanonical(href) {
       let link = document.querySelector('link[rel="canonical"]');
       if (!link) { link = document.createElement('link'); link.setAttribute('rel', 'canonical'); document.head.appendChild(link); }
@@ -340,14 +340,100 @@ export default {
         target.focus({ preventScroll: true })
       }
     },
-    async fetchGames() {
+
+    // --- Datenfluss: EIN Call für Spiele, daraus Rankings bauen ---
+    async loadGames() {
       try {
-        const games = await apiService.fetchGames();
-        this.games = games.filter((game) => !game.isDisabled);
+        const games = await apiService.fetchGames(); // EIN Netzwerkaufruf
+        const active = (games || []).filter(g => !g.isDisabled);
+        this.games = active;   // für HomeSlider/HomeSlider3
+        return active;         // für Rankings weiterverwenden
       } catch (error) {
         console.error("Fehler beim Laden der Spiele:", error);
+        this.games = [];
+        return [];
       }
     },
+
+    async buildRankingsFromGames(activeGames = []) {
+      try {
+        if (!activeGames.length) {
+          this.randomRankings = [];
+          return;
+        }
+
+        // Batch zuerst versuchen
+        const ids = activeGames.map(g => g.encryptedId);
+        let batchMap = {};
+        try {
+          batchMap = await apiService.fetchRankingsBatch(ids); // { [encryptedId]: [...] }
+        } catch (e) {
+          console.warn("Batch-Ranking nicht verfügbar, nutze Fallback pro Spiel.", e);
+        }
+
+        // Mapping aus Batch
+        const fromBatch = activeGames.map(g => {
+          const raw = batchMap[g.encryptedId] || [];
+          const topResults = raw.map(r => ({
+            teamName: (r.teamName?.trim?.() || r.name?.trim?.() || r.team?.trim?.() || ""),
+            duration: r.duration,
+            stars: r.stars,
+            gameType: r.gameType,
+            startTime: r.startTime,
+          }));
+          return {
+            gameId: g.encryptedId,
+            gameName: g.name || "Unbekannt",
+            landingPageUrl: g.landingPageUrl || `/spiel/${g.encryptedId}`,
+            topResults,
+          };
+        });
+
+        this.randomRankings = fromBatch;
+
+        // Fallback: pro Spiel einzeln, falls Batch nicht ging / leer ist
+        if (!Object.keys(batchMap).length) {
+          const perGame = await Promise.all(
+            activeGames.map(async (g) => {
+              try {
+                // Wenn du /top8 nutzt:
+                const data =
+                  (apiService.getTop8Results ? await apiService.getTop8Results(g.encryptedId)
+                                             : await apiService.getTop5Results(g.encryptedId));
+
+                const top = (data?.topResults || []).map(r => ({
+                  teamName: (r.teamName?.trim?.() || r.name?.trim?.() || r.team?.trim?.() || ""),
+                  duration: r.duration,
+                  stars: r.stars,
+                  gameType: r.gameType,
+                  startTime: r.startTime,
+                }));
+
+                return {
+                  gameId: g.encryptedId,
+                  gameName: data?.gameName || g.name || "Unbekannt",
+                  landingPageUrl: data?.landingPageUrl || g.landingPageUrl || `/spiel/${g.encryptedId}`,
+                  topResults: top,
+                };
+              } catch (err) {
+                console.error(`Top-Ergebnisse für ${g.encryptedId} fehlgeschlagen:`, err);
+                return {
+                  gameId: g.encryptedId,
+                  gameName: g.name || "Unbekannt",
+                  landingPageUrl: g.landingPageUrl || `/spiel/${g.encryptedId}`,
+                  topResults: [],
+                };
+              }
+            })
+          );
+          this.randomRankings = perGame;
+        }
+      } catch (error) {
+        console.error("❌ Fehler beim Bauen der Rankings:", error);
+        this.randomRankings = [];
+      }
+    },
+
     async handleCheckout() {
       this.checkoutError = '';
       this.isCheckingOut = true;
@@ -394,12 +480,12 @@ export default {
         }
       } finally {
         this.isCheckingOut = false;
-        // Fehler sofort ansagen
         await nextTick()
         const err = document.getElementById(this.errorId)
         if (err) err.focus({ preventScroll: true })
       }
     },
+
     openModal(game) {
       if (!game || game.isDisabled) {
         alert("Dieses Spiel ist derzeit nicht verfügbar.");
@@ -409,79 +495,26 @@ export default {
       this.currentGame = game;
       this.lastFocusedEl = document.activeElement;
       this.showModal = true;
-      this.checkoutError = ""; // Reset Meldung beim Öffnen
+      this.checkoutError = "";
       this.$nextTick(() => {
         const input = this.$refs.emailInput
         if (input && input.focus) input.focus()
       })
-      // Scroll sperren
       document.documentElement.style.overflow = 'hidden'
     },
+
     closeModal() {
       this.showModal = false;
       this.userEmail = "";
       this.currentGameId = null;
       this.checkoutError = "";
       this.isCheckingOut = false;
-      // Scroll wieder erlauben
       document.documentElement.style.overflow = ''
-      // Fokus zurückgeben
       if (this.lastFocusedEl && this.lastFocusedEl.focus) {
         this.lastFocusedEl.focus()
       }
     },
-  async fetchRandomGameRankings() {
-  try {
-    // ✅ Zufällige Spiele abrufen
-    let randomGameIds = await apiService.getRandomGames();
 
-    // 🛑 Alle aktiven Spiele laden (mit landingPageUrl)
-    const allGames = await apiService.fetchGames();
-    const activeGames = allGames.filter((game) => !game.isDisabled);
-    const activeGameIds = activeGames.map((game) => game.encryptedId);
-
-    // Lookup-Map für schnellen Zugriff
-    const gameById = Object.fromEntries(
-      activeGames.map((g) => [g.encryptedId, g])
-    );
-
-    // Entferne zufällige Spiele, die deaktiviert sind
-    randomGameIds = randomGameIds.filter((id) => activeGameIds.includes(id));
-
-    if (!randomGameIds.length) {
-      console.warn("⚠️ Keine zufälligen Spiele gefunden");
-      return;
-    }
-
-    // ✅ Top-5-Ergebnisse für jedes zufällige Spiel abrufen
-    const rankings = await Promise.all(
-      randomGameIds.map(async (id) => {
-        try {
-          return await apiService.getTop5Results(id);
-        } catch (error) {
-          console.error(`❌ Fehler beim Abrufen von Top 5 für Spiel ${id}:`, error);
-          return null;
-        }
-      })
-    );
-
-    // ✅ Daten filtern + mit landingPageUrl aus Games anreichern
-    this.randomRankings = rankings
-      .filter(Boolean)
-      .map((ranking, index) => {
-        const id = randomGameIds[index];
-        const game = gameById[id] || {};
-        return {
-          gameId: id,
-          gameName: ranking?.gameName || game.name || "Unbekannt",
-          landingPageUrl: ranking?.landingPageUrl || game.landingPageUrl || null,
-          topResults: ranking?.topResults || [],
-        };
-      });
-  } catch (error) {
-    console.error("❌ Fehler beim Laden zufälliger Rankings:", error);
-  }
-},
     trapFocus(e) {
       const modal = this.$refs.modalEl
       if (!modal) return
@@ -520,9 +553,9 @@ export default {
       document.dispatchEvent(new Event('render-event'));
     });
 
-    // Dynamische Daten
-    this.fetchRandomGameRankings();
-    await this.fetchGames();
+    // 🔹 EIN Datengang: Spiele laden, daraus Rankings bauen
+    const activeGames = await this.loadGames();        // lädt /api/games genau einmal
+    await this.buildRankingsFromGames(activeGames);    // kein weiterer /api/games Call
   },
 };
 </script>

@@ -234,11 +234,6 @@ $secondary-text-color: #fac227;
   gap: 0.4rem;
 }
 
-.orders-list {
-  display: grid;
-  gap: 0.75rem;
-}
-
 .order-card {
   border: 1px solid rgba(53, 91, 76, 0.15);
   border-left: 4px solid $secondary-text-color;

@@ -1,8 +1,20 @@
+// src/services/apiService.js
 import axios from 'axios';
+
+/**
+ * ✅ Basis-URL mit sinnvollen Fallbacks
+ * - bevorzugt: VITE_API_BASE (Vite)
+ * - dann: VUE_APP_API_BASE_URL (Vue CLI)
+ * - fallback: Render-Default
+ */
+const BASE_URL =
+  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE) ||
+  process.env.VUE_APP_API_BASE_URL ||
+  'https://backend-kiezjagd.onrender.com/api';
 
 // ✅ Axios-Instanz erstellen
 const axiosInstance = axios.create({
-  baseURL: process.env.VUE_APP_API_BASE_URL,
+  baseURL: BASE_URL,
   timeout: 15000,
 });
 
@@ -20,16 +32,27 @@ function handleApiError(error, methodName) {
   throw error;
 }
 
-// ✅ Hilfsfunktion zur Umwandlung der Dauer in Sekunden
+// ✅ Hilfsfunktion zur Umwandlung der Dauer in Sekunden (robuster)
 function convertDurationToSeconds(duration) {
-  const match = duration?.match?.(/(\d+)h\s(\d+)m\s(\d+)s/) || null;
-  if (match) {
-    const hours = parseInt(match[1], 10) || 0;
-    const minutes = parseInt(match[2], 10) || 0;
-    const seconds = parseInt(match[3], 10) || 0;
+  if (!duration || typeof duration !== 'string') return 0;
+
+  // Formate wie "1h 2m 3s", "2m 10s", "45s"
+  const hms = duration.match(/(?:(\d+)h)?\s*(?:(\d+)m)?\s*(?:(\d+)s)?/i);
+  if (hms && (hms[1] || hms[2] || hms[3])) {
+    const hours = parseInt(hms[1] || '0', 10);
+    const minutes = parseInt(hms[2] || '0', 10);
+    const seconds = parseInt(hms[3] || '0', 10);
     return hours * 3600 + minutes * 60 + seconds;
   }
-  return 0; // Fallback
+
+  // Fallback: "HH:MM:SS" oder "MM:SS"
+  const parts = duration.split(':').map(n => parseInt(n, 10));
+  if (parts.every(n => Number.isFinite(n))) {
+    if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+    if (parts.length === 2) return parts[0] * 60 + parts[1];
+  }
+
+  return 0;
 }
 
 // ✅ performRequest so anpassen, dass GET ≙ params unterstützt
@@ -73,14 +96,41 @@ function normalizeOrdersResponse(out) {
 
 // ✅ API-Service-Objekt
 export const apiService = {
-  // Alle Spiele abrufen - wird auch fuer den Admin Bereich genutzt
-  fetchGames() {
-    return performRequest('get', '/games');
+  // -----------------------
+  // Auth (optional zentral)
+  // -----------------------
+  login(credentials) {
+    return performRequest('post', '/auth/login', credentials)
+      .then(data => {
+        if (data?.token) localStorage.setItem('token', data.token);
+        return data;
+      });
   },
 
-  // alle Spiele abrufen für Admin
-  fetchAllGames() {
-    return performRequest("get", "/games", { admin: true }); // ?admin=true
+  validateToken() {
+    return performRequest('get', '/auth/validate');
+  },
+
+  logout() {
+    localStorage.removeItem('token');
+  },
+
+  // -----------------------
+  // Games
+  // -----------------------
+
+  // Öffentliche Spiele (nicht-admin)
+  fetchGames(params = {}) {
+    return performRequest('get', '/games', params);
+  },
+
+  // Alle Spiele abrufen für Admin — jetzt mit optionaler Projection via fields
+  // Beispiel-Aufruf:
+  // apiService.fetchAllGames({ fields: '_id,name,city,ageGroup,encryptedId,isDisabled,questionsCount' })
+  fetchAllGames({ fields } = {}) {
+    const params = { admin: true };
+    if (fields) params.fields = fields;
+    return performRequest("get", "/games", params); // ?admin=true&fields=...
   },
 
   // Zwei zufällige Spiele abrufen
@@ -88,13 +138,11 @@ export const apiService = {
     return performRequest('get', '/games/random');
   },
 
-  // Ein Spiel anhand der encryptedId abrufen, wenn Admin dann mit anderen Bedingungen
+  // Ein Spiel anhand der encryptedId abrufen
   fetchGameById(encryptedId, isAdmin = false) {
-    console.log("die Id:" + encryptedId);
     if (!encryptedId) throw new Error('⚠️ GameId darf nicht leer sein.');
-    // Hier bleibe ich bei Query-String, damit nichts bricht
-    const adminParam = isAdmin ? "?admin=true" : "";
-    return performRequest('get', `/games/${encryptedId}${adminParam}`);
+    const params = isAdmin ? { admin: true } : undefined;
+    return performRequest('get', `/games/${encodeURIComponent(encryptedId)}`, params);
   },
 
   // Neues Spiel erstellen
@@ -120,10 +168,10 @@ export const apiService = {
     return performRequest('delete', `/games/${id}`);
   },
 
-  // Bestellstatus abrufen
-  fetchOrderStatus(sessionId) {
-    if (!sessionId) throw new Error('⚠️ Session-ID darf nicht leer sein.');
-    return performRequest('get', `/checkout/order-status/${sessionId}`);
+  // Fragen eines Spiels abrufen
+  fetchQuestions(encryptedId) {
+    if (!encryptedId) throw new Error('⚠️ encryptedId darf nicht leer sein.');
+    return performRequest('get', `/games/${encodeURIComponent(encryptedId)}/questions`);
   },
 
   // Frage hinzufügen
@@ -131,16 +179,7 @@ export const apiService = {
     if (!encryptedId || !question) {
       throw new Error('⚠️ encryptedId und Frage dürfen nicht leer sein.');
     }
-    return performRequest('post', `/games/${encryptedId}/questions`, question);
-  },
-
-  // ✅ Alle Bestellungen (mit Pagination/Suche/Sortierung)
-  // params: { page, limit, search, searchBy, sort }
-  //   - searchBy: 'email' | 'gameId' | 'date'
-  //   - sort: z.B. '-createdAt' (neueste zuerst)
-  async fetchOrders(params = {}) {
-    const raw = await performRequest('get', '/order/orders', params);
-    return normalizeOrdersResponse(raw);
+    return performRequest('post', `/games/${encodeURIComponent(encryptedId)}/questions`, question);
   },
 
   // Frage aktualisieren
@@ -148,7 +187,7 @@ export const apiService = {
     if (!encryptedId || !questionId || !question) {
       throw new Error('⚠️ encryptedId, questionId und Frage dürfen nicht leer sein.');
     }
-    return performRequest('put', `/games/${encryptedId}/questions/${questionId}`, question);
+    return performRequest('put', `/games/${encodeURIComponent(encryptedId)}/questions/${questionId}`, question);
   },
 
   // Frage löschen
@@ -158,13 +197,31 @@ export const apiService = {
     }
     const isConfirmed = window.confirm("Bist du sicher, dass du diese Frage löschen möchtest?");
     if (!isConfirmed) return;
-    return performRequest('delete', `/games/${encryptedId}/questions/${questionId}`);
+    return performRequest('delete', `/games/${encodeURIComponent(encryptedId)}/questions/${questionId}`);
   },
 
-  // Ranking eines Spiels abrufen
+  // Reihenfolge speichern
+  updateQuestionOrder(gameId, reordered) {
+    if (!gameId || !Array.isArray(reordered) || reordered.length === 0) {
+      throw new Error('⚠️ Spiel-ID und Sortierliste dürfen nicht leer sein.');
+    }
+    return performRequest('post', '/questions/reorder', { gameId, reordered });
+  },
+
+  // Spiel kopieren
+  copyGame(gameId) {
+    if (!gameId) throw new Error("⚠️ Spiel-ID darf nicht leer sein.");
+    return performRequest('post', `/games/${gameId}/copy`);
+  },
+
+  // -----------------------
+  // Ranking / Ergebnisse
+  // -----------------------
+
+  // Einzel-Ranking (Kompatibilität)
   fetchRanking(encryptedId, sort = true) {
     if (!encryptedId) throw new Error('⚠️ encryptedId darf nicht leer sein.');
-    return performRequest('get', `/games/${encryptedId}/ranking`)
+    return performRequest('get', `/games/${encodeURIComponent(encryptedId)}/ranking`)
       .then(ranking => {
         if (sort && Array.isArray(ranking)) {
           return ranking.slice().sort((a, b) => {
@@ -177,34 +234,32 @@ export const apiService = {
       });
   },
 
-  // Top 5 Teams
-  getTop5Results(encryptedId) {
-    if (!encryptedId) throw new Error('⚠️ encryptedId darf nicht leer sein.');
-    return performRequest('get', `/games/${encryptedId}/top5`);
-  },
+  // 🚀 Batch-Top8 für mehrere Spiele – erwartet Backend-Route /rankings/top8?ids=a,b,c
+  // Rückgabe: { [encryptedId]: [{ teamName, duration }, ...] }
+  async fetchRankingsBatch(encryptedIds = [], sort = true) {
+    if (!encryptedIds.length) return {};
+    const data = await performRequest('get', '/rankings/top8', { ids: encryptedIds.join(',') });
+    if (!data || typeof data !== 'object') return {};
 
-  // Teamname prüfen
-  checkTeamName(teamName, gameId) {
-    console.log('id' + gameId);
-    if (!teamName || !gameId) {
-      throw new Error('Teamname und Spiel-ID sind erforderlich.');
+    if (!sort) return data;
+
+    // pro Spiel sortieren (falls nicht schon sortiert)
+    const sorted = {};
+    for (const id of Object.keys(data)) {
+      const arr = Array.isArray(data[id]) ? data[id] : [];
+      sorted[id] = arr.slice().sort((a, b) => {
+        const da = convertDurationToSeconds(a.duration);
+        const db = convertDurationToSeconds(b.duration);
+        return da - db;
+      });
     }
-    // hier bleiben wir beim Query-String (bewährt)
-    return performRequest('get', `/results/check?teamName=${encodeURIComponent(teamName)}&gameId=${encodeURIComponent(gameId)}`);
+    return sorted;
   },
 
-  // Stripe-Checkout-Session erstellen
-  createCheckoutSession(gameId, email, voucherCode = null) {
-    if (!gameId || !email) {
-      throw new Error('⚠️ Spiel-ID und E-Mail sind erforderlich.');
-    }
-    return performRequest('post', '/order/create-checkout-session', { gameId, email, voucherCode });
-  },
-
-  // Fragen eines Spiels abrufen
-  fetchQuestions(encryptedId) {
+  // Top 8 Teams (bestehender Endpoint)
+  getTop8Results(encryptedId) {
     if (!encryptedId) throw new Error('⚠️ encryptedId darf nicht leer sein.');
-    return performRequest('get', `/games/${encryptedId}/questions`);
+    return performRequest('get', `/games/${encodeURIComponent(encryptedId)}/top8`);
   },
 
   // Ergebnis speichern
@@ -215,18 +270,33 @@ export const apiService = {
     return performRequest('post', `/results`, result);
   },
 
+  // Teamname prüfen
+  checkTeamName(teamName, gameId) {
+    if (!teamName || !gameId) {
+      throw new Error('Teamname und Spiel-ID sind erforderlich.');
+    }
+    return performRequest('get', `/results/check`, {
+      teamName,
+      gameId,
+    });
+  },
+
+  // -----------------------
   // Standortprüfung
+  // -----------------------
   verifyLocation(encryptedId, questionId, userCoordinates) {
     if (!encryptedId || !questionId || !userCoordinates) {
       throw new Error('⚠️ encryptedId, questionId und userCoordinates sind erforderlich.');
     }
-    return performRequest('post', `/games/${encryptedId}/verify-location`, {
+    return performRequest('post', `/games/${encodeURIComponent(encryptedId)}/verify-location`, {
       questionId,
       userCoordinates,
     });
   },
 
-  // Bild hochladen
+  // -----------------------
+  // Uploads
+  // -----------------------
   uploadImage(file) {
     if (!file) throw new Error('Keine Bilddatei zum Hochladen ausgewählt.');
     const formData = new FormData();
@@ -239,7 +309,6 @@ export const apiService = {
     .catch(error => handleApiError(error, 'uploadImage'));
   },
 
-  // Audiodatei hochladen
   uploadAudio(file) {
     if (!file) throw new Error('⚠️ Keine Audiodatei zum Hochladen ausgewählt.');
     const formData = new FormData();
@@ -252,48 +321,37 @@ export const apiService = {
     .catch(error => handleApiError(error, 'uploadAudio'));
   },
 
-  updateQuestionOrder(gameId, reordered) {
-    if (!gameId || !Array.isArray(reordered) || reordered.length === 0) {
-      throw new Error('⚠️ Spiel-ID und Sortierliste dürfen nicht leer sein.');
+  // -----------------------
+  // Orders / Checkout
+  // -----------------------
+  fetchOrderStatus(sessionId) {
+    if (!sessionId) throw new Error('⚠️ Session-ID darf nicht leer sein.');
+    return performRequest('get', `/checkout/order-status/${sessionId}`);
+  },
+
+  createCheckoutSession(gameId, email, voucherCode = null) {
+    if (!gameId || !email) {
+      throw new Error('⚠️ Spiel-ID und E-Mail sind erforderlich.');
     }
-    return performRequest('post', '/questions/reorder', { gameId, reordered });
+    return performRequest('post', '/order/create-checkout-session', { gameId, email, voucherCode });
   },
 
-  // Newsletter (öffentlich)
-  subscribeToNewsletter(email) {
-    if (!email) throw new Error("E-Mail erforderlich");
-    return performRequest("post", "/newsletter/subscribe", { email });
-  },
-
-  unsubscribeFromNewsletter(email) {
-    if (!email) throw new Error("E-Mail erforderlich");
-    return performRequest("post", "/newsletter/unsubscribe", { email });
-  },
-
-  // Team speichern
-  saveTeam(team) {
-    if (!team || !team.name || !team.email || !team.gameId || !Array.isArray(team.players)) {
-      throw new Error('⚠️ Teamdaten sind unvollständig.');
-    }
-    return performRequest('post', '/teams', team);
-  },
-
-  // Zahlung verifizieren (Mailversand auslösen)
   verifyPayment(sessionId) {
     if (!sessionId) throw new Error('⚠️ Session-ID ist erforderlich.');
     return performRequest('post', '/order/verify-payment', { sessionId });
   },
 
-  copyGame(gameId) {
-    if (!gameId) throw new Error("⚠️ Spiel-ID darf nicht leer sein.");
-    return performRequest('post', `/games/${gameId}/copy`);
+  // Alle Bestellungen (mit Pagination/Suche/Sortierung)
+  // params: { page, limit, search, searchBy, sort }
+  async fetchOrders(params = {}) {
+    const raw = await performRequest('get', '/order/orders', params);
+    return normalizeOrdersResponse(raw);
   },
 
-  // ================================
-  // Admin Newsletter (mini)
-  // ================================
+  // -----------------------
+  // Newsletter (Admin)
+  // -----------------------
   fetchNewsletter({ q = "", only = "all" } = {}) {
-    // Hier nutze ich GET+params statt Query-String
     return performRequest("get", "/admin-newsletter", { q, only });
   },
 

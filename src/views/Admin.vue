@@ -34,7 +34,6 @@
       </button>
     </nav>
 
-
     <!-- Inhaltsbereich -->
     <section class="content">
       <!-- Spieleliste -->
@@ -59,14 +58,13 @@
             <h3 class="game-card-title">{{ game.name }}</h3>
 
             <div class="game-card-header-actions">
-    
               <span class="toggle-icon" :title="expandedId === game._id ? 'Zuklappen' : 'Aufklappen'">
                 {{ expandedId === game._id ? '−' : '+' }}
               </span>
             </div>
           </div>
 
-          <!-- Einklappbarer Bereich mit JS-Height-Transition -->
+          <!-- Einklappbarer Bereich -->
           <transition
             @enter="onEnter"
             @after-enter="onAfterEnter"
@@ -80,7 +78,7 @@
               <div class="grid--info">
                 <p><strong>Stadt:</strong> {{ game.city }}</p>
                 <p><strong>Altersgruppe:</strong> {{ game.ageGroup }}</p>
-                <p><strong>Anzahl der Fragen:</strong> {{ game.questions.length }}</p>
+                <p><strong>Anzahl der Fragen:</strong> {{ game.questionsCount ?? game.questions?.length ?? 0 }}</p>
               </div>
 
               <p class="mt-1">
@@ -96,12 +94,17 @@
                 </strong>
               </p>
 
-              <ul class="margin-top-2">
+              <!-- Ranking nur rendern, wenn vorhanden -->
+              <ul class="margin-top-2" v-if="Array.isArray(game.ranking) && game.ranking.length">
                 <li><span class="underline">Top 5 Teams</span></li>
-                <li v-for="team in game.ranking" :key="team.teamName">
+                <li
+                  v-for="(team, i) in (game.ranking || []).slice(0, 5)"
+                  :key="`${game._id}-rank-${i}-${team.teamName}`"
+                >
                   {{ team.teamName }} - {{ team.duration }}
                 </li>
               </ul>
+              <p v-else class="margin-top-2 muted">Noch keine Teams oder wird geladen…</p>
 
               <div class="game-actions">
                 <router-link
@@ -116,13 +119,13 @@
                 <button @click.stop="deleteGame(game._id)">
                   <font-awesome-icon icon="trash" title="löschen" />
                 </button>
-                          <button
-                class="icon-btn"
-                title="Spiel kopieren"
-                @click.stop="copyGame(game._id)"
-              >
-                📋
-              </button>
+                <button
+                  class="icon-btn"
+                  title="Spiel kopieren"
+                  @click.stop="copyGame(game._id)"
+                >
+                  📋
+                </button>
               </div>
             </div>
           </transition>
@@ -140,12 +143,11 @@
         @cancel="cancelEdit"
       />
 
-      <!-- Bestellungen -->
+      <!-- Bestellungen (lazy loaded component) -->
       <OrderList v-if="currentView === 'orders'" />
 
-      <!-- Newsletter -->
+      <!-- Newsletter (lazy loaded component) -->
       <NewsletterAdmin v-if="currentView === 'newsletter'" />
-
     </section>
   </div>
 </template>
@@ -153,8 +155,10 @@
 <script>
 import GameForm from "@/components/GameForm.vue";
 import GameEditForm from "@/components/GameEditForm.vue";
-import OrderList from "@/components/OrderList.vue";
-import NewsletterAdmin from "@/components/AdminNewsletter.vue"; 
+// 👉 Code-Splitting (kleineres Initial-Bundle)
+import { defineAsyncComponent } from 'vue';
+const OrderList = defineAsyncComponent(() => import('@/components/OrderList.vue'));
+const NewsletterAdmin = defineAsyncComponent(() => import('@/components/AdminNewsletter.vue'));
 
 import { apiService } from "@/services/apiService";
 
@@ -167,34 +171,58 @@ export default {
       games: [],
       newGame: { city: "", name: "", ageGroup: "" },
       selectedGame: null,
-      expandedId: null, // nur eine Karte offen
+      expandedId: null,
     };
   },
   methods: {
     async fetchGames() {
       try {
-        const games = await apiService.fetchAllGames();
-        for (const game of games) {
-          const ranking = await apiService.fetchRanking(game.encryptedId);
-          game.ranking = ranking || [];
-        }
-        this.games = games;
-        this.expandedId = null; // Start: alles zu
+        // nur schlanke Felder laden
+        const games = await apiService.fetchAllGames({
+          fields: '_id,name,city,ageGroup,encryptedId,isDisabled,questionsCount'
+        });
+        // Ranking erst bei Expand nachladen
+        this.games = games.map(g => ({ ...g, ranking: null }));
+        this.expandedId = null;
       } catch (error) {
         console.error("Fehler beim Laden der Spiele:", error);
       }
     },
-    toggleGame(game) {
-      this.expandedId = this.expandedId === game._id ? null : game._id;
+
+    async toggleGame(game) {
+      const willOpen = this.expandedId !== game._id;
+      this.expandedId = willOpen ? game._id : null;
+
+      // Lazy: Ranking nur beim Öffnen, nur einmal
+      if (willOpen && game.ranking == null) {
+        try {
+          // Optional: Einzelabruf
+          // game.ranking = await apiService.fetchRanking(game.encryptedId);
+
+          // Besser: Batch für alle sichtbaren Spiele,
+          // hier einfachheitshalber: alle in der Liste
+          const ids = this.games
+            .filter(g => g.ranking == null) // nur die, die noch nichts haben
+            .map(g => g.encryptedId);
+
+          const map = await apiService.fetchRankingsBatch(ids);
+          this.games = this.games.map(g => ({
+            ...g,
+            ranking: g.ranking ?? (map[g.encryptedId] || [])
+          }));
+        } catch (e) {
+          console.error('Ranking konnte nicht geladen werden:', e);
+          game.ranking = [];
+        }
+      }
     },
 
-    // Height-Transition Hooks (sanftes Auf/Zu inkl. Padding)
+    // Height-Transition Hooks
     onEnter(el) {
       el.style.transition = "none";
       el.style.overflow = "hidden";
       el.style.height = "0px";
       el.style.opacity = "0";
-      // Start ohne vertikale Padding
       const origPT = getComputedStyle(el).paddingTop;
       const origPB = getComputedStyle(el).paddingBottom;
       el.dataset.pt = origPT;
@@ -202,9 +230,8 @@ export default {
       el.style.paddingTop = "0px";
       el.style.paddingBottom = "0px";
 
-      // nächste Frame: auf Zielhöhe expandieren
       requestAnimationFrame(() => {
-        const target = el.scrollHeight; // inkl. Inhalt (ohne padding)
+        const target = el.scrollHeight;
         el.style.transition = "height 0.25s ease, opacity 0.2s ease, padding 0.2s ease";
         el.style.height = target + "px";
         el.style.opacity = "1";
@@ -213,7 +240,6 @@ export default {
       });
     },
     onAfterEnter(el) {
-      // auf auto zurücksetzen
       el.style.height = "";
       el.style.opacity = "";
       el.style.paddingTop = "";
@@ -235,12 +261,10 @@ export default {
         el.style.transition = "height 0.25s ease, opacity 0.2s ease, padding 0.2s ease";
         el.style.height = "0px";
         el.style.opacity = "0";
-        // Padding einklappen, damit keine Resthöhe bleibt
         el.style.paddingTop = "0px";
         el.style.paddingBottom = "0px";
       });
 
-      // optional: nach Ende Transition zurücksetzen (Vue ruft after-leave nicht immer mit el)
       el.addEventListener(
         "transitionend",
         () => {
@@ -257,24 +281,23 @@ export default {
 
     async createGame(game) {
       try {
-        const gameData = { ...game };
-        await apiService.createGame(gameData);
+        await apiService.createGame({ ...game });
         await this.fetchGames();
         this.currentView = "list";
-        this.$root.showToast("Daten wurden erfolgreich gespeichert!");
+        this.$root?.showToast?.("Daten wurden erfolgreich gespeichert!");
       } catch (err) {
-        this.$root.showToast("Fehler beim Erstellen des Spiels!!");
+        this.$root?.showToast?.("Fehler beim Erstellen des Spiels!!");
         console.error("Fehler beim Erstellen des Spiels:", err);
       }
     },
     async copyGame(gameId) {
       try {
         await apiService.copyGame(gameId);
-        this.$root.showToast("Spiel wurde erfolgreich kopiert!");
+        this.$root?.showToast?.("Spiel wurde erfolgreich kopiert!");
         await this.fetchGames();
       } catch (error) {
         console.error("Fehler beim Kopieren des Spiels:", error);
-        this.$root.showToast("Fehler beim Kopieren des Spiels!");
+        this.$root?.showToast?.("Fehler beim Kopieren des Spiels!");
       }
     },
     editGame(game) {
@@ -296,11 +319,7 @@ export default {
       }
       await apiService.deleteGame(game_id);
       await this.fetchGames();
-      this.$root.showToast("Spiel wurde erfolgreich gelöscht!");
-    },
-    cancelEdit() {
-      this.selectedGame = null;
-      this.currentView = "list";
+      this.$root?.showToast?.("Spiel wurde erfolgreich gelöscht!");
     },
     logout() {
       localStorage.removeItem("token");
@@ -314,140 +333,30 @@ export default {
 </script>
 
 <style scoped>
-/* Seite vertikal gestapelt */
-.admin-container {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  padding: 0 10px;
-}
+.admin-container { display: flex; flex-direction: column; gap: 16px; padding: 0 10px; }
+.logout { display: flex; align-items: center; justify-content: space-between; }
+.topbar { display: flex; justify-content: flex-end; }
+.topbar button { background:#f7f7f7; border:1px solid #ccc; border-radius:6px; padding:6px 12px; cursor:pointer; transition: background .2s, border-color .2s; margin:0 5px; }
+.topbar button:hover { background:#eee; }
+.topbar button.active { background:#355b4c; border-color:#355b4c; color:#fff; font-weight:600; }
 
-.logout {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
+.game-list { display:flex; flex-wrap:wrap; gap:16px; align-items:flex-start; }
+.game-card { flex:1 1 calc(33.333% - 16px); min-width:280px; align-self:flex-start; border:1px solid #e3e3e3; border-radius:10px; background:#fff; }
+@media (max-width:1100px){ .game-card{ flex:1 1 calc(50% - 16px); } }
+@media (max-width:700px){ .game-card{ flex:1 1 100%; } }
 
-/* Topbar horizontal */
-.topbar {
-  display: flex;
-  justify-content: flex-end;
-  button {
-    background: #f7f7f7;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    padding: 6px 12px;
-    cursor: pointer;
-    transition: background 0.2s, border-color 0.2s;
-    margin: 0 5px;
-  }
-}
-
-.topbar button:hover {
-  background: #eee;
-}
-
-.topbar button.active {
-  background: #355b4c;       /* deine Primärfarbe */
-  border-color: #355b4c;
-  color: #fff;
-  font-weight: 600;
-}
-
-
-/* Cards nebeneinander: Flex statt Grid → unabhängige Höhen */
-.game-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-   align-items: flex-start; 
-}
-
-/* mind. 3 pro Reihe auf großen Screens */  
-.game-card {
-  flex: 1 1 calc(33.333% - 16px);
-  min-width: 280px;
-  align-self: flex-start;    /* <— falls irgendwo height:100% o.ä. wirkt */
-}
-
-@media (max-width: 1100px) {
-  .game-card { flex: 1 1 calc(50% - 16px); }
-}
-@media (max-width: 700px) {
-  .game-card { flex: 1 1 100%; }
-}
-
-.enabled-border { border-color: #b6dfb6; }
-.disabled-border { border-color: #f1bebe; }
-
-.game-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 12px;
-  cursor: pointer;
-  user-select: none;
-}
-
-.game-card-title {
-  margin: 0;
-  font-size: 1.05rem;
-  line-height: 1.2;
-}
-
-.game-card-header-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.icon-btn {
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  font-size: 1.4rem;
-  padding: 0 !important;
-
-}
-
-.toggle-icon {
-  font-weight: 700;
-  font-size: 1.1rem;
-  width: 1.5rem;
-  text-align: center;
-}
-
-/* Body: wir animieren via JS Hooks → Übergangseigenschaften hier */
-.game-card-body {
-  width: 100%;
-  padding: 10px 12px 14px;
-  border-top: 1px solid #eee;
-}
-
-.grid--info {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 6px 12px;
-}
-
-.mt-1 { margin-top: 8px; }
-.margin-top-2 { margin-top: 12px; }
-
-.game-actions {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  margin-top: 12px;
-}
-
-.link-button, .button, .btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 10px;
-  border-radius: 8px;
-  text-decoration: none;
-  border: 1px solid #ddd;
-}
-.btn--logout { background: #fafafa; }
+.enabled-border { border-color:#b6dfb6; }
+.disabled-border { border-color:#f1bebe; }
+.game-card-header { display:flex; justify-content:space-between; align-items:center; padding:10px 12px; cursor:pointer; user-select:none; }
+.game-card-title { margin:0; font-size:1.05rem; line-height:1.2; }
+.game-card-header-actions { display:flex; align-items:center; gap:8px; }
+.icon-btn { border:none; background:transparent; cursor:pointer; font-size:1.4rem; padding:0!important; }
+.toggle-icon { font-weight:700; font-size:1.1rem; width:1.5rem; text-align:center; }
+.game-card-body { width:100%; padding:10px 12px 14px; border-top:1px solid #eee; }
+.grid--info { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:6px 12px; }
+.mt-1{ margin-top:8px; } .margin-top-2{ margin-top:12px; }
+.muted{ color:#666; }
+.game-actions { display:flex; gap:8px; align-items:center; margin-top:12px; }
+.link-button, .button, .btn { display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:8px; text-decoration:none; border:1px solid #ddd; }
+.btn--logout { background:#fafafa; }
 </style>

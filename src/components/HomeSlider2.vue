@@ -65,17 +65,17 @@
           <li v-for="(result, idx) in getSortedResults(item)" :key="idx">
             <template v-if="result.gameType === 'Maxi'">
               <strong>{{ idx + 1 }}. </strong>
-              <strong v-html="highlight(result.teamName)"></strong>
+              <strong v-html="highlight(fallbackTeamName(result))"></strong>
             </template>
             <template v-else>
-              <strong v-html="highlight(result.teamName)"></strong>
+              <strong v-html="highlight(fallbackTeamName(result))"></strong>
             </template>
 
             <span v-if="result.gameType === 'Mini' || result.gameType === 'Medi'">
               {{ result.stars }} Sterne
             </span>
             <span v-else>
-              {{ parseInt(result.duration.split('h')[1]) }} Min.
+              {{ minutesFromDuration(result.duration) }} Min.
             </span>
           </li>
         </ul>
@@ -93,20 +93,24 @@ import BaseSlider from "@/components/BaseSlider.vue";
 export default {
   components: { BaseSlider },
   props: {
+    /**
+     * Erwartete Struktur je Item:
+     * {
+     *   gameName: string,
+     *   landingPageUrl: string | route,
+     *   topResults: Array<{ teamName? | name? | team?, duration?, stars?, gameType?, startTime? }>
+     * }
+     */
     rankings: { type: Array, default: () => [] },
   },
   data() {
     return { searchQuery: "" };
   },
   computed: {
-    // Nur Spiele, bei denen schon jemand gespielt hat
+    // ✅ Nur Spiele, bei denen schon jemand gespielt hat (mind. 1 Ergebnis) – OHNE teamName-Zwang
     participatedRankings() {
       return (this.rankings || []).filter(
-        (item) =>
-          Array.isArray(item.topResults) &&
-          item.topResults.length > 0 &&
-          // optional: Teamnamen vorhanden
-          item.topResults.some(r => (r.teamName || "").trim().length > 0)
+        (item) => Array.isArray(item.topResults) && item.topResults.length > 0
       );
     },
 
@@ -116,7 +120,7 @@ export default {
       const q = this.normalize(this.searchQuery);
       return this.participatedRankings.filter(item =>
         Array.isArray(item.topResults) &&
-        item.topResults.some(r => this.normalize(r.teamName || "").includes(q))
+        item.topResults.some(r => this.normalize(this.fallbackTeamName(r)).includes(q))
       );
     },
 
@@ -134,6 +138,39 @@ export default {
     },
   },
   methods: {
+    // --- Namens-Fallback für inkonsistente Result-Felder ---
+    fallbackTeamName(result = {}) {
+      return (
+        (result.teamName && String(result.teamName).trim()) ||
+        (result.name && String(result.name).trim()) ||
+        (result.team && String(result.team).trim()) ||
+        "Unbenanntes Team"
+      );
+    },
+
+    // --- Dauer zu Minuten (robust für "1h 23m 10s" / "23m 10s" / "45s" / "HH:MM:SS") ---
+    minutesFromDuration(duration = "") {
+      if (typeof duration === "number" && Number.isFinite(duration)) {
+        // Falls in Sekunden gespeichert:
+        return Math.round(duration / 60);
+      }
+      const d = String(duration);
+      // Muster "1h 23m 10s" etc.
+      const h = (d.match(/(\d+)\s*h/i) || [])[1] || 0;
+      const m = (d.match(/(\d+)\s*m/i) || [])[1] || 0;
+      const s = (d.match(/(\d+)\s*s/i) || [])[1] || 0;
+      if (h || m || s) return Number(h) * 60 + Number(m) + Math.round(Number(s) / 60);
+
+      // "HH:MM:SS" oder "MM:SS"
+      const parts = d.split(":").map(n => parseInt(n, 10));
+      if (parts.every(n => Number.isFinite(n))) {
+        if (parts.length === 3) return parts[0] * 60 + parts[1] + Math.round(parts[2] / 60);
+        if (parts.length === 2) return parts[0] + Math.round(parts[1] / 60);
+      }
+      // Fallback: 0
+      return 0;
+    },
+
     // --- Highlight-Helfer ---
     normalize(str = "") {
       return String(str).toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
@@ -190,8 +227,8 @@ export default {
 
     // --- Vorhandene Logik ---
     getGameType(results = []) {
-      if (!results.length) return "";
-      return results[0].gameType;
+      if (!Array.isArray(results) || results.length === 0) return "";
+      return results[0].gameType || ""; // fallback leer, wenn nicht vorhanden
     },
     getSortedResults(item) {
       const results = [...(item.topResults || [])];
@@ -200,18 +237,10 @@ export default {
       if (gameType === "Mini") {
         return results.sort((a, b) => new Date(b.startTime) - new Date(a.startTime));
       } else if (gameType === "Medi") {
-        return results.sort((a, b) => b.stars - a.stars);
+        return results.sort((a, b) => (b.stars || 0) - (a.stars || 0));
       } else {
-        return results.sort((a, b) => {
-          const timeToMinutes = (duration = "") => {
-            const hMatch = duration.match(/(\d+)h/);
-            const mMatch = duration.match(/(\d+)m/);
-            const hours = hMatch ? parseInt(hMatch[1]) : 0;
-            const minutes = mMatch ? parseInt(mMatch[1]) : 0;
-            return hours * 60 + minutes;
-          };
-          return timeToMinutes(a.duration) - timeToMinutes(b.duration);
-        });
+        // Maxi / default: nach Dauer aufsteigend
+        return results.sort((a, b) => this.minutesFromDuration(a.duration) - this.minutesFromDuration(b.duration));
       }
     },
   },
