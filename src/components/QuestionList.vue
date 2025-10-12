@@ -22,10 +22,11 @@
           </div>
 
           <div class="question-content">
-            <p><strong>Frage:</strong> {{ question.question }}</p>
             <p v-if="question.answerquestion">
               <strong>Antwort auf die Frage zuvor:</strong> {{ question.answerquestion }}
             </p>
+            <p><strong>Frage:</strong> {{ question.question }}</p>
+
             <p v-if="question.type === 'text'">
               <strong>Antwort:</strong> {{ question.answer }}
             </p>

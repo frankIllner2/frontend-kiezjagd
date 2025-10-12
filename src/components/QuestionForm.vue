@@ -2,6 +2,18 @@
   <div ref="questionForm" id="edit-question-container" class="question-form">
     <h3>{{ isEditing ? "Frage bearbeiten" : "Neue Frage hinzufügen" }}</h3>
     <form @submit.prevent="saveQuestion">
+
+      <!-- Antwort auf Frage -->
+      <div class="form-group" v-if="questionIndex > 0">
+        <label for="answerQuestion">Antwort auf die Frage zuvor</label>
+        <textarea
+          v-model="question.answerquestion"
+          id="answerQuestion"
+          maxlength="450"
+          rows="2"
+        />
+        <small>{{ question.answerquestion?.length || 0 }}/450 Zeichen</small>
+      </div>
       <!-- Frage -->
       <div class="form-group">
         <label for="question">
@@ -20,18 +32,6 @@
           maxlength="500"
         />
         <small>{{ question.question?.length || 0 }}/500 Zeichen</small>
-      </div>
-
-      <!-- Antwort auf Frage -->
-      <div class="form-group" v-if="questionIndex > 0">
-        <label for="answerQuestion">Individuelle Antwort auf die Frage</label>
-        <textarea
-          v-model="question.answerquestion"
-          id="answerQuestion"
-          maxlength="450"
-          rows="2"
-        />
-        <small>{{ question.answerquestion?.length || 0 }}/450 Zeichen</small>
       </div>
 
       <!-- Fragetyp -->
