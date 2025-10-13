@@ -34,15 +34,17 @@
 
     <div class="form-group">
       <label for="playerCount">Wie viele Spieler seid ihr?</label>
-      <input
-        v-model.number="localPlayerCount"
-        id="playerCount"
-        type="number"
-        :min="1"
-        :max="8"
-        @input="onPlayerCountChange"
-        required
-      />
+        <input
+          v-model="localPlayerCount"
+          id="playerCount"
+          type="number"
+          inputmode="numeric"
+          step="1"
+          :min="1"
+          :max="8"
+          @input="onPlayerCountChange"
+          required
+        />
     </div>
 
     <div class="form-group">
@@ -167,12 +169,23 @@ export default {
 
     // --- Spieler-Eingabefelder synchronisieren ---
     onPlayerCountChange() {
-      // Eingabefehler korrigieren
-      if (!Number.isFinite(this.localPlayerCount)) this.localPlayerCount = 1;
-      if (this.localPlayerCount < 1) this.localPlayerCount = 1;
-      if (this.localPlayerCount > 8) this.localPlayerCount = 8;
+      // Immer als ganze Zahl interpretieren
+      const n = parseInt(this.localPlayerCount, 10);
+
+      // Wenn gerade leer/NaN → noch nichts hart setzen, aber UI nicht „springen“ lassen
+      if (!Number.isFinite(n)) {
+        // nichts tun – der Nutzer tippt evtl. noch
+        return;
+      }
+
+      // Sauber clampen (1..8) und erst dann anwenden
+      const clamped = Math.max(1, Math.min(n, 8));
+      if (clamped !== this.localPlayerCount) {
+        this.localPlayerCount = clamped;
+      }
       this.adjustPlayerInputs();
     },
+
     adjustPlayerInputs() {
       const count = Math.min(Math.max(this.localPlayerCount, 1), 8);
       const current = this.localPlayerNames.length;
