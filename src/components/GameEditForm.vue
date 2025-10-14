@@ -150,9 +150,6 @@
           </div>
 
           <div class="form-group checkbox-group">
-            <input type="checkbox" id="disabled" v-model="game.isDisabled" />
-            <label for="disabled">Spiel deaktivieren</label>
-
             <input type="checkbox" id="isVoucher" v-model="game.isVoucher" />
             <label for="isVoucher">Spiel mit Gutschein-Code einlösen</label>
           </div>
@@ -173,6 +170,31 @@
               v-model="game.landingPageUrl"
               placeholder="/spiel/spurensuche-mama"
             />
+          </div>
+
+           <!-- 💡 Aktivierung: Checkbox + Datumsbereich (datetime-local) + Serientermin -->
+          <div class="form-group checkbox-group">
+            <input type="checkbox" id="activationEnabled" v-model="game.activation.enabled" />
+            <label for="activationEnabled">Spiel aktivieren (Zeitfenster)</label>
+          </div>
+
+          <div class="form-group form-group--city-plz" v-if="game.activation.enabled">
+       
+            <div class="three-col">
+              <div class="col">
+                <label for="activationFrom">Aktiv ab</label>
+                <input id="activationFrom" type="datetime-local" v-model="activationFromLocal" />
+              </div>
+              <div class="col">
+                <label for="activationUntil">Aktiv bis</label>
+                <input id="activationUntil" type="datetime-local" v-model="activationUntilLocal" />
+              </div>
+               <div class="col">
+                <label for="repeatYearly">Jährlich wiederkehrend (Serientermin)</label>
+                <input type="checkbox" id="repeatYearly" v-model="game.activation.repeatYearly" />
+              </div>
+            </div>
+            <small>Zeiten werden als UTC gespeichert, lokale Anzeige in Europe/Berlin.</small>
           </div>
 
           <div class="form-actions">
@@ -225,8 +247,18 @@ export default {
         isVoucher: false,
         voucherName: "",
         gameImage: "",
-        sortIndex: 9999, // 🔥 neu: Default weit hinten
+        sortIndex: 9999,
+        mailtext: "",
+        withCertificate: false,
+        playtime: "",
+        startloction: "",
+        endloction: "",
+        price: "",
+        activation: { enabled: false, from: null, until: null, repeatYearly: false },
       },
+      // lokale Boundaries für datetime-local
+      activationFromLocal: "",
+      activationUntilLocal: "",
       previewImage: null,
       uploadedImage: null,
       selectedQuestion: null,
@@ -243,12 +275,21 @@ export default {
     async fetchGame(id) {
       try {
         const response = await apiService.fetchGameById(id, true);
-        // Default-Werte abfedern (insb. sortIndex)
-        this.game = { voucherName: "", sortIndex: 9999, ...response };
+        this.game = { voucherName: "", sortIndex: 9999, activation: { enabled: false, from: null, until: null, repeatYearly: false }, ...response };
         if (this.game.sortIndex === undefined || this.game.sortIndex === null) {
           this.game.sortIndex = 9999;
         }
         this.uploadedImage = response.gameImage;
+
+        // Prefill datetime-local (to local string: YYYY-MM-DDTHH:MM)
+        const toLocalInput = (iso) => {
+          if (!iso) return "";
+          const d = new Date(iso);
+          const pad = (n) => String(n).padStart(2, "0");
+          return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+        };
+        this.activationFromLocal = toLocalInput(this.game.activation?.from);
+        this.activationUntilLocal = toLocalInput(this.game.activation?.until);
       } catch (error) {
         console.error("Fehler beim Laden des Spiels:", error);
       }
@@ -290,16 +331,41 @@ export default {
 
     async updateGame() {
       try {
+        // Validierung Aktivierungsfenster
+        if (this.game.activation.enabled) {
+          if (!this.activationFromLocal && !this.activationUntilLocal) {
+            this.$root.showToast("Bitte Zeitraum auswählen.", "error");
+            return;
+          }
+          if (this.game.activation.repeatYearly && (!this.activationFromLocal || !this.activationUntilLocal)) {
+            this.$root.showToast("Für jährlich wiederkehrend bitte Start UND Ende wählen.", "error");
+            return;
+          }
+        }
+
+        // Upload-Handling
         let imageUrl = this.game.gameImage;
         if (this.uploadedImage instanceof File) {
           imageUrl = await apiService.uploadImage(this.uploadedImage);
         }
 
+        // Konvertiere Local → UTC ISO
+        const toISO = (local) => {
+          if (!local) return null;
+          const d = new Date(local);
+          return isNaN(d.getTime()) ? null : d.toISOString();
+        };
+
         const payload = {
           ...this.game,
           gameImage: imageUrl,
           voucherName: this.game.isVoucher ? this.game.voucherName : "",
-          // sortIndex ist bereits in this.game enthalten
+          activation: {
+            enabled: !!this.game.activation?.enabled,
+            from: this.game.activation?.enabled ? toISO(this.activationFromLocal) : null,
+            until: this.game.activation?.enabled ? toISO(this.activationUntilLocal) : null,
+            repeatYearly: !!this.game.activation?.repeatYearly,
+          },
         };
 
         await apiService.updateGame({ _id: this.id, ...payload });
@@ -314,20 +380,45 @@ export default {
 </script>
 
 <style lang="sass" scoped>
-.form-group--city-plz .two-col {
+.form-group--city-plz .three-col {
   display: grid;
-  grid-template-columns: minmax(90px,140px) 1fr;
+  grid-template-columns: repeat(3, 1fr);
   gap: 12px;
   align-items: end;
 }
 
-.form-group--city-plz .col input {
-  width: 100%;
+.form-group--city-plz .col {
+  display: flex;
+  flex-direction: column;
 }
 
+.form-group--city-plz .col label {
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.form-group--city-plz .col input[type="datetime-local"],
+.form-group--city-plz .col input[type="text"],
+.form-group--city-plz .col input[type="number"] {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+/* Checkbox sauber vertikal ausrichten */
+.form-group--city-plz .col input[type="checkbox"] {
+  margin-top: auto;
+  transform: scale(1.2);
+  cursor: pointer;
+}
+
+/* Mobile: alles untereinander */
 @media (max-width: 640px) {
-  .form-group--city-plz .two-col {
+  .form-group--city-plz .three-col {
     grid-template-columns: 1fr;
   }
 }
+
 </style>

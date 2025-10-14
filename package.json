@@ -18,8 +18,10 @@
     "animate.css": "^4.1.1",
     "axios": "^1.7.9",
     "core-js": "^3.8.3",
+    "flatpickr": "^4.6.13",
     "register-service-worker": "^1.7.2",
     "vue": "^3.2.13",
+    "vue-flatpickr-component": "^12.0.0",
     "vue-meta": "^3.0.0-alpha.2",
     "vue-router": "^4.5.0",
     "vuedraggable": "^4.1.0"

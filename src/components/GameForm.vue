@@ -145,9 +145,6 @@
     </div>
 
     <div class="form-group checkbox-group">
-      <input type="checkbox" id="disabled" v-model="localGame.isDisabled" />
-      <label for="disabled">Spiel deaktivieren</label>
-
       <input type="checkbox" id="isVoucher" v-model="localGame.isVoucher" />
       <label for="isVoucher">Spiel mit Gutschein-Code einlösen</label>
     </div>
@@ -170,6 +167,30 @@
       />
     </div>
 
+        <!-- 💡 Aktivierung + Serientermin -->
+    <div class="form-group checkbox-group">
+      <input type="checkbox" id="activationEnabled" v-model="localGame.activation.enabled" />
+      <label for="activationEnabled">Spiel aktivieren (Zeitfenster)</label>
+    </div>
+
+    <div class="form-group form-group--city-plz" v-if="localGame.activation.enabled">
+      <div class="three-col">
+        <div class="col">
+          <label for="activationFrom">Aktiv ab</label>
+          <input id="activationFrom" type="datetime-local" v-model="activationFromLocal" />
+        </div>
+        <div class="col">
+          <label for="activationUntil">Aktiv bis</label>
+          <input id="activationUntil" type="datetime-local" v-model="activationUntilLocal" />
+        </div>
+         <div class="col">
+           <label for="repeatYearly">Jährlich wiederkehrend (Serientermin)</label>
+           <input type="checkbox" id="repeatYearly" v-model="localGame.activation.repeatYearly" />
+        </div>
+      </div>
+      <small>Zeiten werden als UTC gespeichert, lokale Anzeige in Europe/Berlin.</small>
+    </div>
+
     <div class="form-actions">
       <button type="submit" class="btn btn--save">Speichern</button>
     </div>
@@ -190,9 +211,12 @@ export default {
     return {
       localGame: {
         voucherName: '',
-        sortIndex: 9999, // 🔥 neu
+        sortIndex: 9999,
+        activation: { enabled: false, from: null, until: null, repeatYearly: false },
         ...this.game
       },
+      activationFromLocal: "",
+      activationUntilLocal: "",
       previewImage: null,
       uploadedImage: null
     };
@@ -200,10 +224,19 @@ export default {
   watch: {
     game: {
       handler(newValue) {
-        this.localGame = { voucherName: '', sortIndex: 9999, ...newValue };
+        this.localGame = { voucherName: '', sortIndex: 9999, activation: { enabled: false, from: null, until: null, repeatYearly: false }, ...newValue };
         if (this.localGame.sortIndex === undefined || this.localGame.sortIndex === null) {
           this.localGame.sortIndex = 9999;
         }
+        // Prefill local datetime inputs
+        const toLocalInput = (iso) => {
+          if (!iso) return "";
+          const d = new Date(iso);
+          const pad = (n) => String(n).padStart(2, "0");
+          return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+        };
+        this.activationFromLocal = toLocalInput(this.localGame.activation?.from);
+        this.activationUntilLocal = toLocalInput(this.localGame.activation?.until);
       },
       deep: true,
     },
@@ -221,6 +254,18 @@ export default {
     },
     async saveGame() {
       try {
+        // Validierung
+        if (this.localGame.activation.enabled) {
+          if (!this.activationFromLocal && !this.activationUntilLocal) {
+            alert("Bitte Zeitraum wählen.");
+            return;
+          }
+          if (this.localGame.activation.repeatYearly && (!this.activationFromLocal || !this.activationUntilLocal)) {
+            alert("Für jährlich wiederkehrend bitte Start UND Ende wählen.");
+            return;
+          }
+        }
+
         let imageUrl = '';
 
         if (this.uploadedImage instanceof File) {
@@ -231,16 +276,27 @@ export default {
           console.warn("⚠️ Kein Bild zum Hochladen ausgewählt.");
         }
 
+        const toISO = (local) => {
+          if (!local) return null;
+          const d = new Date(local);
+          return isNaN(d.getTime()) ? null : d.toISOString();
+        };
+
         const gameData = {
           ...this.localGame,
           gameImage: imageUrl,
-          voucherName: this.localGame.isVoucher ? this.localGame.voucherName : ''
-          // sortIndex ist bereits enthalten
+          voucherName: this.localGame.isVoucher ? this.localGame.voucherName : '',
+          activation: {
+            enabled: !!this.localGame.activation?.enabled,
+            from: this.localGame.activation?.enabled ? toISO(this.activationFromLocal) : null,
+            until: this.localGame.activation?.enabled ? toISO(this.activationUntilLocal) : null,
+            repeatYearly: !!this.localGame.activation?.repeatYearly,
+          },
         };
 
-        this.$emit('save', gameData); // Sende die Daten an Admin.vue
+        this.$emit('save', gameData);
       } catch (error) {
-        console.error('❌ Fehler beim Hochladen des Bildes:', error);
+        console.error('❌ Fehler beim Hochladen/Speichern:', error);
       }
     }
   },
@@ -248,21 +304,46 @@ export default {
 </script>
 
 <style lang="sass" scoped>
-/* City + PLZ nebeneinander, mobil untereinander */
-.form-group--city-plz .two-col {
+
+.form-group--city-plz .three-col {
   display: grid;
-  grid-template-columns: minmax(90px, 140px) 1fr;
+  grid-template-columns: repeat(3, 1fr);
   gap: 12px;
   align-items: end;
 }
 
-.form-group--city-plz .col input {
-  width: 100%;
+.form-group--city-plz .col {
+  display: flex;
+  flex-direction: column;
 }
 
+.form-group--city-plz .col label {
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.form-group--city-plz .col input[type="datetime-local"],
+.form-group--city-plz .col input[type="text"],
+.form-group--city-plz .col input[type="number"] {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+/* Checkbox sauber vertikal ausrichten */
+.form-group--city-plz .col input[type="checkbox"] {
+  margin-top: auto;
+  transform: scale(1.2);
+  cursor: pointer;
+}
+
+/* Mobile: alles untereinander */
 @media (max-width: 640px) {
-  .form-group--city-plz .two-col {
+  .form-group--city-plz .three-col {
     grid-template-columns: 1fr;
   }
 }
+
 </style>
