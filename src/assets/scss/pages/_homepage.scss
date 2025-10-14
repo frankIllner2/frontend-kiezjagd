@@ -520,6 +520,18 @@
           }
         }
       }
+      ul.game-type-Maxi {
+         strong:first-child {
+            width: 10%;
+            padding: 0 10px;
+          }
+          strong:last-child {
+            width: 70%;
+          }
+          span:last-child {
+            width: 20%;
+          }
+      }
     }
 
     /* Grid-Variante aus Home.vue als Fallback */

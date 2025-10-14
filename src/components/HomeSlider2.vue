@@ -7,7 +7,7 @@
       sliderId="ranking-slider"
       containerClass="container ranking-section"
     >
-      <!-- 🎯 Filter sitzt direkt unter dem H2 im Slider -->
+      <!-- 🎯 Filter direkt unter dem Titel -->
       <template #below-title>
         <div class="filterbar">
           <div class="filterbar__field">
@@ -23,66 +23,70 @@
               class="filterbar__clear"
               @click="searchQuery = ''"
               aria-label="Filter zurücksetzen"
-            ></button>
+            />
           </div>
         </div>
 
-        <!-- Hinweis, wenn keine Treffer → es werden alle 'Mitgemacht'-Spiele gezeigt -->
         <p v-if="searchQuery && matchCount === 0" class="filterbar__info">
           Keine Treffer – zeige alle Spiele mit Ergebnissen.
         </p>
       </template>
 
-      <!-- Cards -->
+      <!-- Karten -->
       <template #default="{ item }">
         <div class="game-header">
-          <router-link 
-            :to="item.landingPageUrl" 
-            class="game-link"
-          >
+          <router-link :to="item.landingPageUrl" class="game-link">
             <b>{{ item.gameName }}</b>
           </router-link>
 
+          <!-- Icon je gameType -->
           <img
-            v-if="getGameType(item.topResults) === 'Mini'"
+            v-if="gameTypeRaw(item) === 'Mini'"
             src="@/assets/img/icons/hand.png"
             alt="Mini Icon"
           />
           <img
-            v-else-if="getGameType(item.topResults) === 'Medi'"
+            v-else-if="gameTypeRaw(item) === 'Medi'"
             src="@/assets/img/icons/sterne.png"
             alt="Medi Icon"
           />
           <img
             v-else
             src="@/assets/img/icons/krone.png"
-            alt="Default Icon"
+            alt="Maxi Icon"
           />
         </div>
 
-        <span class="game-type">{{ getGameType(item.topResults) }}</span>
-        <ul>
-          <li v-for="(result, idx) in getSortedResults(item)" :key="idx">
-            <template v-if="result.gameType === 'Maxi'">
+        <!-- Label + Klassenname direkt aus gameType -->
+        <span :class="`game-type game-type-${gameTypeRaw(item)}`">
+          {{ gameTypeRaw(item) }}
+        </span>
+
+        <!-- Ergebnisliste: Klassenname direkt an gameType anhängen -->
+        <ul :class="`results game-type-${gameTypeRaw(item)}`">
+          <li
+            v-for="(result, idx) in getSortedResults(item)"
+            :key="resultKey(result, idx)"
+          >
+            <!-- Rangnummer nur bei Maxi -->
+            <template v-if="gameTypeRaw(item) === 'Maxi'">
               <strong>{{ idx + 1 }}. </strong>
-              <strong v-html="highlight(fallbackTeamName(result))"></strong>
-            </template>
-            <template v-else>
-              <strong v-html="highlight(fallbackTeamName(result))"></strong>
             </template>
 
-            <span v-if="result.gameType === 'Mini' || result.gameType === 'Medi'">
-              {{ result.stars }} Sterne
+            <strong v-html="highlight(fallbackTeamName(result))"></strong>
+
+            <!-- Mini/Medi: Sterne, Maxi: Zeit -->
+            <span v-if="gameTypeRaw(item) === 'Mini' || gameTypeRaw(item) === 'Medi'">
+              {{ toNumberStars(result.stars) }} Sterne
             </span>
             <span v-else>
-              {{ minutesFromDuration(result.duration) }} Min.
+              {{ toMinutes(result.duration) }} Min.
             </span>
           </li>
         </ul>
       </template>
     </BaseSlider>
 
-    <!-- Optional: Leerer Zustand -->
     <p v-else class="filterbar__info">Noch keine Ergebnisse vorhanden.</p>
   </div>
 </template>
@@ -91,14 +95,21 @@
 import BaseSlider from "@/components/BaseSlider.vue";
 
 export default {
+  name: "HomeSlider2",
   components: { BaseSlider },
   props: {
     /**
-     * Erwartete Struktur je Item:
+     * items-Struktur:
      * {
      *   gameName: string,
-     *   landingPageUrl: string | route,
-     *   topResults: Array<{ teamName? | name? | team?, duration?, stars?, gameType?, startTime? }>
+     *   landingPageUrl: string,
+     *   topResults: Array<{
+     *     teamName?: string, name?: string, team?: string,
+     *     duration?: string|number,
+     *     stars?: string|number,
+     *     gameType: 'Mini'|'Medi'|'Maxi',
+     *     startTime?: string|Date
+     *   }>
      * }
      */
     rankings: { type: Array, default: () => [] },
@@ -107,38 +118,51 @@ export default {
     return { searchQuery: "" };
   },
   computed: {
-    // ✅ Nur Spiele, bei denen schon jemand gespielt hat (mind. 1 Ergebnis) – OHNE teamName-Zwang
     participatedRankings() {
       return (this.rankings || []).filter(
         (item) => Array.isArray(item.topResults) && item.topResults.length > 0
       );
     },
-
-    // echtes Filterergebnis basierend auf participatedRankings
     rawFiltered() {
       if (!this.searchQuery) return this.participatedRankings;
       const q = this.normalize(this.searchQuery);
       return this.participatedRankings.filter(item =>
-        Array.isArray(item.topResults) &&
         item.topResults.some(r => this.normalize(this.fallbackTeamName(r)).includes(q))
       );
     },
-
-    // Fallback zeigt ALLE mit Ergebnissen (nicht alle Rankings)
     filteredRankings() {
-      if (this.searchQuery && this.rawFiltered.length === 0) {
-        return this.participatedRankings;
-      }
+      if (this.searchQuery && this.rawFiltered.length === 0) return this.participatedRankings;
       return this.rawFiltered;
     },
-
-    // Zähler zeigt echte Trefferzahl (0..N) innerhalb der "Mitgemacht"-Menge
     matchCount() {
       return this.searchQuery ? this.rawFiltered.length : this.participatedRankings.length;
     },
   },
   methods: {
-    // --- Namens-Fallback für inkonsistente Result-Felder ---
+    // --- gameType 1:1 aus den Daten (ohne Mapping/Lowercasing) ---
+    gameTypeRaw(item) {
+      // nimmt zuerst gameType am Item, sonst vom ersten Result
+      return (item?.gameType || item?.topResults?.[0]?.gameType || "").toString();
+    },
+
+    // --- Sortierung je Typ (Mini=neueste, Medi=sterne, Maxi=Zeit) ---
+    getSortedResults(item) {
+      const results = [...(item?.topResults || [])];
+      const t = this.gameTypeRaw(item);
+
+      if (t === "Mini") {
+        return results.sort((a, b) => new Date(b.startTime || 0) - new Date(a.startTime || 0));
+      } else if (t === "Medi") {
+        return results.sort((a, b) => this.toNumberStars(b.stars) - this.toNumberStars(a.stars));
+      }
+      // Maxi / default: nach Dauer (Minuten) aufsteigend
+      return results.sort((a, b) => this.minutesFromDuration(a.duration) - this.minutesFromDuration(b.duration));
+    },
+
+    // ---------- Helfer ----------
+    resultKey(r = {}, idx) {
+      return [r._id, r.teamName, r.name, r.team, r.startTime, idx].filter(Boolean).join(':');
+    },
     fallbackTeamName(result = {}) {
       return (
         (result.teamName && String(result.teamName).trim()) ||
@@ -147,31 +171,48 @@ export default {
         "Unbenanntes Team"
       );
     },
-
-    // --- Dauer zu Minuten (robust für "1h 23m 10s" / "23m 10s" / "45s" / "HH:MM:SS") ---
-    minutesFromDuration(duration = "") {
-      if (typeof duration === "number" && Number.isFinite(duration)) {
-        // Falls in Sekunden gespeichert:
-        return Math.round(duration / 60);
-      }
-      const d = String(duration);
-      // Muster "1h 23m 10s" etc.
-      const h = (d.match(/(\d+)\s*h/i) || [])[1] || 0;
-      const m = (d.match(/(\d+)\s*m/i) || [])[1] || 0;
-      const s = (d.match(/(\d+)\s*s/i) || [])[1] || 0;
-      if (h || m || s) return Number(h) * 60 + Number(m) + Math.round(Number(s) / 60);
-
-      // "HH:MM:SS" oder "MM:SS"
-      const parts = d.split(":").map(n => parseInt(n, 10));
-      if (parts.every(n => Number.isFinite(n))) {
-        if (parts.length === 3) return parts[0] * 60 + parts[1] + Math.round(parts[2] / 60);
-        if (parts.length === 2) return parts[0] + Math.round(parts[1] / 60);
-      }
-      // Fallback: 0
-      return 0;
+    toNumberStars(v) {
+      if (typeof v === "number") return Number.isFinite(v) ? v : 0;
+      const n = Number(String(v ?? "").trim());
+      return Number.isFinite(n) ? n : 0;
     },
 
-    // --- Highlight-Helfer ---
+    minutesFromDuration(duration = "") {
+      if (typeof duration === "number" && Number.isFinite(duration)) {
+        const secs = duration > 1e6 ? Math.round(duration / 1000) : duration;
+        return Math.max(0, Math.round(secs / 60));
+      }
+      const asNumber = Number(String(duration).trim());
+      if (Number.isFinite(asNumber) && String(duration).trim() !== "") {
+        const secs = asNumber > 1e6 ? Math.round(asNumber / 1000) : asNumber;
+        return Math.max(0, Math.round(secs / 60));
+      }
+      const s = String(duration).trim();
+      const hms = s.match(/(?:(\d+)\s*h)?\s*(?:(\d+)\s*m)?\s*(?:(\d+)\s*s)?/i);
+      if (hms && (hms[1] || hms[2] || hms[3])) {
+        const h = parseInt(hms[1] || "0", 10);
+        const m = parseInt(hms[2] || "0", 10);
+        const sec = parseInt(hms[3] || "0", 10);
+        return h * 60 + m + Math.round(sec / 60);
+      }
+      const parts = s.split(":").map(n => parseInt(n, 10));
+      if (parts.every(n => Number.isFinite(n))) {
+        if (parts.length === 3) {
+          const secs = parts[0] * 3600 + parts[1] * 60 + parts[2];
+          return Math.max(0, Math.round(secs / 60));
+        }
+        if (parts.length === 2) {
+          const secs = parts[0] * 60 + parts[1];
+          return Math.max(0, Math.round(secs / 60));
+        }
+      }
+      return 0;
+    },
+    toMinutes(duration) {
+      return this.minutesFromDuration(duration);
+    },
+
+    // ---------- Suche/Highlight ----------
     normalize(str = "") {
       return String(str).toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
     },
@@ -224,31 +265,11 @@ export default {
       if (currOrig < text.length) parts.push(this.escapeHtml(text.slice(currOrig)));
       return parts.join("");
     },
-
-    // --- Vorhandene Logik ---
-    getGameType(results = []) {
-      if (!Array.isArray(results) || results.length === 0) return "";
-      return results[0].gameType || ""; // fallback leer, wenn nicht vorhanden
-    },
-    getSortedResults(item) {
-      const results = [...(item.topResults || [])];
-      const gameType = this.getGameType(results);
-
-      if (gameType === "Mini") {
-        return results.sort((a, b) => new Date(b.startTime) - new Date(a.startTime));
-      } else if (gameType === "Medi") {
-        return results.sort((a, b) => (b.stars || 0) - (a.stars || 0));
-      } else {
-        // Maxi / default: nach Dauer aufsteigend
-        return results.sort((a, b) => this.minutesFromDuration(a.duration) - this.minutesFromDuration(b.duration));
-      }
-    },
   },
 };
 </script>
 
 <style scoped>
-/* (unverändert) */
 .filterbar {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -289,6 +310,9 @@ export default {
   .filterbar { justify-content: flex-end; display: flex; }
   .filterbar__field { width: 320px; }
 }
+
+/* Debug-Rohdaten optisch klein halten */
+.debug-raw { margin-left: .35rem; opacity: .7; font-size: .8em; }
 
 /* Tablet */
 @media (min-width: 768px) and (max-width: 1023.98px) {
