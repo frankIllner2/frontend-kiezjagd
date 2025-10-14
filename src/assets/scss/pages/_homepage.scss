@@ -682,6 +682,10 @@
           .headline-game-name {
             height: 4em;
             text-align: center;
+            line-height: 1.2;
+            b {
+              font-size: clamp(1rem, 1vw, 1.4em);
+            }
           }
 
           h2 {

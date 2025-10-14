@@ -128,16 +128,18 @@
 
           <div class="headline-game-name">
             <h3 :id="`game-title-${index}`">{{ item.name }}</h3>
+              <b>Start: {{ item.startloction }}</b>
           </div>
 
           <div class="short">
             <div class="short-left">
-              <b>{{ item.startloction }}</b>
+            
+              <b>{{ formatAge(item.ageGroup) }}</b>
             </div>
 
             <!-- Info/Details öffnen (getrackt) -->
             <div class="game-infos">
-              <b>{{ formatAge(item.ageGroup) }}</b>
+              
               <button
                 class="open-layer-btn"
                 type="button"
