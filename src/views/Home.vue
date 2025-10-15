@@ -273,6 +273,7 @@ export default {
       showInstruction3: false,
       showNewsletterForm: false,
       voucherCode: "",
+      isVoucher: "",
       currentGame: null,
       isCheckingOut: false,
       checkoutError: "",
