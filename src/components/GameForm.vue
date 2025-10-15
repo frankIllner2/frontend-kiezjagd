@@ -127,11 +127,7 @@
         placeholder="Email Text zum Spiel"
         rows="4"
       ></textarea>
-      <small>{{ localGame.mailtext?.length || 0}}/1200 Zeichen</small><br />
-      <div class="form-group checkbox-group">
-        <input type="checkbox" id="withCertificate" v-model="localGame.withCertificate" />
-        <label for="withCertificate">E-Mail mit Urkunde im Anhang</label>
-      </div>
+      <small>{{ localGame.mailtext?.length || 0}}/1200 Zeichen</small>
     </div>
 
     <div class="form-group">
@@ -143,7 +139,10 @@
         <option>Maxi</option>
       </select>
     </div>
-
+    <div class="form-group checkbox-group">
+      <input type="checkbox" id="withCertificate" v-model="localGame.withCertificate" />
+      <label for="withCertificate">E-Mail mit Urkunde im Anhang</label>
+    </div>
     <div class="form-group checkbox-group">
       <input type="checkbox" id="isVoucher" v-model="localGame.isVoucher" />
       <label for="isVoucher">Spiel mit Gutschein-Code einlösen</label>
@@ -157,7 +156,7 @@
         placeholder="z. B. TEST2025"
       />
     </div>
-
+    <!--
     <div class="form-group">
       <label for="landingPageUrl">LP - URL</label>
       <input
@@ -166,7 +165,7 @@
         placeholder="/spiel/spurensuche-mama"
       />
     </div>
-
+-->
         <!-- 💡 Aktivierung + Serientermin -->
     <div class="form-group checkbox-group">
       <input type="checkbox" id="activationEnabled" v-model="localGame.activation.enabled" />

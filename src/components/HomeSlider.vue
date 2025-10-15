@@ -536,37 +536,41 @@ export default {
     /* =========================
      * PLZ-Helper
      * ========================= */
-    getGamePlzDisplay(g) {
-      g = g || {};
-      const fromPlz   = this.extractPlz(String(g.plz || ""));
-      if (fromPlz) return fromPlz;
-      const fromStart = this.extractPlz(String(g.startloction || ""));
-      if (fromStart) return fromStart;
-      const fromEnd   = this.extractPlz(String(g.endloction || ""));
-      if (fromEnd) return fromEnd;
-      const fromCity  = this.extractPlz(String(g.city || ""));
-      if (fromCity) return fromCity;
-      return "";
-    },
-    getGamePlz(g) {
-      g = g || {};
-      const fromPlz   = this.extractPlz(String(g.plz || ""));
-      if (fromPlz) return this.normalizePlz(fromPlz);
-      const fromStart = this.extractPlz(String(g.startloction || ""));
-      if (fromStart) return this.normalizePlz(fromStart);
-      const fromEnd   = this.extractPlz(String(g.endloction || ""));
-      if (fromEnd) return this.normalizePlz(fromEnd);
-      const fromCity  = this.extractPlz(String(g.city || ""));
-      if (fromCity) return this.normalizePlz(fromCity);
-      return "";
-    },
+    // 1) Robustere Extraktion: findet 5 Ziffern auch ohne Wortgrenzen
     extractPlz(text) {
-      const m = String(text || "").match(/\b\d{4,5}\b/);
+      const m = String(text || "").match(/\d{5}/); // bewusst ohne \b
       return m ? m[0] : "";
     },
+
+    // 2) Normalisierung belassen (für Prefix-Vergleich)
     normalizePlz(val) {
       return String(val || "").replace(/\D/g, "").replace(/^0+/, "");
     },
+
+    // 3) Anzeige: bevorzugt g.plz, sonst aus anderen Feldern ziehen
+    getGamePlzDisplay(g) {
+      g = g || {};
+      // schnellster Weg: wenn g.plz bereits 5 Ziffern enthält
+      const direct = this.extractPlz(g.plz);
+      if (direct) return direct;
+
+      // Fallbacks (alte Felder bleiben für Sicherheit drin)
+      const candidates = [
+        g.startloction, g.endloction, g.city
+      ];
+      for (let i = 0; i < candidates.length; i++) {
+        const found = this.extractPlz(candidates[i]);
+        if (found) return found;
+      }
+      return "";
+    },
+
+    // 4) Vergleichswert für das eigentliche Filter (nur Ziffern)
+    getGamePlz(g) {
+      const display = this.getGamePlzDisplay(g);
+      return display ? this.normalizePlz(display) : "";
+    },
+
   },
 };
 </script>
