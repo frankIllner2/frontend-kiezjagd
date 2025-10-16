@@ -960,6 +960,9 @@
       font-size: 1rem;
       color: $primary-text-color;
     }
+    p.error-text {
+      color: $admin-third-color;
+    }
 
     input {
       border: 1px solid $background-color-1;

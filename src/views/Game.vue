@@ -470,6 +470,21 @@ export default {
 
       this.showFeedback = true;
 
+      // 🔊 **NEU**: Fehlersound auch bei falschen GPS-Koordinaten abspielen
+      if (this.wrongSound) {
+        try {
+          this.wrongSound.currentTime = 0;
+          const p = this.wrongSound.play();
+          if (p && typeof p.catch === "function") {
+            p.catch((err) => {
+              console.debug('Autoplay blockiert (ok):', err);
+            });
+          }
+        } catch (e) {
+          console.debug('Audio-Fehler ignoriert:', e);
+        }
+      }
+
       // nur zeigen, nicht weiterblättern (Weiter erst bei korrektem Standort oder Auto-Weiter nach 3 Versuchen)
       setTimeout(() => {
         this.showFeedback = false;
@@ -825,7 +840,7 @@ export default {
 .game-finished p {
   margin: 5px 0;
   font-size: 1rem;
-  color: #333;
+  color: #355b4c;
 }
 
 /* Fixierte Sterne-Anzeige oben */
