@@ -208,7 +208,9 @@
   .gps-checker {
     text-align: center;
     margin: 20px;
-      h3 {
+      p {
+        font-size: clamp(1.2rem, 2vw, 2em);
+        line-height: 1.6;
         margin-bottom: 1em;
       }
 

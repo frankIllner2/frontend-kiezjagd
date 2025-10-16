@@ -233,6 +233,7 @@ export default {
       correctSounds: [],
       lastCorrectSoundIndex: null,
       countingStarted: false,
+      wrongSound: null, // 🔊 hinzugefügt: Fehlersound
     };
   },
   computed: {
@@ -309,6 +310,11 @@ export default {
       a.volume = 1.0;
       return a;
     });
+
+    // ❌ Fehlersound vorladen (nur bei falscher Antwort)
+    this.wrongSound = new Audio(require("@/assets/sound/sound-julia-1.mp3"));
+    this.wrongSound.preload = "auto";
+    this.wrongSound.volume = 1.0;
   },
   methods: {
     async loadGameData(gameId) {
@@ -417,12 +423,27 @@ export default {
         const falseImages = [
           require("@/assets/img/frida-false.png"),
           require("@/assets/img/fritz-false.png"),
-          require("@/assets/img/lupe-false.png")
+          require("@/assets/img/lupe-false.png") 
         ];
         this.feedbackImage =
           falseImages[Math.floor(Math.random() * falseImages.length)];
 
         this.showFeedback = true;
+
+        // 🔊 Fehlersound abspielen
+        if (this.wrongSound) {
+          try {
+            this.wrongSound.currentTime = 0;
+            const p = this.wrongSound.play();
+            if (p && typeof p.catch === "function") {
+              p.catch((err) => {
+                console.debug('Autoplay blockiert (ok):', err);
+              });
+            }
+          } catch (e) {
+            console.debug('Audio-Fehler ignoriert:', e);
+          }
+        }
 
         setTimeout(() => {
           this.showFeedback = false;

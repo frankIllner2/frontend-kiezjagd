@@ -1,5 +1,16 @@
 <template>
   <div class="gps-checker">
+    <!-- 👉 exakt wie in GameQuestion -->
+    <div v-if="question.answerquestion" class="answer-section">
+      <p v-html="question.answerquestion"></p>
+      <SpeechButton
+        v-if="gameType === 'Mini'  || gameType === 'Medi'"
+        :text="question.answerquestion"
+      />
+    </div>
+
+    <hr style="border-width: 60%;" v-if="question.answerquestion">
+
     <img
       v-if="question.imageUrl"
       :src="question.imageUrl"
@@ -7,7 +18,7 @@
       class="instruction-image"
     />
 
-    <h3 v-html="question.question"></h3>
+    <p v-html="question.question"></p>
 
     <!-- 🔊 Vorlese-Button für Mini/Medi (Fragetext) -->
     <SpeechButton
@@ -92,10 +103,8 @@ export default {
         "Geht ein paar Meter ins Freie oder wartet kurz für ein genaueres Signal.",
         "Prüft, ob ihr die Seite über HTTPS geöffnet habt."
       ];
-      // Absätze für klare Pausen im Sprachsynthese-Output
       return [header, ...tips].join("\n\n");
     },
-    // Key erzwingt Neu-Render bei Textwechsel (z. B. neuer Fehler/Versuchszähler)
     readOutTextKey() {
       return `${this.error || ""}__${this.attempts}`;
     }
@@ -116,7 +125,6 @@ export default {
       }
 
       this.attempts++;
-      // 🔔 Game über aktuellen Stand informieren
       this.$emit("gpsAttempt", { attempts: this.attempts });
 
       navigator.geolocation.getCurrentPosition(
@@ -135,8 +143,8 @@ export default {
 
             if (resultApi?.success) {
               this.success = true;
-              // ⬇️ Animation in Game.vue starten (dort erfolgt auch der Wechsel zur nächsten Frage)
               this.$emit("gpsSuccess", { attempts: this.attempts });
+              this.onSuccess && this.onSuccess();
             } else {
               this.error =
                 "Ihr seid noch zu weit weg vom Zielpunkt. Geht näher hin und versucht es erneut.";
@@ -175,10 +183,9 @@ export default {
 
     handleFailedAttempt() {
       if (this.attempts >= this.maxAttempts) {
-        // Nach 3 Versuchen automatisch weiter (ohne Animation)
         this.error = null;
         this.success = true;
-        this.onSuccess();
+        this.onSuccess && this.onSuccess();
       }
     },
   },
@@ -187,6 +194,7 @@ export default {
 
 <style scoped>
 .instruction-image { max-width: 100%; margin-bottom: .75rem; }
+.answer-section { margin-bottom: .5rem; }
 .error-wrap { display:flex; align-items:flex-start; gap:.5rem; margin-top:.75rem; }
 .error-texts { flex: 1 1 auto; }
 .error { color: #b00020; margin: 0 0 .25rem; }
