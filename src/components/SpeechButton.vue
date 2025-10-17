@@ -1,12 +1,12 @@
 <template>
-  <div class="speech-controls">
+  <div class="speech-controls" role="group" aria-label="Sprachwiedergabe">
     <!-- Play/Pause -->
     <button
-      @click="onPlayPause"
       class="speech-btn"
+      @click="onPlayPause"
       :disabled="!textSanitized || isStarting"
       :aria-pressed="isSpeaking && !isPaused"
-      :aria-label="isPaused ? 'Vorlesen fortsetzen' : (isSpeaking ? 'Vorlesen pausieren' : 'Vorlesen starten')"
+      :aria-label="isPaused || (!isSpeaking && currentIndex>0) ? 'Weiterlesen' : (isSpeaking ? 'Pausieren' : 'Vorlesen starten')"
       title="Play/Pause"
     >
       <font-awesome-icon
@@ -17,9 +17,9 @@
 
     <!-- Stop -->
     <button
-      @click="onStop"
       class="speech-btn stop"
-      :disabled="!isSpeaking && !isStarting && !isPaused"
+      @click="onStop"
+      :disabled="!isSpeaking && !isPaused && currentIndex === 0"
       aria-label="Vorlesen stoppen"
       title="Stop"
     >
@@ -31,23 +31,27 @@
 <script>
 export default {
   name: "SpeechButton",
-  props: {
-    text: { type: String, required: true },
-  },
+  props: { text: { type: String, required: true } },
   data() {
     return {
+      // Playback
       isSpeaking: false,
       isPaused: false,
       isStarting: false,
       selectedVoice: null,
       currentUtterance: null,
-      voicesChangedHandler: null,
+
+      // Queue / Fortschritt
+      sentences: [],
+      currentIndex: 0, // Satzindex, ab dem gelesen wird
+
+      // Platform
       platform: {
         isAndroid: /Android/i.test(navigator.userAgent),
-        isiOS: /iPhone|iPad|iPod/i.test(navigator.userAgent),
       },
-      lastBoundaryIndex: 0,  // Index der zuletzt gesprochenen Stelle
-      resumeFromIndex: 0,    // Wo beim Fortsetzen wieder eingestiegen wird
+
+      // Listener
+      voicesChangedHandler: null,
     };
   },
   computed: {
@@ -62,191 +66,147 @@ export default {
     speechSynthesis.onvoiceschanged = this.voicesChangedHandler;
 
     document.addEventListener("visibilitychange", this.handleVisibilityChange);
-    window.addEventListener("pagehide", this.onStop, { passive: true });
+
+    // Vorab splitten
+    this.sentences = this.splitIntoSentences(this.textSanitized);
   },
   beforeUnmount() {
-    try { speechSynthesis.cancel(); } catch (e) { void e; }
+    try { speechSynthesis.cancel(); } catch (e) { /* noop */ }
     document.removeEventListener("visibilitychange", this.handleVisibilityChange);
-    window.removeEventListener("pagehide", this.onStop);
     if (speechSynthesis.onvoiceschanged === this.voicesChangedHandler) {
       speechSynthesis.onvoiceschanged = null;
     }
   },
   watch: {
     text() {
-      // Bei Textwechsel stoppen & Indizes zurücksetzen
-      if (this.isSpeaking || this.isPaused || this.isStarting) {
-        this.onStop();
-      }
-      this.lastBoundaryIndex = 0;
-      this.resumeFromIndex = 0;
+      // Bei Textwechsel sauber neu aufsetzen
+      this.onStop();
+      this.sentences = this.splitIntoSentences(this.textSanitized);
+      this.currentIndex = 0;
     },
   },
   methods: {
     sanitizeText(html) {
       const div = document.createElement("div");
       div.innerHTML = html;
-      return (div.textContent || div.innerText || "").trim();
+      return (div.textContent || div.innerText || "").replace(/\s+/g, " ").trim();
+    },
+
+    splitIntoSentences(plain) {
+      if (!plain) return [];
+      // robuste Satztrennung: Punkt, !, ?, … + evtl. Anführungszeichen/ Klammern
+      const parts = [];
+      const regex = /[^.!?…]+(?:[.!?…]+(?:['")\]]*)|\s*$)/g;
+      let m;
+      while ((m = regex.exec(plain)) !== null) {
+        const s = m[0].trim();
+        if (s) parts.push(s);
+      }
+      return parts.length ? parts : [plain];
     },
 
     loadVoices() {
       const voices = window.speechSynthesis.getVoices();
-      const deVoices = voices.filter(v => v.lang?.toLowerCase().startsWith("de"));
+      const de = voices.filter(v => (v.lang || "").toLowerCase().startsWith("de"));
       this.selectedVoice =
         voices.find(v => v.name === "Google Deutsch") ||
-        voices.find(v => v.name?.includes("Microsoft Katja")) ||
-        voices.find(v => v.name?.includes("Microsoft Hedda")) ||
-        voices.find(v => v.name?.includes("Microsoft Stefan")) ||
-        deVoices[0] ||
-        voices[0] ||
-        null;
+        de[0] || voices[0] || null;
     },
 
-    waitFor(ms) {
-      return new Promise(res => setTimeout(res, ms));
-    },
+    wait(ms) { return new Promise(r => setTimeout(r, ms)); },
 
-    async safeCancel(timeoutMs = 400) {
-      try { speechSynthesis.cancel(); } catch (e) { void e; }
+    async safeCancel(timeoutMs = 500) {
+      try { speechSynthesis.cancel(); } catch (e) {void e; }
       const t0 = performance.now();
       while ((speechSynthesis.speaking || speechSynthesis.pending) && (performance.now() - t0) < timeoutMs) {
-        await this.waitFor(16);
+        await this.wait(16);
       }
-      try { speechSynthesis.cancel(); } catch (e) { void e; }
-      await this.waitFor(10);
+      try { speechSynthesis.cancel(); } catch (e) {void e; }
+      // Android braucht oft etwas mehr „Luft“ nach cancel()
+      if (this.platform.isAndroid) await this.wait(100);
     },
 
-    createUtterance(txt, offset = 0) {
-      const utter = new SpeechSynthesisUtterance(txt);
-      utter.lang = "de-DE";
-      utter.rate = 1.05;
-      utter.pitch = 1.2;
-      utter.volume = 1;
-      if (this.selectedVoice) utter.voice = this.selectedVoice;
+    createUtterance(text) {
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = "de-DE";
+      u.rate = 1.05;
+      u.pitch = 1.2;
+      u.volume = 1;
+      if (this.selectedVoice) u.voice = this.selectedVoice;
 
-      // Fortschritt tracken: wo sind wir im Gesamttext?
-      utter.onboundary = (ev) => {
-        // ev.charIndex ist relativ zu 'txt'; addiere offset, um im Gesamttext zu bleiben
-        const absoluteIndex = offset + (ev.charIndex ?? 0);
-        // nur erhöhen (einige Browser feuern boundary mehrfach)
-        if (absoluteIndex > this.lastBoundaryIndex) {
-          this.lastBoundaryIndex = absoluteIndex;
-        }
-      };
-
-      utter.onstart = () => {
+      u.onstart = () => {
         this.isStarting = false;
         this.isSpeaking = true;
         this.isPaused = false;
       };
-      utter.onend = () => {
-        this.isSpeaking = false;
-        this.currentUtterance = null;
+      u.onend = () => {
+        // Wenn nicht pausiert/gestoppt, zum nächsten Satz springen
+        if (!this.isPaused) {
+          this.currentUtterance = null;
+          this.isSpeaking = false;
+          if (this.currentIndex < this.sentences.length - 1) {
+            this.currentIndex += 1;
+            // Auto-Continue für lange Texte? → hier bewusst NEIN, da Button-Player
+          }
+        }
       };
-      utter.onerror = () => {
-        this.isStarting = false;
-        this.isSpeaking = false;
+      u.onerror = () => {
         this.currentUtterance = null;
+        this.isSpeaking = false;
+        // Kein Index-Advance bei Fehler
       };
-      return utter;
+      return u;
     },
 
-    async startFromIndex(index = 0) {
-      const full = this.textSanitized;
-      if (!full) return;
-      if (index >= full.length) {
-        // Nichts mehr zu lesen
-        this.isPaused = false;
-        this.isSpeaking = false;
-        return;
-      }
+    async speakSentenceAt(index) {
+      if (index < 0 || index >= this.sentences.length) return;
       if (this.isStarting) return;
       this.isStarting = true;
 
       await this.safeCancel();
-      if (this.platform.isAndroid) {
-        await this.waitFor(60);
-      }
-      try { speechSynthesis.resume(); } catch (e) { void e; }
+      try { speechSynthesis.resume(); } catch (e) {void e; }
 
-      const slice = full.slice(index);
-      const utter = this.createUtterance(slice, index);
+      const utter = this.createUtterance(this.sentences[index]);
       this.currentUtterance = utter;
 
       try {
         speechSynthesis.speak(utter);
-      } catch (e1) {
-        void e1;
-        await this.waitFor(30);
-        try { speechSynthesis.speak(utter); } catch (e2) { void e2; this.isStarting = false; }
+      } catch (e) {
+        // minimal verzögert erneut versuchen
+        await this.wait(40);
+        try { speechSynthesis.speak(utter); } catch (_) {
+          this.isStarting = false;
+          this.isSpeaking = false;
+        }
       }
     },
 
-    async start() {
-      this.lastBoundaryIndex = 0;
-      this.resumeFromIndex = 0;
-      await this.startFromIndex(0);
-    },
-
-    // „Weiche“ Pause für Android: Abbrechen + Index merken
-    async softPause() {
-      // beim Pausieren an der letztem Boundary weitermachen
-      this.resumeFromIndex = this.lastBoundaryIndex;
-      await this.safeCancel();
-      this.isSpeaking = false;
-      this.isPaused = true;
-    },
-
-    pause() {
-      if (this.platform.isAndroid) {
-        // Fallback-Strategie für Android
-        this.softPause();
+    async startOrResume() {
+      // Wenn bereits gespielt und pausiert → exakt am Satz fortsetzen
+      if (this.isPaused && this.currentIndex < this.sentences.length) {
+        await this.speakSentenceAt(this.currentIndex);
         return;
       }
-      try {
-        if (this.isSpeaking && !this.isPaused) {
-          speechSynthesis.pause();
-          this.isPaused = true;
-        }
-      } catch (e) {
-        void e;
-        // Fallback: SoftPause
-        this.softPause();
-      }
-    },
-
-    resume() {
-      if (this.platform.isAndroid) {
-        // Fortsetzen durch Neu-Start ab gespeicherter Position
-        this.startFromIndex(this.resumeFromIndex || this.lastBoundaryIndex);
-        return;
-      }
-      try {
-        if (this.isSpeaking && this.isPaused) {
-          speechSynthesis.resume();
-          this.isPaused = false;
-        } else if (!this.isSpeaking && this.isPaused) {
-          // Engine hat wirklich gestoppt → ab letzter Boundary neu starten
-          this.startFromIndex(this.resumeFromIndex || this.lastBoundaryIndex);
-        } else if (!this.isSpeaking && !this.isPaused) {
-          this.start();
-        }
-      } catch (e) {
-        void e;
-        this.startFromIndex(this.resumeFromIndex || this.lastBoundaryIndex);
-      }
+      // sonst neu ab currentIndex (0 beim ersten Mal)
+      await this.speakSentenceAt(this.currentIndex);
     },
 
     async onPlayPause() {
       if (!this.isSpeaking && !this.isPaused) {
-        await this.start();
+        // Start
+        await this.startOrResume();
         return;
       }
       if (this.isPaused) {
-        this.resume();
+        // Resume (gleicher Satz neu starten)
+        await this.startOrResume();
         return;
       }
-      this.pause();
+      // Pause: wir stoppen hart, merken den aktuellen Satzindex, ohne ihn zu erhöhen
+      await this.safeCancel();
+      this.isPaused = true;
+      this.isSpeaking = false;
+      // currentIndex bleibt unverändert → Resume liest denselben Satz erneut
     },
 
     async onStop() {
@@ -255,17 +215,80 @@ export default {
       this.isSpeaking = false;
       this.isPaused = false;
       this.currentUtterance = null;
-      this.lastBoundaryIndex = 0;
-      this.resumeFromIndex = 0;
+      this.currentIndex = 0; // zurück an den Anfang
     },
 
     handleVisibilityChange() {
+      // Beim Tab-Wechsel auf Android ist echtes Pause/Resume unzuverlässig → weich pausieren
       if (document.visibilityState !== "visible" && this.isSpeaking) {
-        // beim Tab-Wechsel als „weich pausiert“ markieren
-        this.isPaused = true;
-        this.resumeFromIndex = this.lastBoundaryIndex;
+        this.onPlayPause();
       }
     },
   },
 };
 </script>
+
+<style scoped lang="scss">
+@use "sass:color";
+
+$primary-text-color: #355b4c;
+$secondary-text-color: #FAC227;
+
+/* Container: explizit background-color & border, robust gegen UA-Styles */
+.speech-controls {
+  display: inline-flex;
+  align-items: center;
+  background-color: #f9f9f9; /* explizit */
+  border: 1px solid color.adjust($primary-text-color, $lightness: 35%);
+  border-radius: 6px;
+  padding: 0.18rem 0.35rem; /* flach, aber klar sichtbar */
+  box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+  box-sizing: border-box;
+
+  /* Fallback, falls flex-gap nicht greift (einige WebViews) */
+  gap: 0.35rem;
+}
+.speech-controls > .speech-btn + .speech-btn { /* gap-Fallback */
+  margin-left: 0.35rem;
+}
+
+.speech-btn {
+  -webkit-appearance: none; /* UA-Styles killen (Pixel/Chrome) */
+  appearance: none;
+  background: none;
+  border: none;
+  color: $primary-text-color;
+  line-height: 1;
+  padding: 0; /* optisch kompakt */
+  /* sichtbares Icon klein, aber guter Hit-Bereich: */
+  font-size: 1.1rem;
+  position: relative;
+  cursor: pointer;
+
+  /* unsichtbare Touch-Fläche (≈44px) */
+  &::before {
+    content: "";
+    position: absolute;
+    inset: -0.5rem; /* ~8px Puffer um das Icon herum */
+  }
+
+  &:hover { color: $secondary-text-color; }
+  &:focus-visible {
+    outline: 2px solid $secondary-text-color;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+}
+
+.speech-btn.stop {
+  color: $secondary-text-color;
+  &:hover { color: color.adjust($secondary-text-color, $lightness: -12%); }
+}
+
+.is-speaking { color: $secondary-text-color; }
+</style>
