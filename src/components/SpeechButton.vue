@@ -249,7 +249,7 @@ $secondary-text-color: #FAC227;
   box-sizing: border-box;
 
   /* gap + Fallback */
-  gap: 0.35rem;
+  gap: 1.4rem;
 }
 .speech-controls > .speech-btn + .speech-btn { margin-left: 0.35rem; }
 
@@ -261,7 +261,7 @@ $secondary-text-color: #FAC227;
   color: $primary-text-color;
   line-height: 1;
   padding: 0;            /* optisch kompakt */
-  font-size: 1.1rem;     /* Icon-Größe */
+  font-size: 1.3rem;     /* Icon-Größe */
   position: relative;
   cursor: pointer;
 
