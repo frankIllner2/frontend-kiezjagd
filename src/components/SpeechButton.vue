@@ -31,7 +31,11 @@
 <script>
 export default {
   name: "SpeechButton",
-  props: { text: { type: String, required: true } },
+  props: {
+    text: { type: String, required: true },
+    /** Wenn true, wird nach einem Klick automatisch der komplette Text vorgelesen (Satz-Queue). */
+    autoContinue: { type: Boolean, default: true },
+  },
   data() {
     return {
       // Playback
@@ -43,12 +47,10 @@ export default {
 
       // Queue / Fortschritt
       sentences: [],
-      currentIndex: 0, // Satzindex, ab dem gelesen wird
+      currentIndex: 0, // aktueller Satzindex
 
       // Platform
-      platform: {
-        isAndroid: /Android/i.test(navigator.userAgent),
-      },
+      platform: { isAndroid: /Android/i.test(navigator.userAgent) },
 
       // Listener
       voicesChangedHandler: null,
@@ -67,11 +69,11 @@ export default {
 
     document.addEventListener("visibilitychange", this.handleVisibilityChange);
 
-    // Vorab splitten
+    // Text vorbereiten
     this.sentences = this.splitIntoSentences(this.textSanitized);
   },
   beforeUnmount() {
-    try { speechSynthesis.cancel(); } catch (e) { /* noop */ }
+    try { speechSynthesis.cancel(); } catch (e) { void e; }
     document.removeEventListener("visibilitychange", this.handleVisibilityChange);
     if (speechSynthesis.onvoiceschanged === this.voicesChangedHandler) {
       speechSynthesis.onvoiceschanged = null;
@@ -79,7 +81,7 @@ export default {
   },
   watch: {
     text() {
-      // Bei Textwechsel sauber neu aufsetzen
+      // Bei Textwechsel komplett neu initialisieren
       this.onStop();
       this.sentences = this.splitIntoSentences(this.textSanitized);
       this.currentIndex = 0;
@@ -94,7 +96,7 @@ export default {
 
     splitIntoSentences(plain) {
       if (!plain) return [];
-      // robuste Satztrennung: Punkt, !, ?, … + evtl. Anführungszeichen/ Klammern
+      // robuste Satztrennung: Punkt, !, ?, … (+ evtl. Anführungs-/Klammerabschluss)
       const parts = [];
       const regex = /[^.!?…]+(?:[.!?…]+(?:['")\]]*)|\s*$)/g;
       let m;
@@ -116,14 +118,13 @@ export default {
     wait(ms) { return new Promise(r => setTimeout(r, ms)); },
 
     async safeCancel(timeoutMs = 500) {
-      try { speechSynthesis.cancel(); } catch (e) {void e; }
+      try { speechSynthesis.cancel(); } catch (e) { void e; }
       const t0 = performance.now();
       while ((speechSynthesis.speaking || speechSynthesis.pending) && (performance.now() - t0) < timeoutMs) {
         await this.wait(16);
       }
-      try { speechSynthesis.cancel(); } catch (e) {void e; }
-      // Android braucht oft etwas mehr „Luft“ nach cancel()
-      if (this.platform.isAndroid) await this.wait(100);
+      try { speechSynthesis.cancel(); } catch (e) { void e; }
+      if (this.platform.isAndroid) await this.wait(100); // Android mag etwas „Luft“ nach cancel()
     },
 
     createUtterance(text) {
@@ -139,22 +140,27 @@ export default {
         this.isSpeaking = true;
         this.isPaused = false;
       };
+
       u.onend = () => {
-        // Wenn nicht pausiert/gestoppt, zum nächsten Satz springen
-        if (!this.isPaused) {
-          this.currentUtterance = null;
-          this.isSpeaking = false;
+        // Wenn nicht pausiert/gestoppt und AutoContinue an: nächsten Satz automatisch starten
+        if (this.autoContinue && !this.isPaused) {
           if (this.currentIndex < this.sentences.length - 1) {
             this.currentIndex += 1;
-            // Auto-Continue für lange Texte? → hier bewusst NEIN, da Button-Player
+            // im nächsten Tick sprechen (kein rekursiver Stack)
+            setTimeout(() => { this.speakSentenceAt(this.currentIndex); }, 0);
+            return;
           }
         }
+        // Ende erreicht oder pausiert → Status aktualisieren
+        this.currentUtterance = null;
+        this.isSpeaking = false;
       };
+
       u.onerror = () => {
         this.currentUtterance = null;
         this.isSpeaking = false;
-        // Kein Index-Advance bei Fehler
       };
+
       return u;
     },
 
@@ -164,30 +170,27 @@ export default {
       this.isStarting = true;
 
       await this.safeCancel();
-      try { speechSynthesis.resume(); } catch (e) {void e; }
+      try { speechSynthesis.resume(); } catch (e) { void e; }
 
       const utter = this.createUtterance(this.sentences[index]);
       this.currentUtterance = utter;
 
       try {
         speechSynthesis.speak(utter);
-      } catch (e) {
-        // minimal verzögert erneut versuchen
+      } catch (e1) {
+        void e1;
         await this.wait(40);
-        try { speechSynthesis.speak(utter); } catch (_) {
-          this.isStarting = false;
-          this.isSpeaking = false;
-        }
+        try { speechSynthesis.speak(utter); } catch (e2) { void e2; this.isStarting = false; this.isSpeaking = false; }
       }
     },
 
     async startOrResume() {
-      // Wenn bereits gespielt und pausiert → exakt am Satz fortsetzen
+      // Wenn pausiert → gleichen Satz erneut starten
       if (this.isPaused && this.currentIndex < this.sentences.length) {
         await this.speakSentenceAt(this.currentIndex);
         return;
       }
-      // sonst neu ab currentIndex (0 beim ersten Mal)
+      // ansonsten ab aktuellem Index beginnen (0 beim ersten Mal)
       await this.speakSentenceAt(this.currentIndex);
     },
 
@@ -198,15 +201,14 @@ export default {
         return;
       }
       if (this.isPaused) {
-        // Resume (gleicher Satz neu starten)
+        // Resume → gleicher Satz erneut
         await this.startOrResume();
         return;
       }
-      // Pause: wir stoppen hart, merken den aktuellen Satzindex, ohne ihn zu erhöhen
+      // Pause: hart stoppen, Index bleibt, damit Resume denselben Satz neu beginnt
       await this.safeCancel();
       this.isPaused = true;
       this.isSpeaking = false;
-      // currentIndex bleibt unverändert → Resume liest denselben Satz erneut
     },
 
     async onStop() {
@@ -219,8 +221,9 @@ export default {
     },
 
     handleVisibilityChange() {
-      // Beim Tab-Wechsel auf Android ist echtes Pause/Resume unzuverlässig → weich pausieren
+      // Beim Tab-Wechsel weich pausieren
       if (document.visibilityState !== "visible" && this.isSpeaking) {
+        // entspricht Pause-Verhalten
         this.onPlayPause();
       }
     },
@@ -234,42 +237,39 @@ export default {
 $primary-text-color: #355b4c;
 $secondary-text-color: #FAC227;
 
-/* Container: explizit background-color & border, robust gegen UA-Styles */
+/* Explizit gestylt (Pixel/WebView sicher): */
 .speech-controls {
   display: inline-flex;
   align-items: center;
-  background-color: #f9f9f9; /* explizit */
+  background-color: #f9f9f9;
   border: 1px solid color.adjust($primary-text-color, $lightness: 35%);
   border-radius: 6px;
-  padding: 0.18rem 0.35rem; /* flach, aber klar sichtbar */
+  padding: 0.18rem 0.35rem;
   box-shadow: 0 1px 2px rgba(0,0,0,0.08);
   box-sizing: border-box;
 
-  /* Fallback, falls flex-gap nicht greift (einige WebViews) */
+  /* gap + Fallback */
   gap: 0.35rem;
 }
-.speech-controls > .speech-btn + .speech-btn { /* gap-Fallback */
-  margin-left: 0.35rem;
-}
+.speech-controls > .speech-btn + .speech-btn { margin-left: 0.35rem; }
 
 .speech-btn {
-  -webkit-appearance: none; /* UA-Styles killen (Pixel/Chrome) */
+  -webkit-appearance: none;
   appearance: none;
   background: none;
   border: none;
   color: $primary-text-color;
   line-height: 1;
-  padding: 0; /* optisch kompakt */
-  /* sichtbares Icon klein, aber guter Hit-Bereich: */
-  font-size: 1.1rem;
+  padding: 0;            /* optisch kompakt */
+  font-size: 1.1rem;     /* Icon-Größe */
   position: relative;
   cursor: pointer;
 
-  /* unsichtbare Touch-Fläche (≈44px) */
+  /* Unsichtbare Touch-Fläche (≈44px) */
   &::before {
     content: "";
     position: absolute;
-    inset: -0.5rem; /* ~8px Puffer um das Icon herum */
+    inset: -0.5rem;
   }
 
   &:hover { color: $secondary-text-color; }
@@ -279,10 +279,7 @@ $secondary-text-color: #FAC227;
     border-radius: 4px;
   }
 
-  &:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
-  }
+  &:disabled { opacity: 0.45; cursor: not-allowed; }
 }
 
 .speech-btn.stop {
