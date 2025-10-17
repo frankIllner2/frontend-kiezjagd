@@ -19,7 +19,7 @@
     <button
       @click="onStop"
       class="speech-btn stop"
-      :disabled="!isSpeaking && !isStarting"
+      :disabled="!isSpeaking && !isStarting && !isPaused"
       aria-label="Vorlesen stoppen"
       title="Stop"
     >
@@ -38,14 +38,16 @@ export default {
     return {
       isSpeaking: false,
       isPaused: false,
-      isStarting: false, // schützt vor Doppelklicks während Start-Handshake
+      isStarting: false,
       selectedVoice: null,
       currentUtterance: null,
-      voicesChangedHandler: null, // ✅ kein _
-      platform: {               // ✅ kein _
+      voicesChangedHandler: null,
+      platform: {
         isAndroid: /Android/i.test(navigator.userAgent),
         isiOS: /iPhone|iPad|iPod/i.test(navigator.userAgent),
       },
+      lastBoundaryIndex: 0,  // Index der zuletzt gesprochenen Stelle
+      resumeFromIndex: 0,    // Wo beim Fortsetzen wieder eingestiegen wird
     };
   },
   computed: {
@@ -55,9 +57,7 @@ export default {
   },
   mounted() {
     const load = () => this.loadVoices();
-    if (speechSynthesis.getVoices().length > 0) {
-      load();
-    }
+    if (speechSynthesis.getVoices().length > 0) load();
     this.voicesChangedHandler = load;
     speechSynthesis.onvoiceschanged = this.voicesChangedHandler;
 
@@ -65,11 +65,7 @@ export default {
     window.addEventListener("pagehide", this.onStop, { passive: true });
   },
   beforeUnmount() {
-    try {
-      speechSynthesis.cancel();
-    } catch (e) {
-      void e; // ✅ no-empty fixer
-    }
+    try { speechSynthesis.cancel(); } catch (e) { void e; }
     document.removeEventListener("visibilitychange", this.handleVisibilityChange);
     window.removeEventListener("pagehide", this.onStop);
     if (speechSynthesis.onvoiceschanged === this.voicesChangedHandler) {
@@ -78,9 +74,12 @@ export default {
   },
   watch: {
     text() {
+      // Bei Textwechsel stoppen & Indizes zurücksetzen
       if (this.isSpeaking || this.isPaused || this.isStarting) {
         this.onStop();
       }
+      this.lastBoundaryIndex = 0;
+      this.resumeFromIndex = 0;
     },
   },
   methods: {
@@ -108,22 +107,32 @@ export default {
     },
 
     async safeCancel(timeoutMs = 400) {
-      try { speechSynthesis.cancel(); } catch (e) { void e; } // ✅
+      try { speechSynthesis.cancel(); } catch (e) { void e; }
       const t0 = performance.now();
       while ((speechSynthesis.speaking || speechSynthesis.pending) && (performance.now() - t0) < timeoutMs) {
         await this.waitFor(16);
       }
-      try { speechSynthesis.cancel(); } catch (e) { void e; } // ✅
+      try { speechSynthesis.cancel(); } catch (e) { void e; }
       await this.waitFor(10);
     },
 
-    createUtterance(txt) {
+    createUtterance(txt, offset = 0) {
       const utter = new SpeechSynthesisUtterance(txt);
       utter.lang = "de-DE";
       utter.rate = 1.05;
       utter.pitch = 1.2;
       utter.volume = 1;
       if (this.selectedVoice) utter.voice = this.selectedVoice;
+
+      // Fortschritt tracken: wo sind wir im Gesamttext?
+      utter.onboundary = (ev) => {
+        // ev.charIndex ist relativ zu 'txt'; addiere offset, um im Gesamttext zu bleiben
+        const absoluteIndex = offset + (ev.charIndex ?? 0);
+        // nur erhöhen (einige Browser feuern boundary mehrfach)
+        if (absoluteIndex > this.lastBoundaryIndex) {
+          this.lastBoundaryIndex = absoluteIndex;
+        }
+      };
 
       utter.onstart = () => {
         this.isStarting = false;
@@ -132,73 +141,99 @@ export default {
       };
       utter.onend = () => {
         this.isSpeaking = false;
-        this.isPaused = false;
         this.currentUtterance = null;
       };
       utter.onerror = () => {
         this.isStarting = false;
         this.isSpeaking = false;
-        this.isPaused = false;
         this.currentUtterance = null;
       };
       return utter;
     },
 
-    async start() {
-      if (!this.textSanitized) return;
+    async startFromIndex(index = 0) {
+      const full = this.textSanitized;
+      if (!full) return;
+      if (index >= full.length) {
+        // Nichts mehr zu lesen
+        this.isPaused = false;
+        this.isSpeaking = false;
+        return;
+      }
       if (this.isStarting) return;
       this.isStarting = true;
 
       await this.safeCancel();
-
       if (this.platform.isAndroid) {
         await this.waitFor(60);
       }
+      try { speechSynthesis.resume(); } catch (e) { void e; }
 
-      try { speechSynthesis.resume(); } catch (e) { void e; } // ✅
-
-      const utter = this.createUtterance(this.textSanitized);
+      const slice = full.slice(index);
+      const utter = this.createUtterance(slice, index);
       this.currentUtterance = utter;
 
       try {
         speechSynthesis.speak(utter);
       } catch (e1) {
-        void e1; // ✅
+        void e1;
         await this.waitFor(30);
-        try {
-          speechSynthesis.speak(utter);
-        } catch (e2) {
-          void e2; // ✅
-          this.isStarting = false;
-          this.isSpeaking = false;
-          this.currentUtterance = null;
-        }
+        try { speechSynthesis.speak(utter); } catch (e2) { void e2; this.isStarting = false; }
       }
     },
 
+    async start() {
+      this.lastBoundaryIndex = 0;
+      this.resumeFromIndex = 0;
+      await this.startFromIndex(0);
+    },
+
+    // „Weiche“ Pause für Android: Abbrechen + Index merken
+    async softPause() {
+      // beim Pausieren an der letztem Boundary weitermachen
+      this.resumeFromIndex = this.lastBoundaryIndex;
+      await this.safeCancel();
+      this.isSpeaking = false;
+      this.isPaused = true;
+    },
+
     pause() {
+      if (this.platform.isAndroid) {
+        // Fallback-Strategie für Android
+        this.softPause();
+        return;
+      }
       try {
         if (this.isSpeaking && !this.isPaused) {
           speechSynthesis.pause();
           this.isPaused = true;
         }
       } catch (e) {
-        void e; // ✅
-        this.onStop();
+        void e;
+        // Fallback: SoftPause
+        this.softPause();
       }
     },
 
     resume() {
+      if (this.platform.isAndroid) {
+        // Fortsetzen durch Neu-Start ab gespeicherter Position
+        this.startFromIndex(this.resumeFromIndex || this.lastBoundaryIndex);
+        return;
+      }
       try {
         if (this.isSpeaking && this.isPaused) {
           speechSynthesis.resume();
           this.isPaused = false;
+        } else if (!this.isSpeaking && this.isPaused) {
+          // Engine hat wirklich gestoppt → ab letzter Boundary neu starten
+          this.startFromIndex(this.resumeFromIndex || this.lastBoundaryIndex);
         } else if (!this.isSpeaking && !this.isPaused) {
           this.start();
         }
       } catch (e) {
-        void e; // ✅
-        this.start();
+        void e;
+        this.startFromIndex(this.resumeFromIndex || this.lastBoundaryIndex);
       }
     },
 
@@ -220,83 +255,17 @@ export default {
       this.isSpeaking = false;
       this.isPaused = false;
       this.currentUtterance = null;
+      this.lastBoundaryIndex = 0;
+      this.resumeFromIndex = 0;
     },
 
     handleVisibilityChange() {
       if (document.visibilityState !== "visible" && this.isSpeaking) {
+        // beim Tab-Wechsel als „weich pausiert“ markieren
         this.isPaused = true;
+        this.resumeFromIndex = this.lastBoundaryIndex;
       }
     },
   },
 };
 </script>
-
-
-<style scoped lang="scss">
-@use "sass:color";
-
-/* Farben */
-$primary-text-color: #355b4c;
-$secondary-text-color: #FAC227;
-
-.speech-controls {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  background: #f9f9f9;
-  border: 1px solid $secondary-text-color;
-  border-radius: 6px;
-  padding: 0.2rem 0.35rem; /* ✅ kompakter Hintergrund */
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
-}
-
-.speech-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: none;
-  border: none;
-  color: $primary-text-color;
-
-  /* 👉 Touchfläche bleibt groß */
-  width: 2.25rem;   /* ≈ 36px */
-  height: .5rem;  /* fingerfreundlich */
-  font-size: 1.3rem; /* Icon-Größe */
-  cursor: pointer;
-
-  transition: color 0.25s ease, transform 0.15s ease;
-
-  &:hover {
-    color: $secondary-text-color;
-    transform: scale(1.05);
-  }
-
-  &:focus-visible {
-    outline: 2px solid $secondary-text-color;
-    outline-offset: 2px;
-    border-radius: 4px;
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-}
-
-.speech-btn.stop {
-  color: $secondary-text-color;
-
-  &:hover {
-    color: color.adjust($secondary-text-color, $lightness: -15%);
-  }
-}
-
-.is-speaking {
-  color: $secondary-text-color;
-}
-
-@keyframes pulse {
-  0% { transform: scale(1); }
-  100% { transform: scale(1.08); }
-}
-</style>
