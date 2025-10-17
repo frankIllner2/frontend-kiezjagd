@@ -3,9 +3,9 @@
     <!-- Play/Pause -->
     <button
       @click="onPlayPause"
-      :disabled="!textSanitized"
       class="speech-btn"
-      :aria-pressed="isSpeaking"
+      :disabled="!textSanitized || isStarting"
+      :aria-pressed="isSpeaking && !isPaused"
       :aria-label="isPaused ? 'Vorlesen fortsetzen' : (isSpeaking ? 'Vorlesen pausieren' : 'Vorlesen starten')"
       title="Play/Pause"
     >
@@ -18,8 +18,8 @@
     <!-- Stop -->
     <button
       @click="onStop"
-      :disabled="!isSpeaking"
       class="speech-btn stop"
+      :disabled="!isSpeaking && !isStarting"
       aria-label="Vorlesen stoppen"
       title="Stop"
     >
@@ -32,17 +32,20 @@
 export default {
   name: "SpeechButton",
   props: {
-    text: {
-      type: String,
-      required: true,
-    },
+    text: { type: String, required: true },
   },
   data() {
     return {
       isSpeaking: false,
       isPaused: false,
+      isStarting: false, // schützt vor Doppelklicks während Start-Handshake
       selectedVoice: null,
       currentUtterance: null,
+      voicesChangedHandler: null, // ✅ kein _
+      platform: {               // ✅ kein _
+        isAndroid: /Android/i.test(navigator.userAgent),
+        isiOS: /iPhone|iPad|iPod/i.test(navigator.userAgent),
+      },
     };
   },
   computed: {
@@ -51,148 +54,175 @@ export default {
     },
   },
   mounted() {
+    const load = () => this.loadVoices();
     if (speechSynthesis.getVoices().length > 0) {
-      this.loadVoices();
-    } else {
-      speechSynthesis.onvoiceschanged = this.loadVoices;
+      load();
     }
+    this.voicesChangedHandler = load;
+    speechSynthesis.onvoiceschanged = this.voicesChangedHandler;
 
-    // Sicherheitsnetz: Wenn die Seite den Fokus verliert & Browser automatisch pausiert
     document.addEventListener("visibilitychange", this.handleVisibilityChange);
+    window.addEventListener("pagehide", this.onStop, { passive: true });
   },
   beforeUnmount() {
-    // Aufräumen
-    speechSynthesis.cancel();
+    try {
+      speechSynthesis.cancel();
+    } catch (e) {
+      void e; // ✅ no-empty fixer
+    }
     document.removeEventListener("visibilitychange", this.handleVisibilityChange);
+    window.removeEventListener("pagehide", this.onStop);
+    if (speechSynthesis.onvoiceschanged === this.voicesChangedHandler) {
+      speechSynthesis.onvoiceschanged = null;
+    }
   },
   watch: {
-    // Wenn sich der Text ändert und wir sprechen noch -> stoppen, damit der neue Text sauber gelesen werden kann
     text() {
-      if (this.isSpeaking) {
+      if (this.isSpeaking || this.isPaused || this.isStarting) {
         this.onStop();
       }
     },
   },
   methods: {
-    loadVoices() {
-      const voices = window.speechSynthesis.getVoices();
-      // Optional: Filter auf deutsche Stimmen – damit die Auswahl stabiler ist
-      const deVoices = voices.filter(v => v.lang?.toLowerCase().startsWith("de"));
-      // Deine bevorzugten Kandidaten:
-      this.selectedVoice =
-        voices.find((v) => v.name === "Google Deutsch") ||
-        voices.find((v) => v.name === "Microsoft Katja - German (Germany)") ||
-        voices.find((v) => v.name === "Microsoft Hedda - German (Germany)") ||
-        voices.find((v) => v.name === "Microsoft Stefan - German (Germany)") ||
-        deVoices[0] || // Fallback: erste deutsche Stimme
-        voices[0] ||   // Notfall-Fallback
-        null;
-
-      // Debug
-      // console.log("🎙️ Verfügbare Stimmen:", voices);
-      // console.log("✅ Gewählte Stimme:", this.selectedVoice?.name || "Standard");
-    },
-
     sanitizeText(html) {
       const div = document.createElement("div");
       div.innerHTML = html;
       return (div.textContent || div.innerText || "").trim();
     },
 
-    createUtterance() {
-      const utter = new SpeechSynthesisUtterance(this.textSanitized);
+    loadVoices() {
+      const voices = window.speechSynthesis.getVoices();
+      const deVoices = voices.filter(v => v.lang?.toLowerCase().startsWith("de"));
+      this.selectedVoice =
+        voices.find(v => v.name === "Google Deutsch") ||
+        voices.find(v => v.name?.includes("Microsoft Katja")) ||
+        voices.find(v => v.name?.includes("Microsoft Hedda")) ||
+        voices.find(v => v.name?.includes("Microsoft Stefan")) ||
+        deVoices[0] ||
+        voices[0] ||
+        null;
+    },
+
+    waitFor(ms) {
+      return new Promise(res => setTimeout(res, ms));
+    },
+
+    async safeCancel(timeoutMs = 400) {
+      try { speechSynthesis.cancel(); } catch (e) { void e; } // ✅
+      const t0 = performance.now();
+      while ((speechSynthesis.speaking || speechSynthesis.pending) && (performance.now() - t0) < timeoutMs) {
+        await this.waitFor(16);
+      }
+      try { speechSynthesis.cancel(); } catch (e) { void e; } // ✅
+      await this.waitFor(10);
+    },
+
+    createUtterance(txt) {
+      const utter = new SpeechSynthesisUtterance(txt);
       utter.lang = "de-DE";
       utter.rate = 1.05;
       utter.pitch = 1.2;
       utter.volume = 1;
+      if (this.selectedVoice) utter.voice = this.selectedVoice;
 
-      if (this.selectedVoice) {
-        utter.voice = this.selectedVoice;
-      }
-
+      utter.onstart = () => {
+        this.isStarting = false;
+        this.isSpeaking = true;
+        this.isPaused = false;
+      };
       utter.onend = () => {
         this.isSpeaking = false;
         this.isPaused = false;
         this.currentUtterance = null;
       };
-
       utter.onerror = () => {
+        this.isStarting = false;
         this.isSpeaking = false;
         this.isPaused = false;
         this.currentUtterance = null;
       };
-
       return utter;
     },
 
-    start() {
+    async start() {
       if (!this.textSanitized) return;
+      if (this.isStarting) return;
+      this.isStarting = true;
 
-      // Falls noch etwas in der Queue hängt, vorher leeren
-      if (speechSynthesis.speaking || speechSynthesis.pending) {
-        speechSynthesis.cancel();
+      await this.safeCancel();
+
+      if (this.platform.isAndroid) {
+        await this.waitFor(60);
       }
 
-      this.currentUtterance = this.createUtterance();
-      this.isSpeaking = true;
-      this.isPaused = false;
+      try { speechSynthesis.resume(); } catch (e) { void e; } // ✅
 
-      window.speechSynthesis.speak(this.currentUtterance);
-    },
+      const utter = this.createUtterance(this.textSanitized);
+      this.currentUtterance = utter;
 
-    pause() {
-      if (this.isSpeaking && !this.isPaused) {
+      try {
+        speechSynthesis.speak(utter);
+      } catch (e1) {
+        void e1; // ✅
+        await this.waitFor(30);
         try {
-          speechSynthesis.pause();
-          this.isPaused = true;
-        } catch (e) {
-          // manche Browser blockieren pause(), dann fallback: cancel
-          speechSynthesis.cancel();
+          speechSynthesis.speak(utter);
+        } catch (e2) {
+          void e2; // ✅
+          this.isStarting = false;
           this.isSpeaking = false;
-          this.isPaused = false;
           this.currentUtterance = null;
         }
       }
     },
 
+    pause() {
+      try {
+        if (this.isSpeaking && !this.isPaused) {
+          speechSynthesis.pause();
+          this.isPaused = true;
+        }
+      } catch (e) {
+        void e; // ✅
+        this.onStop();
+      }
+    },
+
     resume() {
-      if (this.isSpeaking && this.isPaused) {
-        try {
+      try {
+        if (this.isSpeaking && this.isPaused) {
           speechSynthesis.resume();
           this.isPaused = false;
-        } catch (e) {
-          // Notfall: wenn resume nicht klappt, neu starten
+        } else if (!this.isSpeaking && !this.isPaused) {
           this.start();
         }
+      } catch (e) {
+        void e; // ✅
+        this.start();
       }
     },
 
-    onPlayPause() {
-      if (!this.isSpeaking) {
-        // Noch nichts läuft -> Start
-        this.start();
+    async onPlayPause() {
+      if (!this.isSpeaking && !this.isPaused) {
+        await this.start();
         return;
       }
-
-      // Läuft bereits:
       if (this.isPaused) {
         this.resume();
-      } else {
-        this.pause();
+        return;
       }
+      this.pause();
     },
 
-    onStop() {
-      if (this.isSpeaking || speechSynthesis.speaking || speechSynthesis.pending) {
-        window.speechSynthesis.cancel();
-      }
+    async onStop() {
+      await this.safeCancel();
+      this.isStarting = false;
       this.isSpeaking = false;
       this.isPaused = false;
       this.currentUtterance = null;
     },
 
     handleVisibilityChange() {
-      // Wenn Tab wechselt, pausieren einige Browser automatisch -> UI-Status synchronisieren
       if (document.visibilityState !== "visible" && this.isSpeaking) {
         this.isPaused = true;
       }
@@ -200,6 +230,7 @@ export default {
   },
 };
 </script>
+
 
 <style scoped lang="scss">
 @use "sass:color";
