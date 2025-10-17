@@ -6,10 +6,11 @@
       handle=".question-header"
       @end="onDragEnd"
       class="questions-container"
+      ref="qContainer"
     >
       <template #header></template>
       <template #item="{ element: question, index }">
-        <div class="question-card">
+        <div class="question-card" :data-id="question._id">
           <div class="question-header">
             <h4>
               {{ index + 1 }}
@@ -106,20 +107,16 @@ import apiService from '@/services/apiService';
 export default {
   components: { draggable, QuestionForm },
   props: {
-    questions: {
-      type: Array,
-      required: true,
-    },
-    gameId: {
-      type: String,
-      required: true,
-    }
+    questions: { type: Array, required: true },
+    gameId: { type: String, required: true },
   },
   data() {
     return {
       localQuestions: [],
       editingId: null,
       showNewForm: false,
+      lastEditedId: null, // Karte, zu der wir zurück wollen
+      stickRaf: null,     // RAF-Loop-ID für Scroll-Lock (ohne Unterstrich)
     };
   },
   computed: {
@@ -132,35 +129,160 @@ export default {
         answer: '',
         imageUrl: '',
         audioUrl: '',
-        coordinates: { lat: null, lon: null }
+        coordinates: { lat: null, lon: null },
       };
-    }
+    },
   },
   watch: {
     questions: {
+      immediate: true,
       handler(newVal) {
-        this.localQuestions = [...newVal];
+        const safe = Array.isArray(newVal) ? newVal : [];
+        console.log('%c[DEBUG] watch questions → len:', 'color:#888', safe.length);
+        this.localQuestions = [...safe];
+
+        // Nach Prop-Refresh: Karte erneut anscrollen + kurz „festhalten“ (Fenster-Scroll)
+        this.$nextTick(() => {
+          if (this.lastEditedId) {
+            const target = this.scrollToCard(this.lastEditedId); // returns target Y
+            if (typeof target === 'number') {
+              this.forceStickWindow(target, { ms: 400, tolerance: 2 });
+              this.focusCard(this.lastEditedId);
+            }
+          }
+        });
       },
-      immediate: true
-    }
+    },
+  },
+  mounted() {
+    console.log('%c[DEBUG] mounted → localQuestions:', 'color:#888', this.localQuestions.length);
+  },
+  beforeUnmount() { // Vue 3 kompatibel
+    if (this.stickRaf) cancelAnimationFrame(this.stickRaf);
   },
   methods: {
+    // --- Card helper ---
+    cardElById(id) {
+      return this.$el.querySelector(`.question-card[data-id="${id}"]`) || null;
+    },
+
+    /**
+     * Scrollt das FENSTER so, dass die Karte ~topPadding unter dem Viewport-Top steht.
+     * Gibt das gesetzte Ziel (pageYOffset) zurück.
+     */
+    scrollToCard(id, { topPadding = 12 } = {}) {
+      const card = this.cardElById(id);
+      if (!card) {
+        console.warn('[DEBUG scrollToCard] Karte nicht gefunden', id);
+        return null;
+      }
+      const rect = card.getBoundingClientRect();
+      const pageY = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+      const target = Math.max(rect.top + pageY - topPadding, 0);
+      window.scrollTo(0, target); // WICHTIG: KEIN smooth
+      console.log('%c[DEBUG scrollToCard]', 'color:cyan', { id, target: target.toFixed(1), movedBy: (target - pageY).toFixed(1) });
+      return target;
+    },
+
+    /**
+     * Hält den Fenster-Scroll kurz stabil (gegen nachlaufende Smooth-Scrolls/Focus-Jumps).
+     * - Deaktiviert temporär 'scroll-behavior: smooth' auf <html>
+     * - Korrigiert jeden Frame auf 'target', wenn Abweichung > tolerance
+     */
+    forceStickWindow(target, { ms = 400, tolerance = 1 } = {}) {
+      const root = document.documentElement;
+      const start = performance.now();
+
+      // smooth scrolling temporär ausschalten
+      const prevBehavior = root.style.scrollBehavior || '';
+      root.style.scrollBehavior = 'auto';
+
+      const step = (now) => {
+        const elapsed = now - start;
+        const current = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+        const diff = target - current;
+
+        if (Math.abs(diff) > tolerance) {
+          window.scrollTo(0, target);
+        }
+
+        if (elapsed < ms) {
+          this.stickRaf = requestAnimationFrame(step);
+        } else {
+          root.style.scrollBehavior = prevBehavior;
+          this.stickRaf = null;
+        }
+      };
+
+      if (this.stickRaf) cancelAnimationFrame(this.stickRaf);
+      this.stickRaf = requestAnimationFrame(step);
+    },
+
+    /**
+     * Setzt den Fokus wieder auf die Karte/den Edit-Button (ohne Scroll).
+     * Verhindert Browser-Autoscroll zu Elementen am Seitenende.
+     */
+    focusCard(id) {
+      const btn = this.$el.querySelector(`.question-card[data-id="${id}"] .btn-action.btn-edit`);
+      if (btn && typeof btn.focus === 'function') {
+        try { btn.focus({ preventScroll: true }); } catch { btn.focus(); }
+        return true;
+      }
+      const card = this.cardElById(id);
+      if (card) {
+        const prev = card.getAttribute('tabindex');
+        card.setAttribute('tabindex', '-1');
+        try { card.focus({ preventScroll: true }); } catch { card.focus(); }
+        requestAnimationFrame(() => {
+          if (prev === null) card.removeAttribute('tabindex');
+          else card.setAttribute('tabindex', prev);
+        });
+        return true;
+      }
+      return false;
+    },
+
+    // --- UI Actions ---
     toggleEdit(question) {
       this.editingId = this.editingId === question._id ? null : question._id;
-      this.showNewForm = false; // falls offenes neues Formular
+      if (this.editingId) {
+        this.lastEditedId = this.editingId;
+        this.$nextTick(() => {
+          const target = this.scrollToCard(this.lastEditedId);
+          if (typeof target === 'number') {
+            this.forceStickWindow(target, { ms: 200, tolerance: 2 });
+            this.focusCard(this.lastEditedId);
+          }
+        });
+      }
+      this.showNewForm = false;
     },
+
     startNewForm() {
-      this.editingId = null; // evtl. offenes Edit-Formular schließen
+      this.editingId = null;
       this.showNewForm = true;
     },
+
     handleSave(updatedQuestion) {
-      const index = this.localQuestions.findIndex(q => q._id === updatedQuestion._id);
-      if (index !== -1) {
-        this.localQuestions.splice(index, 1, updatedQuestion);
+      if (updatedQuestion && updatedQuestion._id) {
+        this.lastEditedId = updatedQuestion._id;
       }
+
+      const index = this.localQuestions.findIndex(q => q._id === updatedQuestion._id);
+      if (index !== -1) this.localQuestions.splice(index, 1, updatedQuestion);
+
       this.editingId = null;
       this.$emit('save', updatedQuestion);
+
+      // 1) Nach lokalem Re-Render scrollen + kurz „festhalten“ + Fokus setzen
+      this.$nextTick(() => {
+        const target = this.scrollToCard(this.lastEditedId);
+        if (typeof target === 'number') this.forceStickWindow(target, { ms: 300, tolerance: 2 });
+        this.focusCard(this.lastEditedId);
+      });
+      // 2) Nach Parent-Refetch (watch) wird es nochmal ausgeführt (mit 400ms Lock)
     },
+
     handleNewSave(newQuestion) {
       this.localQuestions.push(newQuestion);
       this.showNewForm = false;
@@ -168,11 +290,10 @@ export default {
 
       this.$nextTick(() => {
         const lastItem = this.$el.querySelector('.question-card:last-child');
-        if (lastItem) {
-          lastItem.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+        if (lastItem) lastItem.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
     },
+
     async onDragEnd() {
       const reordered = this.localQuestions.map(q => ({ _id: q._id }));
       try {
@@ -181,7 +302,7 @@ export default {
       } catch (err) {
         console.error('❌ Fehler beim Sortieren der Fragen:', err);
       }
-    }
-  }
+    },
+  },
 };
 </script>

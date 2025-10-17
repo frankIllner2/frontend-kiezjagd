@@ -168,7 +168,7 @@ export default {
           } else if (geoErr.code === geoErr.TIMEOUT) {
             msg = "Die Standortanfrage hat zu lange gedauert.";
           }
-          this.error = `${msg} (Versuch ${this.attempts}/${this.maxAttempts})`;
+          this.error = "Versuche es nochmal!";
           this.loading = false;
           this.$emit("gpsFail", {
             attempts: this.attempts,

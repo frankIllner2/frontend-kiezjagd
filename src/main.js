@@ -12,7 +12,7 @@ import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import {
   faEdit, faTrash, faExternalLinkAlt, faArrowLeft, faPuzzlePiece, faMobileAlt, faUsers,
-  faTrophy, faArrowRight, faPlus, faMinus, faMinusCircle, faPlusCircle, faVolumeUp, faStar
+  faTrophy, faArrowRight, faPlus, faMinus, faMinusCircle, faPlusCircle, faVolumeUp, faStar, faPlay, faPause, faStop
 } from '@fortawesome/free-solid-svg-icons';
 import { faFacebook, faTwitter, faInstagram } from '@fortawesome/free-brands-svg-icons';
 
@@ -21,7 +21,8 @@ library.add(
   faArrowLeft, faPuzzlePiece, faMobileAlt,
   faUsers, faTrophy, faFacebook,
   faTwitter, faInstagram, faVolumeUp, faStar,
-  faArrowRight, faMinus, faPlus, faMinusCircle, faPlusCircle
+  faArrowRight, faMinus, faPlus, faMinusCircle, faPlusCircle,
+  faPlay, faPause, faStop
 );
 
 const app = createApp(App);

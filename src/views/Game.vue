@@ -141,12 +141,13 @@
                 <strong>Team:{{ teamName }}</strong>
               </p>
               <p v-if="gameType === 'Maxi'">
-                <strong>Zeit benötigt:</strong> {{ gameDuration }}
+                <strong>Zeit benötigt: </strong> {{ gameDuration }}
               </p>
               <p v-else>
                 <strong>Gesammelte Sterne: 🌟 {{ starCount }}</strong>
               </p>
             </div>
+            <br />
             <div>
               <p>
                 Hat dir das Spiel gefallen und hast du ein paar Anmerkungen - dann schreib
@@ -841,6 +842,7 @@ export default {
   margin: 5px 0;
   font-size: 1rem;
   color: #355b4c;
+  font-weight: bold;
 }
 
 /* Fixierte Sterne-Anzeige oben */
