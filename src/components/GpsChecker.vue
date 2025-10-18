@@ -144,7 +144,8 @@ export default {
             if (resultApi?.success) {
               this.success = true;
               this.$emit("gpsSuccess", { attempts: this.attempts });
-              this.onSuccess && this.onSuccess();
+              // ❌ vorher: this.onSuccess() -> führt zusammen mit Game.vue zum Doppel-Weiter
+              // ✅ jetzt: nur Event emitten, Game.vue steuert den Weiterwechsel
             } else {
               this.error =
                 "Ihr seid noch zu weit weg vom Zielpunkt. Geht näher hin und versucht es erneut.";
