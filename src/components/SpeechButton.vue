@@ -244,12 +244,15 @@ $secondary-text-color: #FAC227;
   background-color: #f9f9f9;
   border: 1px solid color.adjust($primary-text-color, $lightness: 35%);
   border-radius: 6px;
-  padding: 0.18rem 0.35rem;
+  padding: 0.6rem;
   box-shadow: 0 1px 2px rgba(0,0,0,0.08);
   box-sizing: border-box;
-
-  /* gap + Fallback */
   gap: 1.4rem;
+  display: flex;
+  justify-self: center;
+  align-self: center;
+  margin: 1rem auto;
+  width: fit-content;
 }
 .speech-controls > .speech-btn + .speech-btn { margin-left: 0.35rem; }
 
